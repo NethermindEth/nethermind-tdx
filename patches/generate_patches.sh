@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd "$(dirname "$0")" || exit 1
+
 for phase in post pre; do
     for dir in "$phase"/*; do
         if [ -d "$dir" ]; then
