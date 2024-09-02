@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Script to setup docker on ubuntu
+
 sudo apt update
 sudo apt install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
