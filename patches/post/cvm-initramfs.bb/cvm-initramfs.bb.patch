@@ -1,0 +1,11 @@
+--- post/cvm-initramfs.bb/cvm-initramfs.bb.old	2024-09-02 14:58:39.540032347 -0300
++++ post/cvm-initramfs.bb/cvm-initramfs.bb.new	2024-09-02 14:58:39.540032347 -0300
+@@ -7,7 +7,7 @@
+ 
+ CVM_DEPS = "busybox-mdev init-ifupdown initscripts base-files base-passwd netbase busybox-udhcpd"
+ 
+-PACKAGE_INSTALL = "ca-certificates sysvinit busybox-udhcpd date-sync ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
++PACKAGE_INSTALL = "ca-certificates sysvinit busybox-udhcpd date-sync nethermind ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
+ 
+ INITRAMFS_MAXSIZE = "20000000"
+ 

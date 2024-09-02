@@ -1,0 +1,25 @@
+--- pre/default.xml/default.xml.old	2024-09-02 14:58:29.420032370 -0300
++++ pre/default.xml/default.xml.new	2024-09-02 14:58:29.420032370 -0300
+@@ -1,6 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <manifest>
+   <remote name="flashbots"  fetch="https://github.com/flashbots"/>
++  <remote name="jeremy-prater"  fetch="https://github.com/jeremy-prater"/>
+ 
+   <default sync-j="4"/>
+ 
+@@ -12,9 +13,12 @@
+   <project remote="flashbots"       revision="scarthgap"        name="poky"                            path="srcs/poky"/>
+   <project remote="flashbots"       revision="scarthgap"        name="meta-openembedded"               path="srcs/poky/meta-openembedded"/>
+   <project remote="flashbots"       revision="scarthgap"        name="meta-secure-core"                path="srcs/poky/meta-secure-core"/>
++  <project remote="flashbots"       revision="main"             name="meta-confidential-compute"       path="srcs/poky/meta-confidential-compute"/>
++  <!--
+   <project remote="flashbots"       revision="scarthgap"        name="meta-clang"                      path="srcs/poky/meta-clang"/>
+-  <project remote="flashbots"       revision="debug-build"      name="meta-confidential-compute"       path="srcs/poky/meta-confidential-compute"/>
+   <project remote="flashbots"       revision="main"             name="meta-evm"                        path="srcs/poky/meta-evm"/>
+   <project remote="flashbots"       revision="master"           name="meta-rust-bin"                   path="srcs/poky/meta-rust-bin"/>
++  -->
++  <project remote="jeremy-prater"   revision="trunk"            name="meta-dotnet"                     path="srcs/poky/meta-dotnet"/>
+ 
+ </manifest>
+\ No newline at end of file
