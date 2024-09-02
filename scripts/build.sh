@@ -11,6 +11,7 @@ if [ -z "$DOCKER_BUILD" ]; then
     DOCKER=false
     PATCHES_DIR=../patches
     ARTIFACTS_DIR=../artifacts
+    META_NETHERMIND_DIR=../meta-nethermind
 
     cd ./build
 else
@@ -19,6 +20,7 @@ else
     DOCKER=true
     PATCHES_DIR=/patches
     ARTIFACTS_DIR=/artifacts
+    META_NETHERMIND_DIR=/meta-nethermind
 
     cd /build
 fi
@@ -48,10 +50,8 @@ for patch_dir in $PATCHES_DIR/post/*; do
 done
 
 # Copy in meta-nethermind
-if ! $DOCKER; then
-    rm -rf srcs/poky/meta-nethermind
-    cp -r ../meta-nethermind srcs/poky/meta-nethermind
-fi
+rm -rf srcs/poky/meta-nethermind
+cp -r $META_NETHERMIND_DIR srcs/poky/meta-nethermind
 
 source setup
 make build || true
