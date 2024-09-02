@@ -7,13 +7,15 @@ set -e
 
 # check if DOCKER_BUILD is set
 if [ -z "$DOCKER_BUILD" ]; then
-    echo "Running locally"
+    echo "Building locally"
     DOCKER=false
+
     BUILD_DIR=./build
     PATCHES_DIR=./patches
 else
-    echo "Running in docker"
+    echo "Building in docker container"
     DOCKER=true
+
     BUILD_DIR=/build
     PATCHES_DIR=/patches
 fi
