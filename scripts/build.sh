@@ -5,7 +5,6 @@
 
 set -e
 
-# check if DOCKER_BUILD is set
 if [ -z "$DOCKER_BUILD" ]; then
     echo "Building locally"
 
@@ -26,6 +25,7 @@ fi
 
 repo init -u https://github.com/flashbots/yocto-manifests.git -b tdx-rbuilder
 
+# Apply pre-sync patches
 for patch_dir in $PATCHES_DIR/pre/*; do
     patch_base="$patch_dir/$(basename "$patch_dir")"
     patch_target=$(cat "$patch_base.path")
@@ -37,6 +37,7 @@ done
 
 repo sync
 
+# Apply post-sync patches
 for patch_dir in $PATCHES_DIR/post/*; do
     patch_base="$patch_dir/$(basename "$patch_dir")"
     patch_target=$(cat "$patch_base.path")
@@ -46,13 +47,14 @@ for patch_dir in $PATCHES_DIR/post/*; do
     fi
 done
 
+# Copy in meta-nethermind
 if ! $DOCKER; then
     rm -rf srcs/poky/meta-nethermind
     cp -r ../meta-nethermind srcs/poky/meta-nethermind
 fi
 
 source setup
-
 make build || true
 
+# Copy artifacts to artifacts directory
 cp --dereference srcs/poky/build/tmp/deploy/images/tdx/* $ARTIFACTS_DIR/.
