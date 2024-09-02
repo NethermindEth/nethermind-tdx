@@ -9,19 +9,16 @@ set -e
 if [ -z "$DOCKER_BUILD" ]; then
     echo "Building locally"
     DOCKER=false
+    PATCHES_DIR=../patches
 
-    BUILD_DIR=./build
-    PATCHES_DIR=./patches
+    cd ./build
 else
     echo "Building in docker container"
     DOCKER=true
-
-    BUILD_DIR=/build
     PATCHES_DIR=/patches
+
+    cd /build
 fi
-
-cd $BUILD_DIR
-
 repo init -u https://github.com/flashbots/yocto-manifests.git -b tdx-rbuilder
 
 for patch_dir in $PATCHES_DIR/pre/*; do
