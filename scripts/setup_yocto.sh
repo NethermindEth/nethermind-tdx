@@ -9,3 +9,4 @@ sudo locale-gen en_US.UTF-8
 sudo apt install repo -y
 
 mkdir -p build
+mkdir -p artifacts
