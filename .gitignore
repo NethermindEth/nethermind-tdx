@@ -1,1 +1,7 @@
 .vscode
+
+yocto/
+build/
+artifacts/
+
+.env

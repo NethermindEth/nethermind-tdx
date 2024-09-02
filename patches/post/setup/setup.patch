@@ -1,0 +1,34 @@
+--- post/setup/setup.old	2024-09-02 14:58:43.490032452 -0300
++++ post/setup/setup.new	2024-09-02 14:58:43.490032452 -0300
+@@ -28,15 +28,17 @@
+ verbose_output "Sourced the oe-init-build-env script"
+ 
+ # Add the  meta-evm, meta-confidential-compute, meta-secure-core/meta-tpm2, meta-openembedded/meta-python, meta-openembedded/meta-oe layers meta-rust-bin meta-clang to bblayers.conf
+-bitbake-layers add-layer ../meta-evm
++# bitbake-layers add-layer ../meta-evm
+ bitbake-layers add-layer ../meta-confidential-compute
+ bitbake-layers add-layer ../meta-openembedded/meta-oe
+ bitbake-layers add-layer ../meta-openembedded/meta-python
+ bitbake-layers add-layer ../meta-secure-core/meta-tpm2
+-bitbake-layers add-layer ../meta-rust-bin
+-bitbake-layers add-layer ../meta-clang
++# bitbake-layers add-layer ../meta-rust-bin
++# bitbake-layers add-layer ../meta-clang
++bitbake-layers add-layer ../meta-dotnet
++bitbake-layers add-layer ../meta-nethermind
+ 
+-verbose_output "Added the meta-evm and meta-confidential-compute layers to bblayers.conf"
++verbose_output "Added the layers to bblayers.conf"
+ 
+ # Return to the original directory
+ popd
+@@ -49,6 +51,7 @@
+     verbose_output "Processing patch file $patch"
+ 
+     # Apply the patch to the corresponding file in srcs/poky/build/conf/
+-    patch -N $CURRENT_PATH/srcs/poky/build/conf/$filename -i $patch
++    # Ignore errors if the patch has already been applied
++    patch -N -f -s $CURRENT_PATH/srcs/poky/build/conf/$filename -i $patch 2>/dev/null || true
+     verbose_output "Applied patch to $CURRENT_PATH/srcs/poky/build/conf/$filename"
+ done
+\ No newline at end of file
