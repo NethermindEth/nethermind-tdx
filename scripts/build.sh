@@ -8,17 +8,22 @@ set -e
 # check if DOCKER_BUILD is set
 if [ -z "$DOCKER_BUILD" ]; then
     echo "Building locally"
+
     DOCKER=false
     PATCHES_DIR=../patches
+    ARTIFACTS_DIR=../artifacts
 
     cd ./build
 else
     echo "Building in docker container"
+
     DOCKER=true
     PATCHES_DIR=/patches
+    ARTIFACTS_DIR=/artifacts
 
     cd /build
 fi
+
 repo init -u https://github.com/flashbots/yocto-manifests.git -b tdx-rbuilder
 
 for patch_dir in $PATCHES_DIR/pre/*; do
@@ -50,4 +55,4 @@ source setup
 
 make build || true
 
-cp --dereference srcs/poky/build/tmp/deploy/images/tdx/* ../artifacts/.
+cp --dereference srcs/poky/build/tmp/deploy/images/tdx/* $ARTIFACTS_DIR/.
