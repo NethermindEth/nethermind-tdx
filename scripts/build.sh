@@ -5,8 +5,8 @@
 
 set -e
 
-# check if DOCKER is set
-if [ -z "$DOCKER" ]; then
+# check if DOCKER_BUILD is set
+if [ -z "$DOCKER_BUILD" ]; then
     echo "Running locally"
     DOCKER=false
     BUILD_DIR=./build
