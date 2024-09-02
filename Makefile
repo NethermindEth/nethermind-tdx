@@ -17,8 +17,11 @@ azure-image: generate-patches
 
 .PHONY: setup-local
 setup-local:
-	./scripts/setup_git.sh
 	./scripts/setup_yocto.sh
+
+.PHONY: setup-git
+setup-git:
+	./scripts/setup_git.sh
 
 .PHONY: setup-docker
 setup-docker:
