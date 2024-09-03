@@ -1,5 +1,5 @@
---- post/setup/setup.old	2024-09-02 14:58:43.490032452 -0300
-+++ post/setup/setup.new	2024-09-02 14:58:43.490032452 -0300
+--- post/setup/setup.old	2024-09-03 00:12:31.102937245 -0300
++++ post/setup/setup.new	2024-09-02 20:09:52.535698719 -0300
 @@ -28,15 +28,17 @@
  verbose_output "Sourced the oe-init-build-env script"
  
@@ -31,4 +31,3 @@
 +    patch -N -f -s $CURRENT_PATH/srcs/poky/build/conf/$filename -i $patch 2>/dev/null || true
      verbose_output "Applied patch to $CURRENT_PATH/srcs/poky/build/conf/$filename"
  done
-\ No newline at end of file
