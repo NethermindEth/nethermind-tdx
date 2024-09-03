@@ -25,6 +25,21 @@ patching to include our layers and recipes, and exclude unnecessary ones.
 
 ## Building the image
 
+### Environment
+
+First of all, copy the `.env.example` file to `.env` and set the variables
+as described in the file.
+
+```bash
+cp .env.example .env
+```
+
+These variables will apply to both build methods mentioned below. For a test
+run, you can leave the variables as is. The `DEBUG_TWEAKS_ENABLED` is
+important for a development image, allowing root access to the VM.
+
+### Build
+
 There are two options for building the image:
 1. Building it locally on a machine with Yocto instaled.
 2. Building it through a Docker image.
@@ -39,7 +54,7 @@ Ubuntu 22.04 - not 24.04.
 Both methods will take a few hours to complete, and will result in an image
 in `artifacts/`.
 
-### Local Build
+#### Local Build
 
 Preferably, use a VM for the build, as this will install packages that may
 not be desirable later on.
@@ -59,7 +74,7 @@ Then, build the image:
 make azure-image
 ```
 
-### Docker Build
+#### Docker Build
 
 If you don't want to install Yocto on your machine, you can use the provided
 Dockerfile to build the image. This is essentially the same as the local
