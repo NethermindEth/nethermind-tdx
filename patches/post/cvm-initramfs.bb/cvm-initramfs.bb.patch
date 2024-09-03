@@ -1,4 +1,4 @@
---- post/cvm-initramfs.bb/cvm-initramfs.bb.old	2024-09-02 14:58:39.540032347 -0300
+--- post/cvm-initramfs.bb/cvm-initramfs.bb.old	2024-09-03 00:12:28.042937080 -0300
 +++ post/cvm-initramfs.bb/cvm-initramfs.bb.new	2024-09-02 20:09:42.965700753 -0300
 @@ -7,7 +7,7 @@
  
@@ -9,10 +9,3 @@
  
  INITRAMFS_MAXSIZE = "20000000"
  
-@@ -57,4 +57,4 @@
- # Use the same restriction as initramfs-live-install
- COMPATIBLE_HOST = "x86_64.*-linux"
- 
--# QB_KERNEL_CMDLINE_APPEND += "debugshell=3 init=/bin/busybox sh init"
-\ No newline at end of file
-+# QB_KERNEL_CMDLINE_APPEND += "debugshell=3 init=/bin/busybox sh init"
