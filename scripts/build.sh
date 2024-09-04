@@ -55,9 +55,9 @@ done
 rm -rf srcs/poky/meta-nethermind
 cp -r $META_NETHERMIND_DIR srcs/poky/meta-nethermind
 
-# Copy in meta-lighthouse
-rm -rf srcs/poky/meta-lighthouse
-cp -r $META_LIGHTHOUSE_DIR srcs/poky/meta-lighthouse
+# Copy in meta-lighthouse-bin
+rm -rf srcs/poky/meta-lighthouse-bin
+cp -r $META_LIGHTHOUSE_DIR srcs/poky/meta-lighthouse-bin
 
 source setup
 make build || true
