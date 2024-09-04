@@ -1,5 +1,5 @@
 --- post/setup/setup.old	2024-09-03 21:06:00.831520031 -0300
-+++ post/setup/setup.new	2024-09-03 23:57:18.407322365 -0300
++++ post/setup/setup.new	2024-09-04 00:23:11.236970206 -0300
 @@ -28,15 +28,18 @@
  verbose_output "Sourced the oe-init-build-env script"
  
@@ -16,7 +16,7 @@
 +# bitbake-layers add-layer ../meta-clang
 +bitbake-layers add-layer ../meta-dotnet
 +bitbake-layers add-layer ../meta-nethermind
-+bitbake-layers add-layer ../meta-lighthouse
++bitbake-layers add-layer ../meta-lighthouse-bin
  
 -verbose_output "Added the meta-evm and meta-confidential-compute layers to bblayers.conf"
 +verbose_output "Added the layers to bblayers.conf"
