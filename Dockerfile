@@ -13,6 +13,6 @@ RUN chmod +x /usr/bin/build
 
 ADD ./patches /patches
 ADD ./meta-nethermind /meta-nethermind
-ADD ./meta-lighthouse /meta-lighthouse
+ADD ./meta-lighthouse-bin /meta-lighthouse-bin
 
 CMD /usr/bin/setup_git; /usr/bin/build
