@@ -10,9 +10,9 @@
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/lighthouse
-NAME=lighthouse_vc
-DESC="Validator Client"
-PIDFILE=/var/run/lighthouse_vc.pid
+NAME=lighthouse_bn
+DESC="Lighthouse Beacon Node"
+PIDFILE=/var/run/lighthouse_bn.pid
 
 
 start() {
