@@ -1,5 +1,5 @@
---- pre/default.xml/default.xml.old	2024-09-03 00:12:36.322935340 -0300
-+++ pre/default.xml/default.xml.new	2024-09-02 20:09:26.545703718 -0300
+--- pre/default.xml/default.xml.old	2024-09-03 21:06:00.831520031 -0300
++++ pre/default.xml/default.xml.new	2024-09-03 21:14:58.931391490 -0300
 @@ -1,6 +1,7 @@
  <?xml version="1.0" encoding="UTF-8"?>
  <manifest>
