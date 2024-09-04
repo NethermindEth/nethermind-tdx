@@ -12,8 +12,8 @@ INITSCRIPT_PARAMS = "defaults 99"
 inherit update-rc.d
 
 do_install() {
-  install -d ${D}${bindir}
-  install -m 0777 ${BINARY} ${D}${bindir}
+	install -d ${D}${bindir}
+	install -m 0777 ${BINARY} ${D}${bindir}
 	install -d ${D}${sysconfdir}/init.d
 	cp init ${D}${sysconfdir}/init.d/${BINARY}
 	chmod 755 ${D}${sysconfdir}/init.d/${BINARY}
