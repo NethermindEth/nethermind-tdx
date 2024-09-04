@@ -12,6 +12,7 @@ if [ -z "$DOCKER_BUILD" ]; then
     PATCHES_DIR=../patches
     ARTIFACTS_DIR=../artifacts
     META_NETHERMIND_DIR=../meta-nethermind
+    META_LIGHTHOUSE_DIR=../meta-lighthouse-bin
 
     cd ./build
 else
@@ -21,6 +22,7 @@ else
     PATCHES_DIR=/patches
     ARTIFACTS_DIR=/artifacts
     META_NETHERMIND_DIR=/meta-nethermind
+    META_LIGHTHOUSE_DIR=/meta-lighthouse-bin
 
     cd /build
 fi
@@ -52,6 +54,10 @@ done
 # Copy in meta-nethermind
 rm -rf srcs/poky/meta-nethermind
 cp -r $META_NETHERMIND_DIR srcs/poky/meta-nethermind
+
+# Copy in meta-lighthouse-bin
+rm -rf srcs/poky/meta-lighthouse-bin
+cp -r $META_LIGHTHOUSE_DIR srcs/poky/meta-lighthouse-bin
 
 source setup
 make build || true
