@@ -9,13 +9,13 @@ endif
 .PHONY: azure-image-docker
 azure-image-docker: generate-patches tdx-poky
 	mkdir -p build && chmod 0777 ./build
-	mkdir -p reproducible-build/artifacts && chmod 0777 reproducible-build/artifacts
+	mkdir -p artifacts && chmod 0777 ./artifacts
 	$(DOCKER) run -u root --rm --env-file $(ENV_FILE) -it -v $(CURDIR)/artifacts:/artifacts -v $(CURDIR)/build:/build tdx-poky
-	chmod 0755 build reproducible-build/artifacts
+	chmod 0755 build artifacts
 
 .PHONY: tdx-poky
 tdx-poky:
-	$(DOCKER) build -t tdx-poky reproducible-build/
+	$(DOCKER) build -t tdx-poky .
 
 .PHONY: azure-image
 azure-image: generate-patches
