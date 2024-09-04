@@ -1,7 +1,7 @@
 .vscode
+.env
 
 yocto/
 build/
 artifacts/
-
-.env
+lighthouse/

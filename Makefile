@@ -33,6 +33,10 @@ setup-git:
 setup-docker:
 	./scripts/setup_docker.sh
 
+.PHONY: setup-lighthouse
+setup-lighthouse:
+	./scripts/setup_lighthouse.sh
+
 .PHONY: generate-patches
 generate-patches:
 	./patches/generate_patches.sh
