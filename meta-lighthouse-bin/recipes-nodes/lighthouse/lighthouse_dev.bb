@@ -3,6 +3,7 @@ LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
 BINARY = "lighthouse"
 SRC_URI += "file://${BINARY}"
+SRC_URI += "file://init"
 S = "${WORKDIR}"
 
 INITSCRIPT_NAME = "${BINARY}"
