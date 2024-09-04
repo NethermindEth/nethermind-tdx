@@ -18,3 +18,9 @@ RELEASE_DIR = "${ARTIFACTS_DIR}/publish/Nethermind.Runner/release_${BUILD_TARGET
 S = "${WORKDIR}/nethermind-${PV}/src/Nethermind/Nethermind.Runner"
 
 inherit dotnet
+
+DEPENDS += " patchelf-native"
+
+do_compile:append() {
+    patchelf --set-interpreter /lib/ld-linux-x86-64.so.2 ${RELEASE_DIR}/nethermind
+}
