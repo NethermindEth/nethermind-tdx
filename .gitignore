@@ -1,9 +1,7 @@
 .vscode
 .env
 
-./yocto/
-./build/
-./artifacts/
-./lighthouse/
-
-./meta-lighthouse-bin/recipes-nodes/lighthouse/lighthouse
+/yocto/
+/build/
+/artifacts/
+/lighthouse/
