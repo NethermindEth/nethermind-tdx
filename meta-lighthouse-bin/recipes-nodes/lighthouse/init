@@ -19,8 +19,12 @@ start() {
 	echo -n "Starting $DESC: "
 	mount -o remount,size=90% /var/volatile
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
-		vc \
-		--beacon-nodes https://www.lightclientdata.org/ \
+		bn \
+		--network holesky \
+		--execution-endpoint http://localhost:8551 \
+		--execution-jwt /opt/dotnet/nethermind/jwt-secret \
+		--checkpoint-sync-url https://holesky.beaconstate.info \
+		--http \
 		2>&1 | tee /tmp/log"
 	echo "$NAME."
 }
