@@ -38,6 +38,22 @@ These variables will apply to both build methods mentioned below. For a test
 run, you can leave the variables as is. The `DEBUG_TWEAKS_ENABLED` is
 important for a development image, allowing root access to the VM.
 
+### Lighthouse
+
+For now, the Lighthouse binary is being built outside the Yocto build process
+and the final binary is copied into the image.
+
+In order to build Lighthouse, you need Cargo installed. Check the
+[Cargo documentation](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+for instructions.
+
+Then, in order to build Lighthouse and copy it into the `meta-lighthouse-bin` layer,
+run:
+
+```bash
+make setup-lighthouse
+```
+
 ### Build
 
 There are two options for building the image:
