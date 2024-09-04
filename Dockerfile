@@ -14,3 +14,4 @@ RUN chmod +x /usr/bin/build
 ADD ./patches /patches
 ADD ./meta-nethermind /meta-nethermind
 
+CMD /usr/bin/setup_git; /usr/bin/build
