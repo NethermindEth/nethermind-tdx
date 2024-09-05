@@ -13,6 +13,7 @@ DAEMON=/usr/bin/lighthouse
 NAME=lighthouse_bn
 DESC="Lighthouse Beacon Node"
 PIDFILE=/var/run/lighthouse_bn.pid
+LOGFILE=/tmp/lighthouse_bn.log
 
 
 start() {
@@ -25,7 +26,7 @@ start() {
 		--execution-jwt /opt/dotnet/nethermind/jwt-secret \
 		--checkpoint-sync-url https://holesky.beaconstate.info \
 		--http \
-		2>&1 | tee /tmp/log"
+		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
 }
 
