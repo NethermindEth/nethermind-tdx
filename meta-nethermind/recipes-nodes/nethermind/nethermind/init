@@ -18,10 +18,18 @@ PIDFILE=/var/run/nethermind.pid
 LOGFILE=/tmp/nethermind.log
 
 start() {
+	echo -n "Waiting for lighthouse to start... "
+	while ! pgrep lighthouse > /dev/null; do
+		sleep 1
+	done
+	echo "Lighthouse started."
+
+      sleep 10
+
 	echo -n "Starting $DESC: "
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
 		-c holesky \
-        --JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
+		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
 }
