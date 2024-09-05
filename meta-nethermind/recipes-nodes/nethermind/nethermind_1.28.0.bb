@@ -24,6 +24,8 @@ S = "${WORKDIR}/nethermind-${PV}/src/Nethermind/Nethermind.Runner"
 INITSCRIPT_NAME = "nethermind"
 INITSCRIPT_PARAMS = "defaults 98"
 
+RDEPENDS:${PN} += " disk-encryption"
+
 # set the interpreter for the resulting binary
 DEPENDS += " patchelf-native"
 do_compile:append() {
