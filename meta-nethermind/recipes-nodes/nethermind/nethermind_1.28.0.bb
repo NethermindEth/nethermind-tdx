@@ -22,7 +22,7 @@ S = "${WORKDIR}/nethermind-${PV}/src/Nethermind/Nethermind.Runner"
 
 # update-rc.d configuration
 INITSCRIPT_NAME = "nethermind"
-INITSCRIPT_PARAMS = "defaults 98"
+INITSCRIPT_PARAMS = "defaults 99"
 
 RDEPENDS:${PN} += " disk-encryption"
 
