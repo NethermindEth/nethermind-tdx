@@ -1,31 +1,35 @@
+#!/bin/sh
+#
 ### BEGIN INIT INFO
-# Provides:		lighthouse
+# Provides:		nethermind
 # Required-Start:	$remote_fs $syslog $networking
 # Required-Stop:	$remote_fs $syslog
 # Default-Start:	2 3 4 5
 # Default-Stop:		1
-# Short-Description:	Start and stop the lighthouse daemon
+# Short-Description:	Start and stop the nethermind daemon
 ### END INIT INFO
 #
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/lighthouse
-NAME=lighthouse_bn
-DESC="Lighthouse Beacon Node"
-PIDFILE=/var/run/lighthouse_bn.pid
-LOGFILE=/tmp/lighthouse_bn.log
-
+DAEMON=/opt/dotnet/nethermind/nethermind
+NAME=nethermind
+DESC="Nethermind Node"
+PIDFILE=/var/run/nethermind.pid
+LOGFILE=/tmp/nethermind.log
 
 start() {
+	echo -n "Waiting for lighthouse to start... "
+	while ! pgrep lighthouse > /dev/null; do
+		sleep 1
+	done
+	echo "Lighthouse started."
+
+      sleep 10
+
 	echo -n "Starting $DESC: "
-	mount -o remount,size=90% /var/volatile
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
-		bn \
-		--network holesky \
-		--execution-endpoint http://localhost:8551 \
-		--execution-jwt /opt/dotnet/nethermind/jwt-secret \
-		--checkpoint-sync-url https://holesky.beaconstate.info \
-		--http \
+		-c holesky \
+		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
 }
