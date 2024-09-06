@@ -21,6 +21,10 @@ tdx-poky:
 azure-image: generate-patches
 	./scripts/build.sh
 
+.PHONY: run-local
+run-local:
+	./scripts/run_local.sh
+
 .PHONY: setup-local
 setup-local:
 	./scripts/setup_yocto.sh
