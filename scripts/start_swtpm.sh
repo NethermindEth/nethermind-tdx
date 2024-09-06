@@ -7,6 +7,7 @@ set -e
 sudo apt install swtpm swtpm-tools -y
 
 mkdir /tmp/tdxqemu-tpm || true
+mkdir tpmstatedir || true
 
 sudo swtpm_setup --tpmstate /tmp/tdxqemu-tpm \
   --create-ek-cert \
