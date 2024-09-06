@@ -25,6 +25,10 @@ azure-image: generate-patches
 run-local:
 	./scripts/run_local.sh
 
+.PHONY: start-swtpm
+start-swtpm:
+	./scripts/start_swtpm.sh
+
 .PHONY: setup-local
 setup-local:
 	./scripts/setup_yocto.sh
@@ -40,10 +44,6 @@ setup-docker:
 .PHONY: setup-lighthouse
 setup-lighthouse:
 	./scripts/setup_lighthouse.sh
-
-.PHONY: setup-swtpm
-setup-swtpm:
-	./scripts/setup_swtpm.sh
 
 .PHONY: generate-patches
 generate-patches:
