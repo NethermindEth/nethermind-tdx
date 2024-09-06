@@ -18,5 +18,6 @@ sudo swtpm_setup --tpmstate /tmp/tdxqemu-tpm \
 
 swtpm socket --tpmstate dir=/tmp/tdxqemu-tpm \
   --ctrl type=unixio,path=/tmp/tdxqemu-tpm/swtpm-sock \
+  --tpmstate dir=./tpmstatedir \
   --tpm2 \
   --log level=20
