@@ -37,6 +37,10 @@ setup-docker:
 setup-lighthouse:
 	./scripts/setup_lighthouse.sh
 
+.PHONY: setup-swtpm
+setup-swtpm:
+	./scripts/setup_swtpm.sh
+
 .PHONY: generate-patches
 generate-patches:
 	./patches/generate_patches.sh
