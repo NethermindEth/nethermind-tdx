@@ -112,3 +112,30 @@ Then, build the image:
 ```bash
 make azure-image-docker
 ```
+
+## Running the image
+
+### Local Deployment
+
+You can run the VM locally, in a non-TDX machine. This is really useful for
+debugging and testing purposes.
+
+In order to run the VM, you need to start an `swtpm` instance first. This is
+the TPM that will be used in the VM. In a separate terminal, run:
+
+```bash
+make start-swtpm
+```
+
+This will start a `swtpm` instance in the foreground. It will listen for
+incoming connections, and once a connected process exits, it will exit as
+well. It will also create a `tpmstatedir` directory in the project root with
+the state of the TPM.
+
+Then, run the VM:
+
+```bash
+make run-local
+```
+
+This will run the VM using [QEMU](https://www.qemu.org/).
