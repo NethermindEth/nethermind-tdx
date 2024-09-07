@@ -17,6 +17,7 @@ do_compile[network] = "1"
 # meta-dotnet configuration
 DOTNET_PROJECT = "."
 ENABLE_TRIMMING = "false"
+ENABLE_SINGLEFILE = "true"
 RELEASE_DIR = "${ARTIFACTS_DIR}/publish/Nethermind.Runner/release_${BUILD_TARGET}/"
 S = "${WORKDIR}/nethermind-${PV}/src/Nethermind/Nethermind.Runner"
 
