@@ -12,6 +12,8 @@ fi
 if [ -z "$PERSISTENT_DISK" ]; then
     echo "PERSISTENT_DISK is not set"
     exit 1
+else
+    PERSISTENT_DISK=$(realpath "$PERSISTENT_DISK")
 fi
 
 if ! command -v qemu-img &> /dev/null; then
@@ -50,5 +52,5 @@ runqemu cvm-image-azure \
       -chardev socket,id=chrtpm,path=/tmp/tdxqemu-tpm/swtpm-sock \
       -tpmdev emulator,id=tpm0,chardev=chrtpm \
       -device tpm-tis,tpmdev=tpm0 \
-      -hdb "../../../../$PERSISTENT_DISK" \
+      -hdb "$PERSISTENT_DISK" \
     "
