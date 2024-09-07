@@ -6,5 +6,6 @@
 /artifacts/
 /lighthouse/
 /tpmstatedir/
+/measured-boot/
 
 /persistent.qcow2
