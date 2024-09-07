@@ -27,6 +27,7 @@ start() {
 		--execution-jwt /opt/dotnet/nethermind/jwt-secret \
 		--checkpoint-sync-url https://holesky.beaconstate.info \
 		--http \
+		--disable-deposit-contract-sync \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
 }
