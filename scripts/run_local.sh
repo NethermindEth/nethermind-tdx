@@ -19,7 +19,16 @@ if ! command -v qemu-img &> /dev/null; then
 fi
 
 if [ ! -f "$PERSISTENT_DISK" ]; then
-    qemu-img create -f qcow2 "$PERSISTENT_DISK" "$DISK_SIZE"
+    echo "Persistent disk image not found"
+    read -r -p "Are you sure you want to create a $DISK_SIZE persistent disk image? [y/N] " response
+    response=${response,,}
+
+    if [[ "$response" =~ ^(yes|y)$ ]]; then
+        qemu-img create -f qcow2 "$PERSISTENT_DISK" "$DISK_SIZE"
+    else
+        echo "Persistent disk image not created. Exiting."
+        exit 1
+    fi
 fi
 
 cd build/srcs/poky
