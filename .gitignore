@@ -6,3 +6,5 @@
 /artifacts/
 /lighthouse/
 /tpmstatedir/
+
+/persistent.qcow2
