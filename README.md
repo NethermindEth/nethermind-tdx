@@ -1,27 +1,25 @@
 # Nethermind in TDX
 
-This repository holds an experiment in running the Nethermind execution client
-through a TDX TEE.
+This repository contains an experiment in running the Nethermind execution client
+within a TDX TEE (Trusted Execution Environment).
 
-The project is currently based on the recent Flashbots experiments with TDX,
-namely:
+The project is currently based on recent Flashbots experiments with TDX,
+specifically:
 * [T(EE)-Stack demo: running a validator in TDX](https://collective.flashbots.net/t/t-ee-stack-demo-running-a-validator-in-tdx/3551/5)
 * [Building Secure Ethereum Blocks on Minimal Intel TDX Confidential VMs](https://collective.flashbots.net/t/building-secure-ethereum-blocks-on-minimal-intel-tdx-confidential-vms/3795)
 
-The full process here is comprised of the generation of a minimal
-TDX-compatible VM that includes the Nethermind client and only a number of
-essential packages and processes.
+The full process involves generating a minimal TDX-compatible VM that includes
+the Nethermind client and only essential packages and processes.
 
-This is done through Yocto, an open source project that helps developers
-create specific custom Linux-based systems. Through it, multiple layers, from
-system utilities to applications, are put on top of each other to describe
-the system's configuration and build process. This build is reproducible,
-which means we can use the measurement of the resulting image for TDX
-attestations - and any change in the build process should lead to different
-measurements.
+This is accomplished using Yocto, an open-source project that helps developers
+create custom Linux-based systems. Through Yocto, multiple layers, from
+system utilities to applications, are stacked to describe the system's
+configuration and build process. This build is reproducible, meaning we can
+use the measurement of the resulting image for TDX attestations - any change
+in the build process should lead to different measurements.
 
-Currently, we're using the Flashbots Yocto setup as a base and doing minimal
-patching to include our layers and recipes, and exclude unnecessary ones.
+Currently, we're using the Flashbots Yocto setup as a base and applying minimal
+patches to include our layers and recipes while excluding unnecessary ones.
 
 ## Building the image
 
@@ -74,16 +72,19 @@ in `artifacts/`.
 
 #### Local Build
 
-Preferably, use a VM for the build, as this will install packages that may
-not be desirable later on.
+Preferably use a specific machine for the build, as this will e.g. install
+packages that you might not want to have on your main system. You might also
+want to check out the [Docker Build](#docker-build) section for an alternative
+approach if you're not using a specific machine for the build.
 
-Then, set up your Yocto environment:
+First, set up your Yocto environment:
 
 ```bash
 make setup-local
 ```
 
-This will install some Yocto dependencies.
+This will install some Yocto dependencies and create the `build` and
+`artifacts` directories.
 
 Then, build the image:
 
@@ -94,9 +95,10 @@ make azure-image
 
 #### Docker Build
 
-If you don't want to install Yocto on your machine, you can use the provided
-Dockerfile to build the image. This is essentially the same as the local
-build, but it runs inside a Docker container.
+The Docker build follows the same process as the local build, but it runs
+inside a Docker container through a specific `Dockerfile`. This allows for
+a more isolated and portable environment for compilation, and doesn't
+require installing build dependencies directly on the machine.
 
 First, if you don't have Docker installed, install it. You can do it by
 running:
@@ -119,11 +121,11 @@ make azure-image-docker
 
 ### Local Deployment
 
-You can run the VM locally, in a non-TDX machine. This is really useful for
-debugging and testing purposes.
+You can run the VM locally even in a non-TDX machine. This is really useful
+for debugging and testing purposes.
 
-In order to run the VM, you need to start an `swtpm` instance first. This is
-the TPM that will be used in the VM. In a separate terminal, run:
+In order to provide a TPM device to the VM, you need to start an `swtpm`
+instance before running the VM. In a separate terminal, run:
 
 ```bash
 make start-swtpm
@@ -135,17 +137,18 @@ well. It will also create a `tpmstatedir` directory in the project root with
 the state of the TPM.
 
 Then, run the VM. You can specify the size of the persistent disk to be
-created (if not exists) by setting the `DISK_SIZE` environment variable.
-Below is an example of running the VM with a 10GB persistent disk:
+created (in case it doesn't exist) by setting the `DISK_SIZE` environment
+variable. Below is an example of running the VM with a 10GB persistent disk:
 
 ```bash
 DISK_SIZE=10G make run-local
 ```
 
-This will create a 10GB persistent QCOW2 disk image to be used by the VM in
-`persistent.cow2` and run the it using [QEMU](https://www.qemu.org/). The
-image has disk encryption enabled by default on the persistent disk, and you
-might notice the encryption process when booting.
+This will, if needed, create a 10GB persistent QCOW2 disk image to be used
+by the VM in `persistent.cow2` and run the VM using
+[QEMU](https://www.qemu.org/). The image has disk encryption enabled by
+default on the persistent disk, and you might notice the encryption process
+when booting.
 
 You can choose a different path for the persistent disk by setting the
 `PERSISTENT_DISK` environment variable in `.env`.
