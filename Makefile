@@ -45,6 +45,10 @@ setup-docker:
 setup-lighthouse:
 	./scripts/setup_lighthouse.sh
 
+.PHONY: setup-go
+setup-go:
+	./scripts/setup_go.sh
+
 .PHONY: generate-patches
 generate-patches:
 	./patches/generate_patches.sh
