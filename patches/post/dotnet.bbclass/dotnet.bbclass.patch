@@ -1,0 +1,18 @@
+--- post/dotnet.bbclass/dotnet.bbclass.old	2024-09-07 16:24:28.990887336 -0300
++++ post/dotnet.bbclass/dotnet.bbclass.new	2024-09-07 16:24:36.650900623 -0300
+@@ -25,6 +25,7 @@
+ 
+ ENABLE_READYTORUN ?= "false"
+ ENABLE_TRIMMING ?= "true"
++ENABLE_SINGLEFILE ?= "false"
+ 
+ dotnet_do_configure() {
+     # Don't use users's $HOME/.dotnet during configuration
+@@ -48,6 +49,7 @@
+         --self-contained true \
+         -p:PublishTrimmed=${ENABLE_TRIMMING} \
+         -p:PublishReadyToRun=${ENABLE_READYTORUN} \
++        -p:PublishSingleFile=${ENABLE_SINGLEFILE} \
+         -c Release \
+         ${DOTNET_PROJECT}
+ }
