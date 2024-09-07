@@ -4,6 +4,11 @@ set -e
 
 # Script to run the resulting Yocto image on the host machine as a VM
 
+if [ -z "$DISK_SIZE" ]; then
+    echo "DISK_SIZE is not set"
+    exit 1
+fi
+
 PERSISTENT_DISK="persistent.qcow2"
 
 if ! command -v qemu-img &> /dev/null; then
@@ -11,7 +16,7 @@ if ! command -v qemu-img &> /dev/null; then
 fi
 
 if [ ! -f "$PERSISTENT_DISK" ]; then
-    qemu-img create -f qcow2 "$PERSISTENT_DISK" 1G
+    qemu-img create -f qcow2 "$PERSISTENT_DISK" "$DISK_SIZE"
 fi
 
 cd build/srcs/poky

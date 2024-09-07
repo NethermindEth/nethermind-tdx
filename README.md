@@ -132,10 +132,12 @@ incoming connections, and once a connected process exits, it will exit as
 well. It will also create a `tpmstatedir` directory in the project root with
 the state of the TPM.
 
-Then, run the VM:
+Then, run the VM. You can specify the size of the persistent disk to be
+created (if not exists) by setting the `DISK_SIZE` environment variable.
+Below is an example of running the VM with a 10GB persistent disk:
 
 ```bash
-make run-local
+DISK_SIZE=10G make run-local
 ```
 
 This will run the VM using [QEMU](https://www.qemu.org/).
