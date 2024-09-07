@@ -124,8 +124,16 @@ make azure-image-docker
 You can run the VM locally even in a non-TDX machine. This is really useful
 for debugging and testing purposes.
 
-In order to provide a TPM device to the VM, you need to start an `swtpm`
-instance before running the VM. In a separate terminal, run:
+We'll use [QEMU](https://www.qemu.org/) to run the VM. Ensure your machine
+supports [KVM](https://www.linux-kvm.org/). Most modern processors, and
+therefore most bare-metal machines, support KVM. However, if you're using a
+VM, you might need to enable nested virtualization. This feature is supported
+by some cloud providers but not all. You can use the `kvm-ok` command to
+verify if your machine supports KVM.
+
+First, in order to provide a TPM device to the VM, you need to start an
+`swtpm` instance before running the VM. This will emulate a TPM device in the
+host machine. In a separate terminal, run:
 
 ```bash
 make start-swtpm
