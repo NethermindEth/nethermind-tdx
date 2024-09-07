@@ -29,6 +29,7 @@ start() {
 	echo -n "Starting $DESC: "
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
 		-c holesky \
+		-dd /persistent/nethermind \
 		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."

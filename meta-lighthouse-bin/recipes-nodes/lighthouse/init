@@ -22,6 +22,7 @@ start() {
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
 		bn \
 		--network holesky \
+		--datadir /persistent/lighthouse \
 		--execution-endpoint http://localhost:8551 \
 		--execution-jwt /opt/dotnet/nethermind/jwt-secret \
 		--checkpoint-sync-url https://holesky.beaconstate.info \
