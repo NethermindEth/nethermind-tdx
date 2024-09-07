@@ -68,7 +68,8 @@ Both methods are slightly resource-intensive. You need around:
 Ubuntu 22.04 - not 24.04.
 
 Both methods will take a few hours to complete, and will result in an image
-in `artifacts/`.
+in `artifacts/`. It will also generate a `measurements.json` file in the
+`artifacts/` directory, which contains the measurements of the built image.
 
 #### Local Build
 
@@ -77,16 +78,30 @@ packages that you might not want to have on your main system. You might also
 want to check out the [Docker Build](#docker-build) section for an alternative
 approach if you're not using a specific machine for the build.
 
-First, set up your Yocto environment:
+The local build also requires [Go](https://go.dev/) to be installed. You can
+either follow the [official instructions](https://go.dev/doc/install) or
+install it by running:
+
+```bash
+# either follow the official instructions or run this
+make setup-go
+source ~/.profile
+```
+
+This will install Go on your machine and add it to your PATH through
+`~/.profile`.
+
+Then, set up your environment:
 
 ```bash
 make setup-local
 ```
 
-This will install some Yocto dependencies and create the `build` and
-`artifacts` directories.
+This will install some Yocto dependencies, create the `build` and `artifacts`
+directories, and also compile the Go [measured-boot](https://github.com/flashbots/measured-boot)
+utility.
 
-Then, build the image:
+Finally, build the image:
 
 ```bash
 # you can use `make setup-git` to set up a mock git user for cloning

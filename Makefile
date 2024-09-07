@@ -19,7 +19,8 @@ tdx-poky:
 
 .PHONY: azure-image
 azure-image: generate-patches
-	./scripts/build.sh
+	./scripts/build.sh && \
+	./scripts/measure.sh
 
 .PHONY: run-local
 run-local:
@@ -31,7 +32,8 @@ start-swtpm:
 
 .PHONY: setup-local
 setup-local:
-	./scripts/setup_yocto.sh
+	./scripts/setup_yocto.sh && \
+	./scripts/setup_measured_boot.sh
 
 .PHONY: setup-git
 setup-git:
@@ -44,6 +46,10 @@ setup-docker:
 .PHONY: setup-lighthouse
 setup-lighthouse:
 	./scripts/setup_lighthouse.sh
+
+.PHONY: setup-go
+setup-go:
+	./scripts/setup_go.sh
 
 .PHONY: generate-patches
 generate-patches:
