@@ -140,4 +140,7 @@ Below is an example of running the VM with a 10GB persistent disk:
 DISK_SIZE=10G make run-local
 ```
 
-This will run the VM using [QEMU](https://www.qemu.org/).
+This will create a 10GB persistent QCOW2 disk image to be used by the VM in
+`persistent.cow2` and run the it using [QEMU](https://www.qemu.org/). The
+image has disk encryption enabled by default on the persistent disk, and you
+might notice the encryption process when booting.
