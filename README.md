@@ -38,6 +38,8 @@ These variables will apply to both build methods mentioned below. For a test
 run, you can leave the variables as is. The `DEBUG_TWEAKS_ENABLED` is
 important for a development image, allowing root access to the VM.
 
+For more details on each variable, check your `.env` file.
+
 ### Lighthouse
 
 For now, the Lighthouse binary is being built outside the Yocto build process
