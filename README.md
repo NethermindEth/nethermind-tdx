@@ -73,7 +73,9 @@ in `artifacts/`.
 #### Local Build
 
 Preferably use a specific machine for the build, as this will e.g. install
-packages that you might not want to have on your main system.
+packages that you might not want to have on your main system. You might also
+want to check out the [Docker Build](#docker-build) section for an alternative
+approach if you're not using a specific machine for the build.
 
 First, set up your Yocto environment:
 
