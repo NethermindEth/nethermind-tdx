@@ -9,7 +9,10 @@ if [ -z "$DISK_SIZE" ]; then
     exit 1
 fi
 
-PERSISTENT_DISK="persistent.qcow2"
+if [ -z "$PERSISTENT_DISK" ]; then
+    echo "PERSISTENT_DISK is not set"
+    exit 1
+fi
 
 if ! command -v qemu-img &> /dev/null; then
     sudo apt install -y qemu-utils
