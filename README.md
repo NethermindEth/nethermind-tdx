@@ -95,10 +95,10 @@ make azure-image
 
 #### Docker Build
 
-An alternative to the local build, which requires installing build
-dependencies directly on the machine, is the Docker build. This is essentially
-the same as the local build, but it runs inside a Docker container through
-a specific `Dockerfile`.
+The Docker build follows the same process as the local build, but it runs
+inside a Docker container through a specific `Dockerfile`. This allows for
+a more isolated and portable environment for compilation, and doesn't
+require installing build dependencies directly on the machine.
 
 First, if you don't have Docker installed, install it. You can do it by
 running:
