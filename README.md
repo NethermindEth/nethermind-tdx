@@ -38,6 +38,8 @@ These variables will apply to both build methods mentioned below. For a test
 run, you can leave the variables as is. The `DEBUG_TWEAKS_ENABLED` is
 important for a development image, allowing root access to the VM.
 
+For more details on each variable, check your `.env` file.
+
 ### Lighthouse
 
 For now, the Lighthouse binary is being built outside the Yocto build process
@@ -132,10 +134,18 @@ incoming connections, and once a connected process exits, it will exit as
 well. It will also create a `tpmstatedir` directory in the project root with
 the state of the TPM.
 
-Then, run the VM:
+Then, run the VM. You can specify the size of the persistent disk to be
+created (if not exists) by setting the `DISK_SIZE` environment variable.
+Below is an example of running the VM with a 10GB persistent disk:
 
 ```bash
-make run-local
+DISK_SIZE=10G make run-local
 ```
 
-This will run the VM using [QEMU](https://www.qemu.org/).
+This will create a 10GB persistent QCOW2 disk image to be used by the VM in
+`persistent.cow2` and run the it using [QEMU](https://www.qemu.org/). The
+image has disk encryption enabled by default on the persistent disk, and you
+might notice the encryption process when booting.
+
+You can choose a different path for the persistent disk by setting the
+`PERSISTENT_DISK` environment variable in `.env`.
