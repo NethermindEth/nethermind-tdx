@@ -1,0 +1,10 @@
+--- post/dotnet.bbclass/dotnet.bbclass.old	2024-09-07 16:40:09.282550923 -0300
++++ post/dotnet.bbclass/dotnet.bbclass.new	2024-09-07 16:41:05.502630954 -0300
+@@ -48,6 +48,7 @@
+         --self-contained true \
+         -p:PublishTrimmed=${ENABLE_TRIMMING} \
+         -p:PublishReadyToRun=${ENABLE_READYTORUN} \
++        -p:ContinuousIntegrationBuild=true \
+         -c Release \
+         ${DOTNET_PROJECT}
+ }
