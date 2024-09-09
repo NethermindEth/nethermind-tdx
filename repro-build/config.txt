@@ -1,0 +1,1 @@
+-c Release --self-contained true -p:IncludeAllContentForSelfExtract=true -p:PublishSingleFile=true -p:DebugType=embedded -p:Deterministic=true -p:ContinuousIntegrationBuild=true -p:IncludePackageReferencesDuringMarkupCompilation=true -p:EmbedUntrackedSources=true -p:PublishRepositoryUrl=true -p:Deterministic=true
