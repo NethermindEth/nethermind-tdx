@@ -4,7 +4,7 @@ WORKDIR /app
 USER root
 
 ADD ./scripts/setup_measured_boot.sh /app/setup_measured_boot
-RUN chmod +x /app/
+RUN chmod +x /app/setup_measured_boot
 
 ADD ./scripts/setup_git.sh /app/setup_git
 RUN chmod +x /app/setup_git
