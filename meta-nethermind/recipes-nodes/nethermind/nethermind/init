@@ -31,6 +31,7 @@ start() {
 		-c holesky \
 		-dd /persistent/nethermind \
 		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
+		--JsonRpc.Host 0.0.0.0 \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
 }
