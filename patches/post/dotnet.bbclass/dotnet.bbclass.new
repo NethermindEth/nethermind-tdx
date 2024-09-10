@@ -43,13 +43,22 @@ dotnet_do_compile() {
 
     cd ${S}
     ${STAGING_DIR_NATIVE}${bindir}/dotnet publish \
+        -c Release \
         --artifacts-path ${ARTIFACTS_DIR} \
         --runtime ${BUILD_TARGET} \
         --self-contained true \
         -p:PublishTrimmed=${ENABLE_TRIMMING} \
         -p:PublishReadyToRun=${ENABLE_READYTORUN} \
+        -p:PublishSingleFile=true \
+        -p:BuildTimestamp=0 \
+        -p:Commit=0000000000000000000000000000000000000000 \
+        -p:DebugType=none \
+        -p:Deterministic=true \
         -p:ContinuousIntegrationBuild=true \
-        -c Release \
+        -p:IncludeAllContentForSelfExtract=true \
+        -p:IncludePackageReferencesDuringMarkupCompilation=true \
+        -p:EmbedUntrackedSources=true \
+        -p:PublishRepositoryUrl=true \
         ${DOTNET_PROJECT}
 }
 
