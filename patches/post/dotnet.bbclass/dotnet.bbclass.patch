@@ -1,10 +1,26 @@
---- post/dotnet.bbclass/dotnet.bbclass.old	2024-09-07 16:40:09.282550923 -0300
-+++ post/dotnet.bbclass/dotnet.bbclass.new	2024-09-07 16:41:05.502630954 -0300
-@@ -48,6 +48,7 @@
+--- post/dotnet.bbclass/dotnet.bbclass.old	2024-09-09 16:59:48.844788452 -0300
++++ post/dotnet.bbclass/dotnet.bbclass.new	2024-09-10 15:02:33.597581919 -0300
+@@ -43,12 +43,22 @@
+ 
+     cd ${S}
+     ${STAGING_DIR_NATIVE}${bindir}/dotnet publish \
++        -c Release \
+         --artifacts-path ${ARTIFACTS_DIR} \
+         --runtime ${BUILD_TARGET} \
          --self-contained true \
          -p:PublishTrimmed=${ENABLE_TRIMMING} \
          -p:PublishReadyToRun=${ENABLE_READYTORUN} \
+-        -c Release \
++        -p:PublishSingleFile=true \
++        -p:BuildTimestamp=0 \
++        -p:Commit=0000000000000000000000000000000000000000 \
++        -p:DebugType=none \
++        -p:Deterministic=true \
 +        -p:ContinuousIntegrationBuild=true \
-         -c Release \
++        -p:IncludeAllContentForSelfExtract=true \
++        -p:IncludePackageReferencesDuringMarkupCompilation=true \
++        -p:EmbedUntrackedSources=true \
++        -p:PublishRepositoryUrl=true \
          ${DOTNET_PROJECT}
  }
+ 
