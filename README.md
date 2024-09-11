@@ -134,7 +134,7 @@ make azure-image-docker
 
 ## Running the image
 
-### Local Deployment
+### Development
 
 You can run the VM locally even in a non-TDX machine. This is really useful
 for debugging and testing purposes.
@@ -175,3 +175,33 @@ when booting.
 
 You can choose a different path for the persistent disk by setting the
 `PERSISTENT_DISK` environment variable in `.env`.
+
+### Production
+
+Currently, the only supported production deployment is through Azure.
+
+In order to deploy the image to Azure, you need to have the Azure CLI
+installed. You can install it by following the
+[official instructions](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+
+Then, you need to make sure that your Azure account is
+[logged in](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli?view=azure-cli-latest).
+
+After that, you can deploy the image to Azure by running the `deploy-azure`
+target together with a few parameters:
+
+```bash
+make deploy-azure \
+    DISK_PATH=artifacts/dev/cvm-image-azure-tdx.rootfs.wic.vhd \
+    VM_NAME=mytdxvm \
+    AZURE_REGION=westeurope \
+    AZURE_VM_SIZE=Standard_EC4es_v5 \
+    AZURE_STORAGE_SIZE=500 \
+    ALLOWED_IP=1.2.3.4
+```
+
+This will deploy the image to Azure, creating a new VM. A highlight here is
+this deployment script is only compatible with the
+[ECesv5-series VMs](https://learn.microsoft.com/en-us/azure/virtual-machines/ecesv5-ecedsv5-series#ecesv5-series-specifications).
+This is because we attach an arbitrary storage disk, since they don't have a
+temporary disk and we currently rely on one storage disk for disk encryption. 
