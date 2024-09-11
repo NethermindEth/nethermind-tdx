@@ -4,20 +4,12 @@ set -ex
 
 # Script to deploy the resulting image to Azure
 
-if ! command -v az &> /dev/null; then
-    echo "Error: 'az' command not found. Please install the Azure CLI."
-    exit 1
-fi
-
-if ! command -v azcopy &> /dev/null; then
-    echo "Error: 'azcopy' command not found. Please install AzCopy."
-    exit 1
-fi
-
-if ! command -v jq &> /dev/null; then
-    echo "Error: 'jq' command not found. Please install jq."
-    exit 1
-fi
+for cmd in az azcopy jq; do
+    if ! command -v $cmd &> /dev/null; then
+        echo "Error: '$cmd' command not found."
+        exit 1
+    fi
+done
 
 for var in DISK_PATH VM_NAME AZURE_REGION AZURE_VM_SIZE AZURE_STORAGE_SIZE ALLOWED_IP; do
     if [ -z "${!var}" ]; then
