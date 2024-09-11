@@ -63,7 +63,7 @@ setup-local:
 
 .PHONY: setup-proxy
 setup-proxy:
-	./scripts/setup-proxy.sh
+	./scripts/setup_proxy.sh
 
 .PHONY: setup-git
 setup-git:
