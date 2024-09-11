@@ -223,7 +223,10 @@ make deploy-azure \
 
 This will deploy the image to Azure, creating a new VM. A highlight here is
 this deployment script is only compatible with the
-[ECesv5-series VMs](https://learn.microsoft.com/en-us/azure/virtual-machines/ecesv5-ecedsv5-series#ecesv5-series-specifications).
+[ECesv5-series VMs](https://learn.microsoft.com/en-us/azure/virtual-machines/ecesv5-ecedsv5-series#ecesv5-series-specifications)
+or
+[DCesv5-series](https://learn.microsoft.com/en-us/azure/virtual-machines/dcesv5-series#dcesv5-series-specifications)
+VMs.
 This is because we currently rely on one storage disk for disk encryption, and
 the ECesv5-series VMs are the ones that don't have a temporary disk by default.
 
