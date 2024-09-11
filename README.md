@@ -196,3 +196,37 @@ ssh -p 2222 root@localhost
 
 You can configure the mapped ports by setting the `RPC_PORT` and `SSH_PORT`
 variables in `.env`.
+
+## Remote Attestation
+
+First, set up the proxy dependencies:
+
+```bash
+make setup-proxy
+```
+
+This target will clone and build
+[`cvm-reverse-proxy`](https://github.com/konvera/cvm-reverse-proxy/),
+which is what we're using for remote attestation. It requires `go` and `git`
+to be installed.
+
+We can then start the client proxy, pointing it to the deployed image on
+Azure:
+
+```bash
+make start-proxy \
+    PROXY_PORT=4000 \
+    TARGET_DOMAIN=https://<VM_PUBLIC_IP> \
+    TARGET_PORT=8545 \
+    MEASUREMENTS_PATH=./artifacts/dev/measurements.json
+```
+
+This will start the proxy in `http://localhost:4000`. To trigger a remote
+attestation, you can send a request to it:
+
+```bash
+curl http://localhost:4000
+```
+
+This will trigger a remote attestation process and print the results,
+indicating whether it was successful or not based on the local measurements.
