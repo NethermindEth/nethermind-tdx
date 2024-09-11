@@ -57,6 +57,10 @@ setup-local:
 	./scripts/setup_yocto.sh && \
 	./scripts/setup_measured_boot.sh
 
+.PHONY: setup-proxy
+setup-proxy:
+	./scripts/setup-proxy.sh
+
 .PHONY: setup-git
 setup-git:
 	./scripts/setup_git.sh
