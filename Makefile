@@ -52,6 +52,10 @@ run-local:
 start-swtpm:
 	./scripts/start_swtpm.sh
 
+.PHONY: start-proxy
+start-proxy:
+	./scripts/start_proxy.sh
+
 .PHONY: setup-local
 setup-local:
 	./scripts/setup_yocto.sh && \
