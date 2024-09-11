@@ -45,3 +45,6 @@ az network nsg rule create --nsg-name ${NSG_NAME} --resource-group ${RESOURCE_GR
 az network nsg rule create --nsg-name ${NSG_NAME} --resource-group ${RESOURCE_GROUP_NAME} --name ANY30303 --priority 114 --destination-port-ranges 30303 --access Allow
 
 az vm create --name ${VM_NAME} --size ${AZURE_VM_SIZE} --resource-group ${RESOURCE_GROUP_NAME} --attach-os-disk ${DISK_NAME} --security-type ConfidentialVM --enable-vtpm true --enable-secure-boot false --os-disk-security-encryption-type NonPersistedTPM --os-type Linux --nsg ${NSG_NAME} --attach-data-disks ${STORAGE_DISK_NAME}
+
+echo "VM created, you can connect to it with SSH"
+echo "To delete the VM, run 'az group delete --name ${RESOURCE_GROUP_NAME}'"
