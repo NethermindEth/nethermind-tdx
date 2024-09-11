@@ -69,6 +69,6 @@ cp --dereference srcs/poky/build/tmp/deploy/images/tdx/* $ARTIFACTS_DIR/.
 
 # Clean up .NET build processes if not in container
 if [ "$DOCKER" = false ]; then
-    pkill -f MSBuild.dll
-    pkill -f VBCSCompiler.dll
+    pkill -f MSBuild.dll || true
+    pkill -f VBCSCompiler.dll || true
 fi
