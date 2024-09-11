@@ -175,3 +175,21 @@ when booting.
 
 You can choose a different path for the persistent disk by setting the
 `PERSISTENT_DISK` environment variable in `.env`.
+
+This command also forwards the VM's JSON RPC API and SSH ports to the host, so
+you can interact with the Nethermind's JSON RPC API and also SSH into the VM
+from your host. For example, to check the sync status of the Nethermind
+client, you can run:
+
+```bash
+curl -X POST http://localhost:8545 \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
+```
+
+And to connect to the VM through SSH:
+
+```bash
+# assuming root access from DEBUG_TWEAKS_ENABLED
+ssh -p 2222 root@localhost
+```
