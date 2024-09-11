@@ -24,7 +24,7 @@ STORAGE_DISK_NAME=${VM_NAME}-storage
 NSG_NAME=${VM_NAME}
 DISK_SIZE=`wc -c < ${DISK_PATH}`
 
-az group create --name ${DISK_NAME} --location ${AZURE_REGION}
+az group create --name ${RESOURCE_GROUP_NAME} --location ${AZURE_REGION}
 
 az disk create -n ${DISK_NAME} -g ${RESOURCE_GROUP_NAME} -l ${AZURE_REGION} --os-type Linux --upload-type Upload --upload-size-bytes ${DISK_SIZE} --sku standard_lrs --security-type ConfidentialVM_NonPersistedTPM --hyper-v-generation V2
 SAS_REQ=`az disk grant-access -n ${DISK_NAME} -g ${RESOURCE_GROUP_NAME} --access-level Write --duration-in-seconds 86400`
