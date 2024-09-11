@@ -33,7 +33,7 @@ if [ ! -f "$PERSISTENT_DISK" ]; then
     fi
 fi
 
-cd build/srcs/poky
+cd $BUILD_DIR/srcs/poky
 source oe-init-build-env
 
 ln -s "$PWD/tmp/work/x86_64-linux/qemu-helper-native/1.0/recipe-sysroot-native/usr/bin/qemu-system-x86_64" \
@@ -47,7 +47,7 @@ runqemu cvm-image-azure \
     ovmf \
     qemuparams=" \
       -m 12G \
-      -nic user,restrict=off,model=virtio,hostfwd=tcp::8545-:8545 \
+      -nic user,restrict=off,model=virtio,hostfwd=tcp::${RPC_PORT:-8545}-:8545,hostfwd=tcp::${SSH_PORT:-2222}-:22 \
       -chardev socket,id=chrtpm,path=/tmp/tdxqemu-tpm/swtpm-sock \
       -tpmdev emulator,id=tpm0,chardev=chrtpm \
       -device tpm-tis,tpmdev=tpm0 \
