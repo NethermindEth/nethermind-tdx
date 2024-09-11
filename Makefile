@@ -56,10 +56,18 @@ deploy-azure:
 start-swtpm:
 	./scripts/start_swtpm.sh
 
+.PHONY: start-proxy
+start-proxy:
+	./scripts/start_proxy.sh
+
 .PHONY: setup-local
 setup-local:
 	./scripts/setup_yocto.sh && \
 	./scripts/setup_measured_boot.sh
+
+.PHONY: setup-proxy
+setup-proxy:
+	./scripts/setup_proxy.sh
 
 .PHONY: setup-git
 setup-git:

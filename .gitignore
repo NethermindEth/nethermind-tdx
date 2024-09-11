@@ -7,5 +7,6 @@
 /lighthouse/
 /tpmstatedir/
 /measured-boot/
+/cvm-reverse-proxy/
 
 /persistent.qcow2
