@@ -9,18 +9,18 @@ if [ -z "$DOCKER_BUILD" ]; then
     echo "Measuring locally"
 
     MEASURED_BOOT=$(realpath measured-boot/measured-boot)
-    IMAGE_PATH=$(realpath build/srcs/poky/build/tmp/deploy/images/tdx/cvm-image-azure-tdx.rootfs.wic.vhd)
-    OUTPUT_PATH=$(realpath artifacts/measurements.json)
+    IMAGE_PATH=$(realpath "$ARTIFACTS_DIR/cvm-image-azure-tdx.rootfs.wic.vhd")
+    OUTPUT_PATH=$(realpath "$ARTIFACTS_DIR/measurements.json")
 
-    cd ./build
+    cd "./$BUILD_DIR"
 else
     echo "Measuring in docker container"
 
     MEASURED_BOOT=/usr/bin/measured-boot
-    IMAGE_PATH=/build/srcs/poky/build/tmp/deploy/images/tdx/cvm-image-azure-tdx.rootfs.wic.vhd
-    OUTPUT_PATH=/artifacts/measurements.json
+    IMAGE_PATH="/$ARTIFACTS_DIR/cvm-image-azure-tdx.rootfs.wic.vhd"
+    OUTPUT_PATH="/$ARTIFACTS_DIR/measurements.json"
 
-    cd /build
+    cd "/$BUILD_DIR"
 fi
 
 cd srcs/poky

@@ -9,22 +9,22 @@ if [ -z "$DOCKER_BUILD" ]; then
     echo "Building locally"
 
     DOCKER=false
-    PATCHES_DIR=../patches
-    ARTIFACTS_DIR=../artifacts
-    META_NETHERMIND_DIR=../meta-nethermind
-    META_LIGHTHOUSE_DIR=../meta-lighthouse-bin
+    PATCHES_DIR=$(realpath patches)
+    ARTIFACTS_DIR=$(realpath $ARTIFACTS_DIR)
+    META_NETHERMIND_DIR=$(realpath meta-nethermind)
+    META_LIGHTHOUSE_DIR=$(realpath meta-lighthouse-bin)
 
-    cd ./build
+    cd "./$BUILD_DIR"
 else
     echo "Building in docker container"
 
     DOCKER=true
     PATCHES_DIR=/patches
-    ARTIFACTS_DIR=/artifacts
+    ARTIFACTS_DIR="/$ARTIFACTS_DIR"
     META_NETHERMIND_DIR=/meta-nethermind
     META_LIGHTHOUSE_DIR=/meta-lighthouse-bin
 
-    cd /build
+    cd "/$BUILD_DIR"
 fi
 
 repo init -u https://github.com/flashbots/yocto-manifests.git -b tdx-rbuilder
