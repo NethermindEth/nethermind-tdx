@@ -47,7 +47,7 @@ runqemu cvm-image-azure \
     ovmf \
     qemuparams=" \
       -m 12G \
-      -nic user,restrict=off,model=virtio,hostfwd=tcp::8545-:8545 \
+      -nic user,restrict=off,model=virtio,hostfwd=tcp::8545-:8545,hostfwd=tcp::2222-:22 \
       -chardev socket,id=chrtpm,path=/tmp/tdxqemu-tpm/swtpm-sock \
       -tpmdev emulator,id=tpm0,chardev=chrtpm \
       -device tpm-tis,tpmdev=tpm0 \
