@@ -217,7 +217,7 @@ make deploy-azure \
     VM_NAME=mytdxvm \
     AZURE_REGION=westeurope \
     AZURE_VM_SIZE=Standard_EC4es_v5 \
-    AZURE_STORAGE_SIZE=500 \
+    AZURE_STORAGE_GB=500 \
     ALLOWED_IP=1.2.3.4
 ```
 

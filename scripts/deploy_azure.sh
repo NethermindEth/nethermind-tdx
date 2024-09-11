@@ -11,7 +11,7 @@ for cmd in az azcopy jq; do
     fi
 done
 
-for var in DISK_PATH VM_NAME AZURE_REGION AZURE_VM_SIZE AZURE_STORAGE_SIZE ALLOWED_IP; do
+for var in DISK_PATH VM_NAME AZURE_REGION AZURE_VM_SIZE AZURE_STORAGE_GB ALLOWED_IP; do
     if [ -z "${!var}" ]; then
         echo "Error: '$var' is not set."
         exit 1
@@ -34,7 +34,7 @@ SAS_URI=`echo ${SAS_REQ} | jq -r '.accessSas'`
 azcopy copy ${DISK_PATH} ${SAS_URI} --blob-type PageBlob
 az disk revoke-access -n ${DISK_NAME} -g ${RESOURCE_GROUP_NAME}
 
-az disk create -n ${STORAGE_DISK_NAME} -g ${RESOURCE_GROUP_NAME} -l ${AZURE_REGION} --size-gb ${AZURE_STORAGE_SIZE} --sku StandardSSD_LRS
+az disk create -n ${STORAGE_DISK_NAME} -g ${RESOURCE_GROUP_NAME} -l ${AZURE_REGION} --size-gb ${AZURE_STORAGE_GB} --sku StandardSSD_LRS
 
 az network nsg create --name ${NSG_NAME} --resource-group ${RESOURCE_GROUP_NAME} --location ${AZURE_REGION}
 az network nsg rule create --nsg-name ${NSG_NAME} --resource-group ${RESOURCE_GROUP_NAME} --name AllowSSH --priority 100 --source-address-prefixes ${ALLOWED_IP} --destination-port-ranges 22 --access Allow --protocol Tcp
