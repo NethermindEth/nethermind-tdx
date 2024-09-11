@@ -1,26 +1,46 @@
 DOCKER?=docker
 ENV_FILE?=.env
+BUILD_CONFIG?=dev
 
 ifneq (,$(wildcard ./$(ENV_FILE)))
     include $(ENV_FILE)
     export
 endif
 
+ifeq ($(DEBUG_TWEAKS_ENABLED),false)
+    BUILD_CONFIG=release
+endif
+
+export BUILD_DIR=build/$(BUILD_CONFIG)
+export ARTIFACTS_DIR=artifacts/$(BUILD_CONFIG)
+
+.PHONY: setup-dirs
+setup-dirs:
+	mkdir -p $(BUILD_DIR)
+	mkdir -p $(ARTIFACTS_DIR)
+
 .PHONY: azure-image-docker
-azure-image-docker: generate-patches tdx-poky
-	mkdir -p build && sudo chmod 0777 ./build
-	mkdir -p artifacts && sudo chmod 0777 ./artifacts
-	$(DOCKER) run -u root --rm --env-file $(ENV_FILE) -it -v $(CURDIR)/artifacts:/artifacts -v $(CURDIR)/build:/build tdx-poky
-	sudo chmod 0755 build artifacts
+azure-image-docker: setup-dirs generate-patches tdx-poky
+	sudo chmod 0777 $(BUILD_DIR)
+	sudo chmod 0777 $(ARTIFACTS_DIR)
+	$(DOCKER) run \
+		-u root \
+		-it \
+		--rm \
+		--env-file $(ENV_FILE) \
+		--env BUILD_DIR=$(BUILD_DIR) \
+		--env ARTIFACTS_DIR=$(ARTIFACTS_DIR) \
+		-v $(CURDIR)/artifacts:/artifacts \
+		-v $(CURDIR)/build:/build \
+		tdx-poky
+	sudo chmod 0755 $(BUILD_DIR) $(ARTIFACTS_DIR)
 
 .PHONY: tdx-poky
 tdx-poky:
 	$(DOCKER) build -t tdx-poky .
 
 .PHONY: azure-image
-azure-image: generate-patches
-	mkdir -p build
-	mkdir -p artifacts
+azure-image: setup-dirs generate-patches
 	./scripts/build.sh && \
 	./scripts/measure.sh
 
