@@ -19,6 +19,8 @@ tdx-poky:
 
 .PHONY: azure-image
 azure-image: generate-patches
+	mkdir -p build
+	mkdir -p artifacts
 	./scripts/build.sh && \
 	./scripts/measure.sh
 
