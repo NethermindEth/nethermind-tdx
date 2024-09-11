@@ -193,3 +193,6 @@ And to connect to the VM through SSH:
 # assuming root access from DEBUG_TWEAKS_ENABLED
 ssh -p 2222 root@localhost
 ```
+
+You can configure the mapped ports by setting the `RPC_PORT` and `SSH_PORT`
+variables in `.env`.
