@@ -8,10 +8,10 @@ endif
 
 .PHONY: azure-image-docker
 azure-image-docker: generate-patches tdx-poky
-	mkdir -p build && chmod 0777 ./build
-	mkdir -p artifacts && chmod 0777 ./artifacts
+	mkdir -p build && sudo chmod 0777 ./build
+	mkdir -p artifacts && sudo chmod 0777 ./artifacts
 	$(DOCKER) run -u root --rm --env-file $(ENV_FILE) -it -v $(CURDIR)/artifacts:/artifacts -v $(CURDIR)/build:/build tdx-poky
-	chmod 0755 build artifacts
+	sudo chmod 0755 build artifacts
 
 .PHONY: tdx-poky
 tdx-poky:
