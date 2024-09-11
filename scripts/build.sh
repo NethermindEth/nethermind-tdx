@@ -35,7 +35,8 @@ for patch_dir in $PATCHES_DIR/pre/*; do
     patch_target=$(cat "$patch_base.path")
 
     if ! diff -q $patch_target "$patch_base.new"; then
-        patch $patch_target < $patch_base.patch
+        chmod +w $patch_target
+        cp "$patch_base.new" $patch_target
     fi
 done
 
@@ -47,7 +48,8 @@ for patch_dir in $PATCHES_DIR/post/*; do
     patch_target=$(cat "$patch_base.path")
 
     if ! diff -q $patch_target "$patch_base.new"; then
-        patch $patch_target < $patch_base.patch
+        chmod +w $patch_target
+        cp "$patch_base.new" $patch_target
     fi
 done
 
