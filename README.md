@@ -212,6 +212,7 @@ After that, you can deploy the image to Azure by running the `deploy-azure`
 target together with a few parameters:
 
 ```bash
+# VM size and storage are enough for a Holesky node
 make deploy-azure \
     DISK_PATH=artifacts/dev/cvm-image-azure-tdx.rootfs.wic.vhd \
     VM_NAME=mytdxvm \
