@@ -27,6 +27,12 @@ DISK_SIZE=$(wc -c < ${DISK_PATH})
 OS_DISK_SKU="Standard_LRS"
 STORAGE_DISK_SKU="StandardSSD_LRS"
 
+# Register necessary providers
+az provider register --namespace Microsoft.Compute
+az provider register --namespace Microsoft.Network
+az provider register --namespace Microsoft.Storage
+az provider register --namespace Microsoft.Attestation
+
 # Create resource group
 az group create --name ${RESOURCE_GROUP_NAME} --location ${AZURE_REGION}
 
