@@ -230,6 +230,13 @@ VMs.
 This is because we currently rely on one storage disk for disk encryption, and
 the ECesv5-series VMs are the ones that don't have a temporary disk by default.
 
+If you set `DEBUG_TWEAKS_ENABLED`, you'll then be able to SSH into the VM as
+root, such as:
+
+```bash
+ssh root@<VM_PUBLIC_IP>
+```
+
 ## Remote Attestation
 
 First, set up the proxy dependencies:
