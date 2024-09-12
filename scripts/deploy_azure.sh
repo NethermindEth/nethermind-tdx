@@ -26,6 +26,7 @@ DISK_SIZE=$(wc -c < ${DISK_PATH})
 
 OS_DISK_SKU="Standard_LRS"
 STORAGE_DISK_SKU="StandardSSD_LRS"
+ATTESTATION_NAME="attestor"
 
 # Register necessary providers
 az provider register --namespace Microsoft.Compute
@@ -115,6 +116,19 @@ for rule_name in "${!NSG_RULES[@]}"; do
         --name ${rule_name} \
         ${NSG_RULES[$rule_name]}
 done
+
+# Create attestation provider
+az attestation create \
+    --name ${ATTESTATION_NAME} \
+    --resource-group ${RESOURCE_GROUP_NAME} \
+    --location ${AZURE_REGION}
+ATTESTATION_URI=$( \
+    az attestation show \
+        --name ${ATTESTATION_NAME} \
+        --resource-group ${RESOURCE_GROUP_NAME} \
+    | jq -r '.attestUri'
+)
+echo "Attestation URI: ${ATTESTATION_URI}"
 
 # Create VM
 az vm create \
