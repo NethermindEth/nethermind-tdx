@@ -31,7 +31,7 @@ repo init -u https://github.com/flashbots/yocto-manifests.git -b tdx-rbuilder
 
 # Apply pre-sync patches
 for patch_dir in $PATCHES_DIR/pre/*; do
-    patch_base="$patch_dir/$(basename "$patch_dir")"
+    patch_base=$(find "$patch_dir" -name "*.old" | sed 's/\.old$//')
     patch_target=$(cat "$patch_base.path")
 
     if ! diff -q $patch_target "$patch_base.new"; then
@@ -44,7 +44,7 @@ repo sync
 
 # Apply post-sync patches
 for patch_dir in $PATCHES_DIR/post/*; do
-    patch_base="$patch_dir/$(basename "$patch_dir")"
+    patch_base=$(find "$patch_dir" -name "*.old" | sed 's/\.old$//')
     patch_target=$(cat "$patch_base.path")
 
     if ! diff -q $patch_target "$patch_base.new"; then
