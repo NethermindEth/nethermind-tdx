@@ -254,8 +254,10 @@ make start-proxy \
     MEASUREMENTS_PATH=./artifacts/dev/measurements.json
 ```
 
-This will start the proxy in `http://localhost:4000`. To trigger a remote
-attestation, you can send a request to it:
+This will start the proxy in `http://localhost:4000`. It's necessary that your
+Azure VM is executing the server counterpart of `cvm-reverse-proxy` which
+points to your Azure attestation provider instance. With that, to trigger a
+remote attestation, you can send a request to your proxy client:
 
 ```bash
 curl http://localhost:4000
