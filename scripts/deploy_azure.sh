@@ -28,6 +28,21 @@ OS_DISK_SKU="Standard_LRS"
 STORAGE_DISK_SKU="StandardSSD_LRS"
 ATTESTATION_NAME="attestor"
 
+cleanup() {
+    read -r -p "An error occurred. Do you want to remove the resource group? [y/N] " response
+    response=${response,,}
+
+    if [[ "$response" =~ ^(yes|y)$ ]]; then
+        echo "Removing resource group ${RESOURCE_GROUP_NAME}..."
+        az group delete --name ${RESOURCE_GROUP_NAME} --yes --no-wait
+        echo "Resource group deletion initiated. It may take a few minutes to complete."
+    fi
+    exit 1
+}
+
+# Trap to catch errors
+trap "cleanup" ERR
+
 # Register necessary providers
 az provider register --namespace Microsoft.Compute
 az provider register --namespace Microsoft.Network
