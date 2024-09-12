@@ -222,9 +222,10 @@ make deploy-azure \
     ALLOWED_IP=1.2.3.4
 ```
 
-This will deploy the image to Azure, creating a new VM. A highlight here is
-this deployment script is only compatible with the
-[ECesv5-series VMs](https://learn.microsoft.com/en-us/azure/virtual-machines/ecesv5-ecedsv5-series#ecesv5-series-specifications)
+This will deploy the image to Azure, creating a new VM and some related
+instances in a resource group. A highlight here is this deployment script is
+only compatible with the
+[ECesv5-series](https://learn.microsoft.com/en-us/azure/virtual-machines/ecesv5-ecedsv5-series#ecesv5-series-specifications)
 or
 [DCesv5-series](https://learn.microsoft.com/en-us/azure/virtual-machines/dcesv5-series#dcesv5-series-specifications)
 VMs.
