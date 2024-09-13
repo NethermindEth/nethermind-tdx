@@ -204,6 +204,7 @@ Currently, the only supported production deployment is through Azure.
 In order to deploy the image to Azure, you need to have the Azure CLI
 installed. You can install it by following the
 [official instructions](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+You also need to install `azcopy` from your preferred source.
 
 Then, you need to make sure that your Azure account is
 [logged in](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli?view=azure-cli-latest).
@@ -221,6 +222,16 @@ make deploy-azure \
     AZURE_STORAGE_GB=500 \
     ALLOWED_IP=1.2.3.4
 ```
+
+> If you stumble across `'ConfidentialVM_NonPersistedTPM' is not a valid value for '--security-type'`,
+> this means https://github.com/Azure/azure-cli/issues/29207 was most likely
+> not fixed yet. In this case, one of the solutions is to apply a patch to the
+> Azure SDK to allow the use of `ConfidentialVM_NonPersistedTPM` as a security
+> type, similarly to what was done in https://github.com/Azure/azure-sdk-for-python/pull/36161.
+> You can apply it through this one-liner:
+> ```bash
+> sudo bash -c '[ "$(sha256sum /opt/az/lib/python3.11/site-packages/azure/mgmt/compute/v2023_04_02/models/_compute_management_client_enums.py | cut -d" " -f1)" = "98620d4cf48c9a668ded8927c1f56a9360b4fc72278f3e447e8a965fd81eea45" ] && sed -i "129i\    CONFIDENTIAL_VM_NON_PERSISTED_TPM = \"ConfidentialVM_NonPersistedTPM\"\n    \"\"\"Indicates Confidential VM disk with no encryption\"\"\"" /opt/az/lib/python3.11/site-packages/azure/mgmt/compute/v2023_04_02/models/_compute_management_client_enums.py || echo "hash mismatch: fix not applied"'
+> ```
 
 This will deploy the image to Azure, creating a new VM and some related
 instances in a resource group. A highlight here is this deployment script is
