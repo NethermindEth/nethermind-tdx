@@ -19,7 +19,7 @@ for var in DISK_PATH VM_NAME AZURE_REGION AZURE_VM_SIZE AZURE_STORAGE_GB ALLOWED
 done
 
 RESOURCE_GROUP_NAME=${VM_NAME}
-DISK_NAME=${VM_NAME}
+OS_DISK_NAME=${VM_NAME}
 STORAGE_DISK_NAME=${VM_NAME}-storage
 NSG_NAME=${VM_NAME}
 DISK_SIZE=$(wc -c < ${DISK_PATH})
@@ -54,7 +54,7 @@ az group create --name ${RESOURCE_GROUP_NAME} --location ${AZURE_REGION}
 
 # Create OS disk and copy the image to it
 az disk create \
-    -n ${DISK_NAME} \
+    -n ${OS_DISK_NAME} \
     -g ${RESOURCE_GROUP_NAME} \
     -l ${AZURE_REGION} \
     --os-type Linux \
@@ -66,14 +66,14 @@ az disk create \
 
 SAS_REQ=$( \
     az disk grant-access \
-        -n ${DISK_NAME} \
+        -n ${OS_DISK_NAME} \
         -g ${RESOURCE_GROUP_NAME} \
         --access-level Write \
         --duration-in-seconds 86400 \
 )
 SAS_URI=$(echo ${SAS_REQ} | jq -r '.accessSas')
 azcopy copy ${DISK_PATH} ${SAS_URI} --blob-type PageBlob
-az disk revoke-access -n ${DISK_NAME} -g ${RESOURCE_GROUP_NAME}
+az disk revoke-access -n ${OS_DISK_NAME} -g ${RESOURCE_GROUP_NAME}
 
 # Create storage disk
 az disk create \
@@ -150,7 +150,7 @@ az vm create \
     --name ${VM_NAME} \
     --size ${AZURE_VM_SIZE} \
     --resource-group ${RESOURCE_GROUP_NAME} \
-    --attach-os-disk ${DISK_NAME} \
+    --attach-os-disk ${OS_DISK_NAME} \
     --security-type ConfidentialVM \
     --enable-vtpm true \
     --enable-secure-boot false \
