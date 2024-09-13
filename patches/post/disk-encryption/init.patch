@@ -1,5 +1,5 @@
 --- post/disk-encryption/init.old	2024-09-12 21:03:35.793471700 -0300
-+++ post/disk-encryption/init.new	2024-09-12 21:43:00.530147004 -0300
++++ post/disk-encryption/init.new	2024-09-12 21:50:43.598377106 -0300
 @@ -86,15 +86,21 @@
  
  start() {
@@ -7,7 +7,7 @@
 -    
 +
 +    data_sd=$(fdisk -l | grep "Disk /dev/sd" | sort -k5 -rn | head -n1 | awk '{print $2}' | tr -d ':')
-+    if [ -z "$data_sd" ]; then
++    if [ -z "$data_sd" ] || [[ "$data_sd" != /dev/sd* ]]; then
 +        log "No data disk found. Aborting disk encryption setup."
 +        return 1
 +    fi
