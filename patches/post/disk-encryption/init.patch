@@ -1,0 +1,44 @@
+--- post/disk-encryption/init.old	2024-09-12 21:03:35.793471700 -0300
++++ post/disk-encryption/init.new	2024-09-12 21:50:43.598377106 -0300
+@@ -86,15 +86,21 @@
+ 
+ start() {
+     log "Starting $DESC"
+-    
++
++    data_sd=$(fdisk -l | grep "Disk /dev/sd" | sort -k5 -rn | head -n1 | awk '{print $2}' | tr -d ':')
++    if [ -z "$data_sd" ] || [[ "$data_sd" != /dev/sd* ]]; then
++        log "No data disk found. Aborting disk encryption setup."
++        return 1
++    fi
++
+     # Error checking
+     if [ ! -e /dev/tpm0 ] || [ ! -e /dev/tpmrm0 ]; then
+         log "TPM device not found. Aborting disk encryption setup."
+         return 1
+     fi
+ 
+-    if [ ! -b /dev/sdb ]; then
+-        log "Target disk /dev/sdb not found. Aborting disk encryption setup."
++    if [ ! -b "$data_sd" ]; then
++        log "Target disk $data_sd not found. Aborting disk encryption setup."
+         return 1
+     fi
+ 
+@@ -115,13 +121,13 @@
+         log "Existing key retrieved from TPM."
+     fi
+ 
+-    if ! echo -n "$KEY" | cryptsetup luksOpen /dev/sdb data - ; then
++    if ! echo -n "$KEY" | cryptsetup luksOpen "$data_sd" data - ; then
+         log "LUKS volume not opened successfully. Formatting and creating filesystem."
+-        if ! echo -n "$KEY" | cryptsetup -q --batch-mode luksFormat /dev/sdb; then
++        if ! echo -n "$KEY" | cryptsetup -q --batch-mode luksFormat "$data_sd"; then
+             log "Failed to format LUKS volume. Aborting."
+             return 1
+         fi
+-        if ! echo -n "$KEY" | cryptsetup luksOpen /dev/sdb data - ; then
++        if ! echo -n "$KEY" | cryptsetup luksOpen "$data_sd" data - ; then
+             log "Failed to open LUKS volume after formatting. Aborting."
+             return 1
+         fi

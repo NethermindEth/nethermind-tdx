@@ -48,6 +48,10 @@ azure-image: setup-dirs generate-patches
 run-local:
 	./scripts/run_local.sh
 
+.PHONY: deploy-azure
+deploy-azure:
+	./scripts/deploy_azure.sh
+
 .PHONY: start-swtpm
 start-swtpm:
 	./scripts/start_swtpm.sh
