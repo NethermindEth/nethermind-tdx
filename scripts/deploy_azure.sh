@@ -133,9 +133,9 @@ for rule_name in "${!NSG_RULES[@]}"; do
         ${NSG_RULES[$rule_name]}
 done
 
-ATTESTATION_PROVIDER_URL=$(echo ${CONFIG} | jq -r '.ATTESTATION_PROVIDER_URL')
-if [ "${ATTESTATION_PROVIDER_URL}" == "auto" ]; then
-    echo "ATTESTATION_PROVIDER_URL is set to 'auto', creating attestation provider..."
+ATTESTATION_PROVIDER_URL=$(echo ${CONFIG} | jq '.ATTESTATION_PROVIDER_URL')
+if [ "${ATTESTATION_PROVIDER_URL}" == "null" ]; then
+    echo "ATTESTATION_PROVIDER_URL is set to 'null', creating attestation provider..."
 
     ATTESTATION_NAME=${RESOURCE_GROUP_NAME//-}$(openssl rand -hex 6)
     # Create attestation provider
@@ -153,6 +153,9 @@ if [ "${ATTESTATION_PROVIDER_URL}" == "auto" ]; then
 
     CONFIG=$(echo ${CONFIG} | jq --arg uri "${ATTESTATION_PROVIDER_URL}" '.ATTESTATION_PROVIDER_URL = $uri')
 fi
+
+echo "Final config:"
+echo ${CONFIG} | jq .
 
 TMP_CONFIG_PATH=$(mktemp)
 echo ${CONFIG} > ${TMP_CONFIG_PATH}

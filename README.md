@@ -49,7 +49,7 @@ without impacting its measurements. Here's a quick overview of the available
 options:
 
 * `ATTESTATION_PROVIDER_URL`: The URL of the attestation provider. If set to
-`auto`, the VM deployment script will deploy a new attestation provider in
+`null`, the VM deployment script will deploy a new attestation provider in
 Azure.
 
 ### Lighthouse
