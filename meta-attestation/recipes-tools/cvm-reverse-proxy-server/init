@@ -1,0 +1,65 @@
+### BEGIN INIT INFO
+# Provides:		cvm-reverse-proxy-server
+# Required-Start:	$remote_fs $syslog $networking
+# Required-Stop:	$remote_fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:		1
+# Short-Description:	Start and stop the CVM reverse proxy server
+### END INIT INFO
+#
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/cvm-reverse-proxy
+NAME=cvm-reverse-proxy-server
+DESC="CVM Reverse Proxy Server"
+PIDFILE=/var/run/cvm_reverse_proxy_server.pid
+LOGFILE=/tmp/cvm_reverse_proxy_server.log
+
+start() {
+    if [ -f /etc/json-config ]; then
+        # Provides ATTESTATION_PROVIDER_URL
+        source /etc/json-config
+    else 
+        echo "No json-config found"
+    fi
+
+    if [ -z "$ATTESTATION_PROVIDER_URL" ]; then
+        echo "ATTESTATION_PROVIDER_URL is not set, defaulting to https://localhost"
+    fi
+
+    ATTESTATION_PROVIDER_URL=${ATTESTATION_PROVIDER_URL:-"https://localhost"}
+
+	echo -n "Starting $DESC: "
+
+	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
+		-server \
+		-target-domain=${ATTESTATION_PROVIDER_URL} \
+		-target-port 443 \
+		-listen-port 8745 \
+		2>&1 | tee ${LOGFILE}"
+	echo "$NAME."
+}
+
+stop() {
+	echo -n "Stopping $DESC: "
+	start-stop-daemon -K -x "$DAEMON" -p $PIDFILE
+	echo "$NAME."
+}
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+        start
+        ;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|reload}" >&2
+	exit 1
+	;;
+esac
+exit 0

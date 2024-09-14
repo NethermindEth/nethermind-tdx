@@ -1,0 +1,1 @@
+PACKAGE_INSTALL:append = " cvm-reverse-proxy-server"
