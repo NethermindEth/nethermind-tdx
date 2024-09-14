@@ -38,6 +38,7 @@ bitbake-layers add-layer ../meta-secure-core/meta-tpm2
 bitbake-layers add-layer ../meta-dotnet
 bitbake-layers add-layer ../meta-nethermind
 bitbake-layers add-layer ../meta-lighthouse-bin
+bitbake-layers add-layer ../meta-json-config
 
 verbose_output "Added the layers to bblayers.conf"
 

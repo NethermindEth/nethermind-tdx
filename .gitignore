@@ -10,3 +10,4 @@
 /cvm-reverse-proxy/
 
 /persistent.qcow2
+/config.json

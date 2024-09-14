@@ -11,7 +11,7 @@ for cmd in az azcopy jq; do
     fi
 done
 
-for var in DISK_PATH VM_NAME AZURE_REGION AZURE_VM_SIZE AZURE_STORAGE_GB ALLOWED_IP; do
+for var in DISK_PATH VM_NAME AZURE_REGION AZURE_VM_SIZE AZURE_STORAGE_GB ALLOWED_IP CONFIG_PATH; do
     if [ -z "${!var}" ]; then
         echo "Error: '$var' is not set."
         exit 1
@@ -26,7 +26,8 @@ DISK_SIZE=$(wc -c < ${DISK_PATH})
 
 OS_DISK_SKU="Standard_LRS"
 STORAGE_DISK_SKU="StandardSSD_LRS"
-ATTESTATION_NAME="attestor"
+
+CONFIG=$(cat ${CONFIG_PATH})
 
 cleanup() {
     read -r -p "An error occurred. Do you want to remove the resource group? [y/N] " response
@@ -132,18 +133,33 @@ for rule_name in "${!NSG_RULES[@]}"; do
         ${NSG_RULES[$rule_name]}
 done
 
-# Create attestation provider
-az attestation create \
-    --name ${ATTESTATION_NAME} \
-    --resource-group ${RESOURCE_GROUP_NAME} \
-    --location ${AZURE_REGION}
-ATTESTATION_URI=$( \
-    az attestation show \
+ATTESTATION_PROVIDER_URL=$(echo ${CONFIG} | jq '.ATTESTATION_PROVIDER_URL')
+if [ "${ATTESTATION_PROVIDER_URL}" == "null" ]; then
+    echo "ATTESTATION_PROVIDER_URL is set to 'null', creating attestation provider..."
+
+    ATTESTATION_NAME=${RESOURCE_GROUP_NAME//-}$(openssl rand -hex 6)
+    # Create attestation provider
+    az attestation create \
         --name ${ATTESTATION_NAME} \
         --resource-group ${RESOURCE_GROUP_NAME} \
-    | jq -r '.attestUri'
-)
-echo "Attestation URI: ${ATTESTATION_URI}"
+        --location ${AZURE_REGION}
+    ATTESTATION_PROVIDER_URL=$( \
+        az attestation show \
+            --name ${ATTESTATION_NAME} \
+            --resource-group ${RESOURCE_GROUP_NAME} \
+        | jq -r '.attestUri'
+    )
+    echo "Attestation provider URL: ${ATTESTATION_PROVIDER_URL}"
+
+    CONFIG=$(echo ${CONFIG} | jq --arg uri "${ATTESTATION_PROVIDER_URL}" '.ATTESTATION_PROVIDER_URL = $uri')
+fi
+
+echo "Final config:"
+echo ${CONFIG} | jq .
+
+TMP_CONFIG_PATH=$(mktemp)
+echo ${CONFIG} > ${TMP_CONFIG_PATH}
+echo "Final config written to ${TMP_CONFIG_PATH}"
 
 # Create VM
 az vm create \
@@ -157,7 +173,8 @@ az vm create \
     --os-disk-security-encryption-type NonPersistedTPM \
     --os-type Linux \
     --nsg ${NSG_NAME} \
-    --attach-data-disks ${STORAGE_DISK_NAME}
+    --attach-data-disks ${STORAGE_DISK_NAME} \
+    --user-data ${TMP_CONFIG_PATH}
 
 echo "VM created, you can connect to it with SSH"
 echo "To delete the VM, run 'az group delete --name ${RESOURCE_GROUP_NAME}'"

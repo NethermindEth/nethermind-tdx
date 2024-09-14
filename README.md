@@ -38,6 +38,20 @@ important for a development image, allowing root access to the VM.
 
 For more details on each variable, check your `.env` file.
 
+Then, copy the `config.json.example` file to `config.json`.
+
+```bash
+cp config.json.example config.json
+```
+
+This file is passed to the VM as user data and is used to configure the VM
+without impacting its measurements. Here's a quick overview of the available
+options:
+
+* `ATTESTATION_PROVIDER_URL`: The URL of the attestation provider. If set to
+`null`, the VM deployment script will deploy a new attestation provider in
+Azure.
+
 ### Lighthouse
 
 For now, the Lighthouse binary is being built outside the Yocto build process
@@ -220,7 +234,8 @@ make deploy-azure \
     AZURE_REGION=centralus \
     AZURE_VM_SIZE=Standard_DC4es_v5 \
     AZURE_STORAGE_GB=500 \
-    ALLOWED_IP=1.2.3.4
+    ALLOWED_IP=1.2.3.4 \
+    CONFIG_PATH=config.json
 ```
 
 > If you stumble across `'ConfidentialVM_NonPersistedTPM' is not a valid value for '--security-type'`,
