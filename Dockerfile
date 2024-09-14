@@ -33,5 +33,6 @@ ADD ./patches /patches
 ADD ./meta-nethermind /meta-nethermind
 ADD ./meta-lighthouse-bin /meta-lighthouse-bin
 ADD ./meta-json-config /meta-json-config
+ADD ./meta-attestation /meta-attestation
 
 CMD /usr/bin/setup_git; /usr/bin/build; /usr/bin/measure

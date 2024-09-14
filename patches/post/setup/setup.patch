@@ -1,6 +1,6 @@
 --- post/setup/setup.old	2024-09-03 21:06:00.831520031 -0300
-+++ post/setup/setup.new	2024-09-13 19:57:24.056331308 -0300
-@@ -28,15 +28,19 @@
++++ post/setup/setup.new	2024-09-13 23:46:15.527670229 -0300
+@@ -28,15 +28,20 @@
  verbose_output "Sourced the oe-init-build-env script"
  
  # Add the  meta-evm, meta-confidential-compute, meta-secure-core/meta-tpm2, meta-openembedded/meta-python, meta-openembedded/meta-oe layers meta-rust-bin meta-clang to bblayers.conf
@@ -18,13 +18,14 @@
 +bitbake-layers add-layer ../meta-nethermind
 +bitbake-layers add-layer ../meta-lighthouse-bin
 +bitbake-layers add-layer ../meta-json-config
++bitbake-layers add-layer ../meta-attestation
  
 -verbose_output "Added the meta-evm and meta-confidential-compute layers to bblayers.conf"
 +verbose_output "Added the layers to bblayers.conf"
  
  # Return to the original directory
  popd
-@@ -49,6 +53,7 @@
+@@ -49,6 +54,7 @@
      verbose_output "Processing patch file $patch"
  
      # Apply the patch to the corresponding file in srcs/poky/build/conf/
