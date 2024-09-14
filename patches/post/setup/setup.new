@@ -39,6 +39,7 @@ bitbake-layers add-layer ../meta-dotnet
 bitbake-layers add-layer ../meta-nethermind
 bitbake-layers add-layer ../meta-lighthouse-bin
 bitbake-layers add-layer ../meta-json-config
+bitbake-layers add-layer ../meta-attestation
 
 verbose_output "Added the layers to bblayers.conf"
 

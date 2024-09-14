@@ -14,6 +14,7 @@ if [ -z "$DOCKER_BUILD" ]; then
     META_NETHERMIND_DIR=$(realpath meta-nethermind)
     META_LIGHTHOUSE_DIR=$(realpath meta-lighthouse-bin)
     META_JSON_CONFIG_DIR=$(realpath meta-json-config)
+    META_ATTESTATION_DIR=$(realpath meta-attestation)
 
     cd "./$BUILD_DIR"
 else
@@ -25,6 +26,7 @@ else
     META_NETHERMIND_DIR=/meta-nethermind
     META_LIGHTHOUSE_DIR=/meta-lighthouse-bin
     META_JSON_CONFIG_DIR=/meta-json-config
+    META_ATTESTATION_DIR=/meta-attestation
 
     cd "/$BUILD_DIR"
 fi
@@ -66,6 +68,10 @@ cp -r $META_LIGHTHOUSE_DIR srcs/poky/meta-lighthouse-bin
 # Copy in meta-json-config
 rm -rf srcs/poky/meta-json-config
 cp -r $META_JSON_CONFIG_DIR srcs/poky/meta-json-config
+
+# Copy in meta-attestation
+rm -rf srcs/poky/meta-attestation
+cp -r $META_ATTESTATION_DIR srcs/poky/meta-attestation
 
 source setup
 make build || true
