@@ -22,7 +22,7 @@ setup-dirs:
 .PHONY: azure-image-docker
 azure-image-docker: setup-dirs generate-patches tdx-poky
 	sudo chmod 0777 $(BUILD_DIR)
-	sudo chmod 0777 $(ARTIFACTS_DIR)
+	sudo chmod -R 0777 artifacts
 	$(DOCKER) run \
 		-u root \
 		-it \
@@ -33,7 +33,8 @@ azure-image-docker: setup-dirs generate-patches tdx-poky
 		-v $(CURDIR)/artifacts:/artifacts \
 		-v $(CURDIR)/build:/build \
 		tdx-poky
-	sudo chmod 0755 $(BUILD_DIR) $(ARTIFACTS_DIR)
+	sudo chmod 0755 $(BUILD_DIR)
+	sudo chmod -R 0755 artifacts
 
 .PHONY: tdx-poky
 tdx-poky:
