@@ -16,7 +16,7 @@ FROM crops/poky@sha256:f51ae3279f98768514273061336421e686e13d0a42fdb056c0b88c9af
 ENV DOCKER_BUILD=true
 
 USER root
-RUN apt install -y repo
+RUN apt install -y repo jq parted libncurses5 mtools
 
 COPY --from=go-builder /app/measured-boot/measured-boot /usr/bin/measured-boot
 
