@@ -21,3 +21,28 @@ do_install() {
 FILES_${PN} += "${bindir}"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
+
+python () {
+    network = d.getVar("NODE_NETWORK")
+    
+    if network is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            if network is None:
+                network = origenv.getVar("NODE_NETWORK")
+        
+    if network:
+        d.setVar("NODE_NETWORK", network)
+    else:
+        # default to holesky
+        d.setVar("NODE_NETWORK", "holesky")
+}
+
+# set the network config
+do_install:append() {
+    install -d ${D}${sysconfdir}
+    
+    # Create configuration file
+    echo -n "" > ${D}${sysconfdir}/lighthouse.conf
+    echo "export NODE_NETWORK='${NODE_NETWORK}'" >> ${D}${sysconfdir}/lighthouse.conf
+}

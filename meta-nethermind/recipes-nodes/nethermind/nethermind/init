@@ -24,11 +24,13 @@ start() {
 	done
 	echo "Lighthouse started."
 
-      sleep 10
+	sleep 10
+
+	source /etc/nethermind.conf
 
 	echo -n "Starting $DESC: "
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
-		-c holesky \
+		--network $NODE_NETWORK \
 		-dd /persistent/nethermind \
 		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
 		--JsonRpc.Host 0.0.0.0 \
