@@ -32,10 +32,37 @@ do_compile:append() {
     patchelf --set-interpreter /lib/ld-linux-x86-64.so.2 ${RELEASE_DIR}/nethermind
 }
 
-FILES:${PN} += "${sysconfdir}/init.d/nethermind"
+FILES:${PN} += " ${sysconfdir}/init.d/nethermind"
 
 # install the init script
 do_install:append() {
     install -d ${D}${sysconfdir}/init.d
     install -m 0755 ${THISDIR}/nethermind/init ${D}${sysconfdir}/init.d/nethermind
+}
+
+python () {
+    network = d.getVar("NODE_NETWORK")
+    
+    if network is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            if network is None:
+                network = origenv.getVar("NODE_NETWORK")
+        
+    if network:
+        d.setVar("NODE_NETWORK", network)
+    else:
+        # default to holesky
+        d.setVar("NODE_NETWORK", "holesky")
+}
+
+FILES:${PN} += " ${sysconfdir}/nethermind.conf"
+
+# set the network config
+do_install:append() {
+    install -d ${D}${sysconfdir}
+    
+    # Create configuration file
+    echo -n "" > ${D}${sysconfdir}/nethermind.conf
+    echo "export NODE_NETWORK='${NODE_NETWORK}'" >> ${D}${sysconfdir}/nethermind.conf
 }
