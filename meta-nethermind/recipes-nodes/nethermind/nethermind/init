@@ -18,21 +18,21 @@ PIDFILE=/var/run/nethermind.pid
 LOGFILE=/tmp/nethermind.log
 
 get_cli_args() {
-    local args=""
-    [ -n "$NETHERMIND_METRICSCONFIG_ENABLED" ] && args+=" --Metrics.Enabled '$NETHERMIND_METRICSCONFIG_ENABLED'"
-    [ -n "$NETHERMIND_METRICSCONFIG_INTERVALSECONDS" ] && args+=" --Metrics.IntervalSeconds '$NETHERMIND_METRICSCONFIG_INTERVALSECONDS'"
-    [ -n "$NETHERMIND_METRICSCONFIG_NODENAME" ] && args+=" --Metrics.NodeName '$NETHERMIND_METRICSCONFIG_NODENAME'"
-    [ -n "$NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL" ] && args+=" --Metrics.PushGatewayUrl '$NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL'"
-    echo "$args"
+	local args=""
+	[ -n "$NETHERMIND_METRICSCONFIG_ENABLED" ] && args+=" --Metrics.Enabled '$NETHERMIND_METRICSCONFIG_ENABLED'"
+	[ -n "$NETHERMIND_METRICSCONFIG_INTERVALSECONDS" ] && args+=" --Metrics.IntervalSeconds '$NETHERMIND_METRICSCONFIG_INTERVALSECONDS'"
+	[ -n "$NETHERMIND_METRICSCONFIG_NODENAME" ] && args+=" --Metrics.NodeName '$NETHERMIND_METRICSCONFIG_NODENAME'"
+	[ -n "$NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL" ] && args+=" --Metrics.PushGatewayUrl '$NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL'"
+	echo "$args"
 }
 
 start() {
 	if [ -f /etc/json-config ]; then
-        # Provides ATTESTATION_PROVIDER_URL
-        source /etc/json-config
-    else 
-        echo "No json-config found"
-    fi
+		# Provides ATTESTATION_PROVIDER_URL
+		source /etc/json-config
+	else 
+		echo "No json-config found"
+	fi
 	
 	echo -n "Waiting for lighthouse to start... "
 	while ! pgrep lighthouse > /dev/null; do
@@ -64,15 +64,15 @@ stop() {
 }
 case "$1" in
   start)
-        start
-        ;;
+		start
+		;;
   stop)
-        stop
-        ;;
+		stop
+		;;
   restart|reload)
-        stop
-        start
-        ;;
+		stop
+		start
+		;;
   *)
 	N=/etc/init.d/$NAME
 	echo "Usage: $N {start|stop|restart|reload}" >&2
