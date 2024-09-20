@@ -13,7 +13,7 @@ for cmd in az jq; do
 done
 
 # Check for required environment variables
-for var in VM_NAME AZURE_REGION AZURE_STORAGE_GB ALLOWED_IP; do
+for var in VM_NAME AZURE_STORAGE_GB ALLOWED_IP; do
     if [ -z "${!var}" ]; then
         echo "Error: '$var' is not set."
         exit 1
@@ -29,6 +29,7 @@ NSG_NAME=${VM_NAME}-nsg
 
 OS_DISK_SKU="PremiumV2_LRS"
 STORAGE_DISK_SKU="PremiumV2_LRS"
+AZURE_REGION="eastus"
 
 cleanup() {
     read -r -p "An error occurred. Do you want to remove the resource group? [y/N] " response

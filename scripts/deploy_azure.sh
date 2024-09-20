@@ -11,7 +11,7 @@ for cmd in az azcopy jq; do
     fi
 done
 
-for var in DISK_PATH VM_NAME AZURE_REGION AZURE_STORAGE_GB ALLOWED_IP CONFIG_PATH; do
+for var in DISK_PATH VM_NAME AZURE_STORAGE_GB ALLOWED_IP CONFIG_PATH; do
     if [ -z "${!var}" ]; then
         echo "Error: '$var' is not set."
         exit 1
@@ -28,6 +28,7 @@ DISK_SIZE=$(wc -c < ${DISK_PATH})
 
 OS_DISK_SKU="PremiumV2_LRS"
 STORAGE_DISK_SKU="PremiumV2_LRS"
+AZURE_REGION="centralus"
 
 CONFIG=$(cat ${CONFIG_PATH})
 
