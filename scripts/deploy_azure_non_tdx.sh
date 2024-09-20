@@ -27,8 +27,8 @@ OS_DISK_NAME=${VM_NAME}-os
 STORAGE_DISK_NAME=${VM_NAME}-storage
 NSG_NAME=${VM_NAME}-nsg
 
-OS_DISK_SKU="StandardSSD_LRS"
-STORAGE_DISK_SKU="StandardSSD_LRS"
+OS_DISK_SKU="PremiumV2_LRS"
+STORAGE_DISK_SKU="PremiumV2_LRS"
 
 cleanup() {
     read -r -p "An error occurred. Do you want to remove the resource group? [y/N] " response
