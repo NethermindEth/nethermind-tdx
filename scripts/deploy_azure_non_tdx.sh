@@ -13,7 +13,7 @@ for cmd in az jq; do
 done
 
 # Check for required environment variables
-for var in VM_NAME AZURE_STORAGE_GB ALLOWED_IP; do
+for var in ALLOWED_IP; do
     if [ -z "${!var}" ]; then
         echo "Error: '$var' is not set."
         exit 1
@@ -27,6 +27,8 @@ OS_DISK_NAME=${VM_NAME}-os
 STORAGE_DISK_NAME=${VM_NAME}-storage
 NSG_NAME=${VM_NAME}-nsg
 
+VM_NAME="non-tdx"
+AZURE_STORAGE_GB=1300
 OS_DISK_SKU="PremiumV2_LRS"
 STORAGE_DISK_SKU="PremiumV2_LRS"
 AZURE_REGION="eastus"
