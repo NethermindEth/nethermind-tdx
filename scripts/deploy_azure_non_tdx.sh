@@ -21,7 +21,7 @@ for var in ALLOWED_IP; do
 done
 
 VM_NAME="non-tdx"
-AZURE_VM_SIZE="Standard_D4_v5"
+AZURE_VM_SIZE="Standard_D4s_v5"
 AZURE_STORAGE_GB=1300
 OS_DISK_SKU="PremiumV2_LRS"
 STORAGE_DISK_SKU="PremiumV2_LRS"
