@@ -20,18 +20,17 @@ for var in ALLOWED_IP; do
     fi
 done
 
+VM_NAME="non-tdx"
 AZURE_VM_SIZE="Standard_D4_v5"
+AZURE_STORAGE_GB=1300
+OS_DISK_SKU="PremiumV2_LRS"
+STORAGE_DISK_SKU="PremiumV2_LRS"
+AZURE_REGION="eastus"
 
 RESOURCE_GROUP_NAME=${VM_NAME}
 OS_DISK_NAME=${VM_NAME}-os
 STORAGE_DISK_NAME=${VM_NAME}-storage
 NSG_NAME=${VM_NAME}-nsg
-
-VM_NAME="non-tdx"
-AZURE_STORAGE_GB=1300
-OS_DISK_SKU="PremiumV2_LRS"
-STORAGE_DISK_SKU="PremiumV2_LRS"
-AZURE_REGION="eastus"
 
 cleanup() {
     read -r -p "An error occurred. Do you want to remove the resource group? [y/N] " response
