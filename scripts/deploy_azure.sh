@@ -11,12 +11,14 @@ for cmd in az azcopy jq; do
     fi
 done
 
-for var in DISK_PATH VM_NAME AZURE_REGION AZURE_VM_SIZE AZURE_STORAGE_GB ALLOWED_IP CONFIG_PATH; do
+for var in DISK_PATH VM_NAME AZURE_REGION AZURE_STORAGE_GB ALLOWED_IP CONFIG_PATH; do
     if [ -z "${!var}" ]; then
         echo "Error: '$var' is not set."
         exit 1
     fi
 done
+
+AZURE_VM_SIZE="Standard_DC8es_v5"
 
 RESOURCE_GROUP_NAME=${VM_NAME}
 OS_DISK_NAME=${VM_NAME}

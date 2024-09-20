@@ -13,12 +13,14 @@ for cmd in az jq; do
 done
 
 # Check for required environment variables
-for var in VM_NAME AZURE_REGION AZURE_VM_SIZE AZURE_STORAGE_GB ALLOWED_IP; do
+for var in VM_NAME AZURE_REGION AZURE_STORAGE_GB ALLOWED_IP; do
     if [ -z "${!var}" ]; then
         echo "Error: '$var' is not set."
         exit 1
     fi
 done
+
+AZURE_VM_SIZE="Standard_D8_v5"
 
 RESOURCE_GROUP_NAME=${VM_NAME}
 OS_DISK_NAME=${VM_NAME}-os
