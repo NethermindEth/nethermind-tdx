@@ -48,7 +48,7 @@ start() {
 
 	echo -n "Starting $DESC: "
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
-		--network $NODE_NETWORK \
+		--config $NODE_NETWORK \
 		-dd /persistent/nethermind \
 		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
 		--JsonRpc.Host 0.0.0.0 \
