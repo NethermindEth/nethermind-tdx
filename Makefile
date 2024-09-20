@@ -59,6 +59,10 @@ run-local:
 deploy-azure:
 	./scripts/deploy_azure.sh
 
+.PHONY: deploy-azure-non-tdx
+deploy-azure-non-tdx:
+	./scripts/deploy_azure_non_tdx.sh
+
 .PHONY: start-swtpm
 start-swtpm:
 	./scripts/start_swtpm.sh
