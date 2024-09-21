@@ -19,7 +19,7 @@ for var in DISK_PATH ALLOWED_IP CONFIG_PATH; do
 done
 
 VM_NAME="tdx"
-AZURE_VM_SIZE="Standard_DC4es_v5"
+AZURE_VM_SIZE="Standard_EC4es_v5"
 AZURE_STORAGE_GB=1300
 OS_DISK_SKU="Premium_LRS"
 STORAGE_DISK_SKU="Premium_LRS"
