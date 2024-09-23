@@ -43,6 +43,7 @@ start() {
 	sleep 10
 
 	source /etc/nethermind.conf
+	ulimit -n 100000
 
 	cli_args=$(get_cli_args)
 
