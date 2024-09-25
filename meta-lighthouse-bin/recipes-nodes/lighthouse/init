@@ -13,7 +13,7 @@ DAEMON=/usr/bin/lighthouse
 NAME=lighthouse_bn
 DESC="Lighthouse Beacon Node"
 PIDFILE=/var/run/lighthouse_bn.pid
-LOGFILE=/tmp/lighthouse_bn.log
+LOGFILE=/var/log/lighthouse_bn.log
 
 
 start() {
