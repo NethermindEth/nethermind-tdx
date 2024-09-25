@@ -21,11 +21,11 @@ for var in ALLOWED_IP; do
 done
 
 VM_NAME="non-tdx"
-AZURE_VM_SIZE="Standard_E4s_v5"
+AZURE_VM_SIZE="Standard_EC4es_v5"
 AZURE_STORAGE_GB=1300
 OS_DISK_SKU="Premium_LRS"
 STORAGE_DISK_SKU="Premium_LRS"
-AZURE_REGION="westus"
+AZURE_REGION="eastus2"
 
 RESOURCE_GROUP_NAME=${VM_NAME}
 OS_DISK_NAME=${VM_NAME}-os
