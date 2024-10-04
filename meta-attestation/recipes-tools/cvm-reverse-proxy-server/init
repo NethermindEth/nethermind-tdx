@@ -13,7 +13,7 @@ DAEMON=/usr/bin/cvm-reverse-proxy
 NAME=cvm-reverse-proxy-server
 DESC="CVM Reverse Proxy Server"
 PIDFILE=/var/run/cvm_reverse_proxy_server.pid
-LOGFILE=/tmp/cvm_reverse_proxy_server.log
+LOGFILE=/var/log/cvm_reverse_proxy_server.log
 
 start() {
     if [ -f /etc/json-config ]; then
