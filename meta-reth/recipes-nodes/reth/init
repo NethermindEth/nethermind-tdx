@@ -1,0 +1,96 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          reth
+# Required-Start:    $network $remote_fs reth-sync
+# Required-Stop:     $network $remote_fs
+# Default-Start:     5
+# Default-Stop:      0 1 6
+# Short-Description: Reth Node
+# Description:       Start and stop the reth daemon
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/reth
+NAME=reth
+DESC="Reth Node"
+PIDFILE=/var/run/reth.pid
+LOGFILE=/var/log/reth.log
+RETH_USER=reth
+ETH_GROUP=eth
+RETH_DIR=/persistent/reth
+
+start() {
+	echo -n "Starting $DESC: "
+	# Source the setup.env file
+	if [ -f /usr/bin/setup_env.sh ]; then
+		source /usr/bin/setup_env.sh
+	fi
+
+	# Ensure the reth log file exists and has correct permissions
+  	touch $LOGFILE
+  	chown $RETH_USER:$ETH_GROUP $LOGFILE
+
+	# Ensure the RETH_DIR exists and has correct permissions
+	mkdir -p $RETH_DIR
+	chown $RETH_USER:$ETH_GROUP $RETH_DIR
+
+	chown ${RETH_USER}:${ETH_GROUP} /var/volatile/jwt-secret
+	start-stop-daemon -S --make-pidfile -p $PIDFILE -c $RETH_USER:$ETH_GROUP -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
+		node \
+		--full \
+		--datadir "$RETH_DIR" \
+		--authrpc.jwtsecret "/var/volatile/jwt-secret" \
+		--http \
+		--http.addr 0.0.0.0 \
+		--http.port 8545 \
+		--http.api "eth,net,web3,trace,rpc,debug,txpool" \
+		--log.stdout.format json \
+		--log.file.max-files 0 \
+		--prune.receipts.full \
+		--metrics 0.0.0.0:9001 \
+		2>&1 | tee ${LOGFILE}"
+	echo "$NAME."
+}
+
+stop() {
+    echo "Stopping $NAME"
+    if [ -f $PIDFILE ]; then
+        PID=$(cat $PIDFILE)
+        # Find all child processes of the shell process
+        PIDS="$PID $(pgrep -P $PID)"
+
+        # Send SIGTERM to all processes
+        for pid in $PIDS; do
+            kill -TERM $pid 2>/dev/null
+        done
+
+        # Send SIGKILL to any remaining processes
+        for pid in $PIDS; do
+            kill -KILL $pid 2>/dev/null
+        done
+
+        rm -f $PIDFILE
+    else
+        echo "$PIDFILE not found, $NAME may not be running"
+    fi
+    echo "$NAME stopped"
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+        start
+        ;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|reload}" >&2
+	exit 1
+	;;
+esac
+exit 0
