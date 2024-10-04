@@ -5,12 +5,8 @@ BUILD_CONFIG?=dev
 docker_envs = $()
 
 ifneq (,$(wildcard ./$(ENV_FILE)))
-# Local build
     include $(ENV_FILE)
     export
-
-# Docker build
-	docker_envs = $(foreach var,$(shell grep -v '^#' $(ENV_FILE) | grep -v '^\s*$$'),--env $(var))
 endif
 
 ifeq ($(DEBUG_TWEAKS_ENABLED),false)
@@ -33,7 +29,7 @@ azure-image-docker: setup-dirs generate-patches tdx-poky
 		-u root \
 		-it \
 		--rm \
-		$(call docker_envs) \
+		--env-file $(ENV_FILE) \
 		--env BUILD_DIR=$(BUILD_DIR) \
 		--env ARTIFACTS_DIR=$(ARTIFACTS_DIR) \
 		-v $(CURDIR)/artifacts:/artifacts \
