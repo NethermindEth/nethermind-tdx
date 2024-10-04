@@ -50,6 +50,9 @@ start() {
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
 		--config $NODE_NETWORK \
 		-dd /persistent/nethermind \
+		--Sync.NonValidatorNode true \
+		--Sync.DownloadBodiesInFastSync false \
+		--Sync.DownloadReceiptsInFastSync false \
 		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
 		--JsonRpc.Host 0.0.0.0 \
 		$cli_args \
