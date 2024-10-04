@@ -73,6 +73,10 @@ cp -r $META_JSON_CONFIG_DIR srcs/poky/meta-json-config
 rm -rf srcs/poky/meta-attestation
 cp -r $META_ATTESTATION_DIR srcs/poky/meta-attestation
 
+# Copy in meta-reth
+rm -rf srcs/poky/meta-reth
+cp -r $META_ATTESTATION_DIR srcs/poky/meta-reth
+
 source setup
 make build || true
 
