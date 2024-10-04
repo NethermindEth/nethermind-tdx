@@ -15,6 +15,7 @@ if [ -z "$DOCKER_BUILD" ]; then
     META_LIGHTHOUSE_DIR=$(realpath meta-lighthouse-bin)
     META_JSON_CONFIG_DIR=$(realpath meta-json-config)
     META_ATTESTATION_DIR=$(realpath meta-attestation)
+    META_RETH_DIR=$(realpath meta-reth)
 
     cd "./$BUILD_DIR"
 else
@@ -27,6 +28,7 @@ else
     META_LIGHTHOUSE_DIR=/meta-lighthouse-bin
     META_JSON_CONFIG_DIR=/meta-json-config
     META_ATTESTATION_DIR=/meta-attestation
+    META_RETH_DIR=/meta-reth
 
     cd "/$BUILD_DIR"
 fi
@@ -75,7 +77,7 @@ cp -r $META_ATTESTATION_DIR srcs/poky/meta-attestation
 
 # Copy in meta-reth
 rm -rf srcs/poky/meta-reth
-cp -r $META_ATTESTATION_DIR srcs/poky/meta-reth
+cp -r $META_RETH_DIR srcs/poky/meta-reth
 
 source setup
 make build || true
