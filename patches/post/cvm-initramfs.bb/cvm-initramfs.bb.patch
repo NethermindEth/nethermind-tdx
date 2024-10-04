@@ -1,5 +1,5 @@
---- post/cvm-initramfs.bb/cvm-initramfs.bb.old	2024-09-25 11:02:06.359192785 -0300
-+++ post/cvm-initramfs.bb/cvm-initramfs.bb.new	2024-09-25 11:01:51.050311490 -0300
+--- post/cvm-initramfs.bb/cvm-initramfs.bb.old	2024-10-04 15:08:56.263249878 +0100
++++ post/cvm-initramfs.bb/cvm-initramfs.bb.new	2024-10-04 15:13:13.473176403 +0100
 @@ -7,7 +7,7 @@
  
  CVM_DEPS = "busybox-mdev init-ifupdown initscripts base-files base-passwd netbase busybox-udhcpd"

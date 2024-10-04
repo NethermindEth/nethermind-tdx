@@ -10,8 +10,8 @@
 ### END INIT INFO
 #
 
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/opt/dotnet/nethermind/nethermind
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/dotnet/nethermind
+DAEMON=nethermind
 NAME=nethermind
 DESC="Nethermind Node"
 PIDFILE=/var/run/nethermind.pid
