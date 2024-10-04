@@ -51,11 +51,11 @@ start() {
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
 		--config $NODE_NETWORK \
 		-dd /persistent/nethermind \
-		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
-		--JsonRpc.Host 0.0.0.0 \
 		--Sync.NonValidatorNode true \
 		--Sync.DownloadBodiesInFastSync false \
 		--Sync.DownloadReceiptsInFastSync false \
+		--JsonRpc.JwtSecretFile /var/volatile/jwt-secret \
+		--JsonRpc.Host 0.0.0.0 \
 		$cli_args \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
