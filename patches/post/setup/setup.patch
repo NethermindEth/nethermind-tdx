@@ -1,5 +1,5 @@
---- post/setup/setup.old	2024-09-03 21:06:00.831520031 -0300
-+++ post/setup/setup.new	2024-09-13 23:46:15.527670229 -0300
+--- post/setup/setup.old	2024-09-04 01:06:00.831520031 +0100
++++ post/setup/setup.new	2024-10-04 19:32:48.745658859 +0100
 @@ -28,15 +28,20 @@
  verbose_output "Sourced the oe-init-build-env script"
  
@@ -10,10 +10,8 @@
  bitbake-layers add-layer ../meta-openembedded/meta-oe
  bitbake-layers add-layer ../meta-openembedded/meta-python
  bitbake-layers add-layer ../meta-secure-core/meta-tpm2
--bitbake-layers add-layer ../meta-rust-bin
--bitbake-layers add-layer ../meta-clang
-+# bitbake-layers add-layer ../meta-rust-bin
-+# bitbake-layers add-layer ../meta-clang
+ bitbake-layers add-layer ../meta-rust-bin
+ bitbake-layers add-layer ../meta-clang
 +bitbake-layers add-layer ../meta-dotnet
 +bitbake-layers add-layer ../meta-nethermind
 +bitbake-layers add-layer ../meta-lighthouse-bin

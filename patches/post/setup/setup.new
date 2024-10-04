@@ -33,8 +33,8 @@ bitbake-layers add-layer ../meta-confidential-compute
 bitbake-layers add-layer ../meta-openembedded/meta-oe
 bitbake-layers add-layer ../meta-openembedded/meta-python
 bitbake-layers add-layer ../meta-secure-core/meta-tpm2
-# bitbake-layers add-layer ../meta-rust-bin
-# bitbake-layers add-layer ../meta-clang
+bitbake-layers add-layer ../meta-rust-bin
+bitbake-layers add-layer ../meta-clang
 bitbake-layers add-layer ../meta-dotnet
 bitbake-layers add-layer ../meta-nethermind
 bitbake-layers add-layer ../meta-lighthouse-bin
