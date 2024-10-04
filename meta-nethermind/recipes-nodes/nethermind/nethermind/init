@@ -15,7 +15,7 @@ DAEMON=/opt/dotnet/nethermind/nethermind
 NAME=nethermind
 DESC="Nethermind Node"
 PIDFILE=/var/run/nethermind.pid
-LOGFILE=/tmp/nethermind.log
+LOGFILE=/var/log/nethermind.log
 
 get_cli_args() {
 	local args=""
