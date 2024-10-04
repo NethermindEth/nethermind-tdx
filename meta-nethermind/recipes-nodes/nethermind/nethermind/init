@@ -54,7 +54,7 @@ start() {
 		--Sync.NonValidatorNode true \
 		--Sync.DownloadBodiesInFastSync false \
 		--Sync.DownloadReceiptsInFastSync false \
-		--JsonRpc.JwtSecretFile /opt/dotnet/nethermind/jwt-secret \
+		--JsonRpc.JwtSecretFile /var/volatile/jwt-secret \
 		--JsonRpc.Host 0.0.0.0 \
 		$cli_args \
 		2>&1 | tee ${LOGFILE}"
