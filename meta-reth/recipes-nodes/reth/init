@@ -43,7 +43,7 @@ start() {
 		--http \
 		--http.addr 0.0.0.0 \
 		--http.port 8545 \
-		--http.api "eth,net,web3,trace,rpc,debug,txpool" \
+		--http.api "eth,net,web3" \
 		--log.stdout.format json \
 		--log.file.max-files 0 \
 		--prune.receipts.full \
