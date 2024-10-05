@@ -2,7 +2,7 @@
 
 set -e
 
-rm -rf artifacts
+rm -rf artifacts || true
 
 for node in geth nethermind reth; do
     echo "Building $node"
