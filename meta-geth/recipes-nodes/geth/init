@@ -25,7 +25,6 @@ start() {
 		--datadir=/persistent/geth \
 		--metrics \
 		--metrics.expensive \
-		--metrics.builder \
 		--metrics.addr=127.0.0.1 \
 		--metrics.port=6061 \
 		--pprof \
