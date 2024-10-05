@@ -1,24 +1,25 @@
 --- pre/default.xml/default.xml.old	2024-10-04 19:39:19.055544333 +0100
-+++ pre/default.xml/default.xml.new	2024-10-05 00:41:45.981041946 +0100
-@@ -1,6 +1,7 @@
++++ pre/default.xml/default.xml.new	2024-10-05 19:55:05.017055791 +0100
+@@ -1,6 +1,8 @@
  <?xml version="1.0" encoding="UTF-8"?>
  <manifest>
    <remote name="flashbots"  fetch="https://github.com/flashbots"/>
 +  <remote name="jeremy-prater"  fetch="https://github.com/jeremy-prater"/>
++  <remote name="rust-embedded" fetch="https://github.com/rust-embedded"/>
  
    <default sync-j="4"/>
  
-@@ -12,9 +13,12 @@
+@@ -12,9 +14,12 @@
    <project remote="flashbots"       revision="scarthgap"        name="poky"                            path="srcs/poky"/>
    <project remote="flashbots"       revision="scarthgap"        name="meta-openembedded"               path="srcs/poky/meta-openembedded"/>
    <project remote="flashbots"       revision="scarthgap"        name="meta-secure-core"                path="srcs/poky/meta-secure-core"/>
 -  <project remote="flashbots"       revision="scarthgap"        name="meta-clang"                      path="srcs/poky/meta-clang"/>
    <project remote="flashbots"       revision="main"             name="meta-confidential-compute"       path="srcs/poky/meta-confidential-compute"/>
--  <project remote="flashbots"       revision="main"             name="meta-evm"                        path="srcs/poky/meta-evm"/>
 +  <project remote="flashbots"       revision="scarthgap"        name="meta-clang"                      path="srcs/poky/meta-clang"/>
-   <project remote="flashbots"       revision="master"           name="meta-rust-bin"                   path="srcs/poky/meta-rust-bin"/>
++  <project remote="rust-embedded"   revision="master"           name="meta-rust-bin"                   path="srcs/poky/meta-rust-bin"/>
 +  <!--
-+  <project remote="flashbots"       revision="main"             name="meta-evm"                        path="srcs/poky/meta-evm"/>
+   <project remote="flashbots"       revision="main"             name="meta-evm"                        path="srcs/poky/meta-evm"/>
+-  <project remote="flashbots"       revision="master"           name="meta-rust-bin"                   path="srcs/poky/meta-rust-bin"/>
 +  -->
    <project remote="flashbots"       revision="main"             name="meta-observability"              path="srcs/poky/meta-observability"/>
 +  <project remote="jeremy-prater"   revision="trunk"            name="meta-dotnet"                     path="srcs/poky/meta-dotnet"/>
