@@ -27,7 +27,6 @@ start() {
 		--metrics.expensive \
 		--metrics.addr=0.0.0.0 \
 		--metrics.port=6061 \
-		--pprof \
 		--http \
 		--http.api="eth,net,web3" \
 		--http.corsdomain=* \

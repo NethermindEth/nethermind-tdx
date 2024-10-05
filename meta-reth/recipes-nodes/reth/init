@@ -46,7 +46,6 @@ start() {
 		--http.api "eth,net,web3" \
 		--log.stdout.format json \
 		--log.file.max-files 0 \
-		--prune.receipts.full \
 		--metrics 0.0.0.0:9001 \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
