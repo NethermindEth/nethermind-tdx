@@ -18,7 +18,9 @@ INHIBIT_PACKAGE_STRIP = '1'
 #GO_EXTRA_LDFLAGS:append = " -s -w -buildid="
 #GOBUILDFLAGS:append = " -buildvcs=false"
 
-RDEPENDS:${PN}-dev += "bash"
+DEPENDS += " eth-group"
+RDEPENDS:${PN}-dev += " bash"
+RDEPENDS:${PN} += " disk-encryption json-config eth-group lighthouse"
 
 USERADD_PACKAGES = "${PN}"
 USERADD_PARAM:${PN} = "-r -s /bin/false -G eth geth"
