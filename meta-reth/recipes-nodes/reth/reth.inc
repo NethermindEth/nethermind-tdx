@@ -54,4 +54,7 @@ python () {
         # If INCLUDE_RCLONE is not set, set it to '1' by default
         d.setVar('INCLUDE_RCLONE', '1')
 }
+
 # RDEPENDS:${PN} += "${@'reth-sync' if d.getVar('INCLUDE_RCLONE') == '1' else ''}"
+
+INSANE_SKIP:${PN}:append = "already-stripped"
