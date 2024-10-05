@@ -41,6 +41,7 @@ bitbake-layers add-layer ../meta-lighthouse-bin
 bitbake-layers add-layer ../meta-json-config
 bitbake-layers add-layer ../meta-attestation
 bitbake-layers add-layer ../meta-reth
+bitbake-layers add-layer ../meta-geth
 
 verbose_output "Added the layers to bblayers.conf"
 

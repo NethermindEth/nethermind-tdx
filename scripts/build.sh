@@ -16,6 +16,7 @@ if [ -z "$DOCKER_BUILD" ]; then
     META_JSON_CONFIG_DIR=$(realpath meta-json-config)
     META_ATTESTATION_DIR=$(realpath meta-attestation)
     META_RETH_DIR=$(realpath meta-reth)
+    META_GETH_DIR=$(realpath meta-geth)
 
     cd "./$BUILD_DIR"
 else
@@ -29,6 +30,7 @@ else
     META_JSON_CONFIG_DIR=/meta-json-config
     META_ATTESTATION_DIR=/meta-attestation
     META_RETH_DIR=/meta-reth
+    META_GETH_DIR=/meta-geth
 
     cd "/$BUILD_DIR"
 fi
@@ -78,6 +80,10 @@ cp -r $META_ATTESTATION_DIR srcs/poky/meta-attestation
 # Copy in meta-reth
 rm -rf srcs/poky/meta-reth
 cp -r $META_RETH_DIR srcs/poky/meta-reth
+
+# Copy in meta-geth
+rm -rf srcs/poky/meta-geth
+cp -r $META_GETH_DIR srcs/poky/meta-geth
 
 source setup
 make build || true
