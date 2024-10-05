@@ -5,7 +5,7 @@ LICENSE = "GPL-3.0-only & LGPL-3.0-only"
 LIC_FILES_CHKSUM = "file://src/${GO_WORKDIR}/COPYING;md5=1ebbd3e34237af26da5dc08a4e440464 \
 		    file://src/${GO_WORKDIR}/COPYING.LESSER;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
-inherit go-mod update-rc.d
+inherit go-mod update-rc.d useradd
 
 GO_INSTALL = "${GO_IMPORT}/cmd/geth"
 GO_LINKSHARED = ""
@@ -19,6 +19,9 @@ INHIBIT_PACKAGE_STRIP = '1'
 #GOBUILDFLAGS:append = " -buildvcs=false"
 
 RDEPENDS:${PN}-dev += "bash"
+
+USERADD_PACKAGES = "${PN}"
+USERADD_PARAM:${PN} = "-r -s /bin/false -G eth geth"
 
 do_compile[network] = "1"
 
