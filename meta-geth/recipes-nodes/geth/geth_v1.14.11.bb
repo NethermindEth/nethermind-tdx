@@ -1,4 +1,4 @@
-include go-ethereum.inc
+include geth.inc
 
 SRC_URI = "git://${GO_IMPORT};protocol=https;branch=master"
 SRCREV = "${AUTOREV}"
