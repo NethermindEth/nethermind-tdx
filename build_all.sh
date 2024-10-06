@@ -4,7 +4,7 @@ set -e
 
 rm -rf artifacts || true
 
-for node in geth nethermind reth; do
+for node in nethermind reth geth; do
     echo "Building $node"
 
     rm -rf "${node}-artifacts" || true
