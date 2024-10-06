@@ -11,5 +11,7 @@ for node in geth nethermind reth; do
 
     sed -i "s/nethermind|reth|geth/${node}/g" patches/post/cvm-initramfs.bb/cvm-initramfs.bb.new
 
+    make azure-image
+    
     mv artifacts "${node}-artifacts"
 done
