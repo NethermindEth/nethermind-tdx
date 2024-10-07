@@ -11,14 +11,13 @@ for cmd in az azcopy jq; do
     fi
 done
 
-for var in DISK_PATH ALLOWED_IP CONFIG_PATH; do
+for var in DISK_PATH ALLOWED_IP CONFIG_PATH VM_NAME; do
     if [ -z "${!var}" ]; then
         echo "Error: '$var' is not set."
         exit 1
     fi
 done
 
-VM_NAME="tdx"
 AZURE_VM_SIZE="Standard_EC4es_v5"
 AZURE_STORAGE_GB=600
 OS_DISK_SKU="Premium_LRS"
