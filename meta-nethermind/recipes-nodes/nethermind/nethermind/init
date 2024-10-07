@@ -55,6 +55,7 @@ start() {
 		--JsonRpc.JwtSecretFile /var/volatile/jwt-secret \
 		--JsonRpc.Host 0.0.0.0 \
 		--JsonRpc.EnabledModules [eth,net,web3] \
+		--Metrics.ExposePort 9091 \
 		$cli_args \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
