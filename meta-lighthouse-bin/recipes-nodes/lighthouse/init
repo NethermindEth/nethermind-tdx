@@ -32,7 +32,7 @@ start() {
 		bn \
 		--network $NODE_NETWORK \
 		--datadir /persistent/lighthouse \
-		--execution-endpoint http://localhost:8551 \
+		--execution-endpoint http://localhost:8081 \
 		--execution-jwt /var/volatile/jwt-secret \
 		--checkpoint-sync-url $CHECKPOINT_SYNC_URL \
 		--http \
