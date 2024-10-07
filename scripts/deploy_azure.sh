@@ -140,7 +140,7 @@ ATTESTATION_PROVIDER_URL=$(echo ${CONFIG} | jq '.ATTESTATION_PROVIDER_URL')
 if [ "${ATTESTATION_PROVIDER_URL}" == "null" ]; then
     echo "ATTESTATION_PROVIDER_URL is set to 'null', creating attestation provider..."
 
-    ATTESTATION_NAME=${RESOURCE_GROUP_NAME//-}$(openssl rand -hex 6)
+    ATTESTATION_NAME=${RESOURCE_GROUP_NAME//-}$(openssl rand -hex 3)
     # Create attestation provider
     az attestation create \
         --name ${ATTESTATION_NAME} \
