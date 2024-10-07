@@ -101,6 +101,18 @@ declare -A NSG_RULES=(
         --destination-port-ranges 22 \
         --access Allow \
         --protocol Tcp"
+    ["AllowInterceptorPrometheus"]=" \
+        --priority 101 \
+        --source-address-prefixes ${ALLOWED_IP} \
+        --destination-port-ranges 9100 \
+        --access Allow \
+        --protocol Tcp"
+    ["AllowELPrometheus"]=" \
+        --priority 102 \
+        --source-address-prefixes ${ALLOWED_IP} \
+        --destination-port-ranges 9091 \
+        --access Allow \
+        --protocol Tcp"
     ["TCP8545"]=" \
         --priority 110 \
         --destination-port-ranges 8545 \
