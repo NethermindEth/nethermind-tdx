@@ -32,6 +32,7 @@ verbose_output "Sourced the oe-init-build-env script"
 bitbake-layers add-layer ../meta-confidential-compute
 bitbake-layers add-layer ../meta-openembedded/meta-oe
 bitbake-layers add-layer ../meta-openembedded/meta-python
+bitbake-layers add-layer ../meta-openembedded/meta-webserver
 bitbake-layers add-layer ../meta-secure-core/meta-tpm2
 bitbake-layers add-layer ../meta-rust-bin
 bitbake-layers add-layer ../meta-clang
@@ -42,6 +43,7 @@ bitbake-layers add-layer ../meta-json-config
 bitbake-layers add-layer ../meta-attestation
 bitbake-layers add-layer ../meta-reth
 bitbake-layers add-layer ../meta-geth
+bitbake-layers add-layer ../meta-metrics
 
 verbose_output "Added the layers to bblayers.conf"
 

@@ -17,6 +17,7 @@ if [ -z "$DOCKER_BUILD" ]; then
     META_ATTESTATION_DIR=$(realpath meta-attestation)
     META_RETH_DIR=$(realpath meta-reth)
     META_GETH_DIR=$(realpath meta-geth)
+    META_METRICS_DIR=$(realpath meta-metrics)
 
     cd "./$BUILD_DIR"
 else
@@ -31,6 +32,7 @@ else
     META_ATTESTATION_DIR=/meta-attestation
     META_RETH_DIR=/meta-reth
     META_GETH_DIR=/meta-geth
+    META_METRICS_DIR=/meta-metrics
 
     cd "/$BUILD_DIR"
 fi
@@ -84,6 +86,10 @@ cp -r $META_RETH_DIR srcs/poky/meta-reth
 # Copy in meta-geth
 rm -rf srcs/poky/meta-geth
 cp -r $META_GETH_DIR srcs/poky/meta-geth
+
+# Copy in meta-metrics
+rm -rf srcs/poky/meta-metrics
+cp -r $META_METRICS_DIR srcs/poky/meta-metrics
 
 source setup
 make build || true
