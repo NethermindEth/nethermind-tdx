@@ -24,6 +24,7 @@ do_compile[network] = "1"
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 SRC_URI += "file://init"
 SRC_URI += "file://default.conf"
+SRC_URI += "file://nginx.conf"
 
 INITSCRIPT_NAME = "jrpc-interceptor"
 INITSCRIPT_PARAMS = "defaults 97"
@@ -40,7 +41,7 @@ do_install:append() {
     install -d ${D}${sysconfdir}/nginx
     install -d ${D}${sysconfdir}/nginx/conf.d
 
-    install -m 0644 ${WORKDIR}/nginx/nginx.conf ${D}${sysconfdir}/nginx/nginx.conf
+    install -m 0644 ${THISDIR}/nginx.conf ${D}${sysconfdir}/nginx/nginx.conf
     install -m 0644 ${THISDIR}/default.conf ${D}${sysconfdir}/nginx/conf.d/default.conf
 }
 
