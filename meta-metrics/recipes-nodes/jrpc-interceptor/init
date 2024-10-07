@@ -1,0 +1,53 @@
+### BEGIN INIT INFO
+# Provides:		jrpc-interceptor
+# Required-Start:    $network $remote_fs $syslog nginx
+# Required-Stop:     $network $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description:	Start and stop the jrpc-interceptor daemon
+### END INIT INFO
+#
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/jrpc-interceptor
+NAME=jrpc-interceptor
+DESC="jrpc-interceptor"
+PIDFILE=/var/run/jrpc-interceptor.pid
+LOGFILE=/var/log/jrpc-interceptor.log
+
+
+start() {
+	echo -n "Starting $DESC: "
+
+	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
+		-debug=true \
+        -listenSyslog=127.0.0.1:514 \
+        -listenHTTP=0.0.0.0:9100 \
+        -usePrometheus=true \
+		2>&1 | tee ${LOGFILE}"
+	echo "$NAME."
+}
+
+stop() {
+	echo -n "Stopping $DESC: "
+	start-stop-daemon -K -x "$DAEMON" -p $PIDFILE
+	echo "$NAME."
+}
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+        start
+        ;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|reload}" >&2
+	exit 1
+	;;
+esac
+exit 0
