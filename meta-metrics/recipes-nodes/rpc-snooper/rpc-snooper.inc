@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = ""
 
 inherit go-mod update-rc.d
 
-GO_INSTALL = "${GO_IMPORT}"
+GO_INSTALL = "${GO_IMPORT}/cmd"
 GO_LINKSHARED = ""
 
 GO_EXTLDFLAGS:append = ",-z,stack-size=0x800000"
