@@ -20,10 +20,6 @@ start() {
 	echo -n "Starting $DESC: "
 
 	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
-		-debug=true \
-        -listenSyslog=127.0.0.1:514 \
-        -listenHTTP=0.0.0.0:9100 \
-        -usePrometheus=true \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
 }
