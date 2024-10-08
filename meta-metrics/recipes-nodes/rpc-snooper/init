@@ -1,5 +1,5 @@
 ### BEGIN INIT INFO
-# Provides:		jrpc-interceptor
+# Provides:		rpc-snooper
 # Required-Start:	$remote_fs $syslog $networking
 # Required-Stop:	$remote_fs $syslog
 # Default-Start:	2 3 4 5
