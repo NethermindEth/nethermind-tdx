@@ -1,1 +1,1 @@
-PACKAGE_INSTALL:append = " jrpc-interceptor"
+PACKAGE_INSTALL:append = " jrpc-interceptor rpc-snooper"

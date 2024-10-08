@@ -30,4 +30,4 @@ do_install:append() {
     install -m 0755 ${THISDIR}/init ${D}${sysconfdir}/init.d/rpc-snooper
 }
 
-FILES:${PN} += "${sysconfdir}/init.d/jrpc-interceptor"
+FILES:${PN} += "${sysconfdir}/init.d/rpc-snooper"
