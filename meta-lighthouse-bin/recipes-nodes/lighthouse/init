@@ -33,7 +33,7 @@ start() {
 		--network $NODE_NETWORK \
 		--datadir /persistent/lighthouse \
 		--execution-endpoint http://localhost:8081 \
-		--execution-jwt /var/volatile/jwt-secret \
+		--execution-jwt /var/volatile/jwtsecret \
 		--checkpoint-sync-url $CHECKPOINT_SYNC_URL \
 		--http \
 		--disable-deposit-contract-sync \

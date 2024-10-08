@@ -34,12 +34,12 @@ start() {
 	mkdir -p $RETH_DIR
 	chown $RETH_USER:$ETH_GROUP $RETH_DIR
 
-	chown ${RETH_USER}:${ETH_GROUP} /var/volatile/jwt-secret
+	chown ${RETH_USER}:${ETH_GROUP} /var/volatile/jwtsecret
 	start-stop-daemon -S --make-pidfile -p $PIDFILE -c $RETH_USER:$ETH_GROUP -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
 		node \
 		--full \
 		--datadir "$RETH_DIR" \
-		--authrpc.jwtsecret "/var/volatile/jwt-secret" \
+		--authrpc.jwtsecret "/var/volatile/jwtsecret" \
 		--http \
 		--http.addr 0.0.0.0 \
 		--http.port 8545 \

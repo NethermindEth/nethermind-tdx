@@ -52,7 +52,7 @@ start() {
 		--config $NODE_NETWORK \
 		-dd /persistent/nethermind \
 		--Sync.NonValidatorNode true \
-		--JsonRpc.JwtSecretFile /var/volatile/jwt-secret \
+		--JsonRpc.JwtSecretFile /var/volatile/jwtsecret \
 		--JsonRpc.Host 0.0.0.0 \
 		--Metrics.ExposePort 9091 \
 		$cli_args \
