@@ -37,6 +37,9 @@ start() {
 		--checkpoint-sync-url $CHECKPOINT_SYNC_URL \
 		--http \
 		--disable-deposit-contract-sync \
+		--metrics \
+		--metrics-address 0.0.0.0 \
+		--metrics-port 9093 \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
 }
