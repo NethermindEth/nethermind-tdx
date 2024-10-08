@@ -9,7 +9,7 @@
 #
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/rpc-snooper
+DAEMON=/usr/bin/snooper
 NAME=rpc-snooper
 DESC="rpc-snooper"
 PIDFILE=/var/run/rpc-snooper.pid
