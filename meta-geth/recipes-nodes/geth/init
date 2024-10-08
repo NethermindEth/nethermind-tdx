@@ -28,7 +28,6 @@ start() {
 		--metrics.addr=0.0.0.0 \
 		--metrics.port=9091 \
 		--http \
-		--http.api="eth,net,web3" \
 		--http.corsdomain=* \
 		--http.addr=0.0.0.0 \
 		--http.port=8545 \
