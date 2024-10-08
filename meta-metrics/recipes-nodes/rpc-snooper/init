@@ -1,0 +1,51 @@
+### BEGIN INIT INFO
+# Provides:		jrpc-interceptor
+# Required-Start:	$remote_fs $syslog $networking
+# Required-Stop:	$remote_fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:	1
+# Short-Description:	Start and stop the rpc-snooper daemon
+### END INIT INFO
+#
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/rpc-snooper
+NAME=rpc-snooper
+DESC="rpc-snooper"
+PIDFILE=/var/run/rpc-snooper.pid
+LOGFILE=/var/log/rpc-snooper.log
+
+
+start() {
+	echo -n "Starting $DESC: "
+
+	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
+            --port 8081 \
+            --metrics-port 9092 \
+		2>&1 | tee ${LOGFILE}"
+	echo "$NAME."
+}
+
+stop() {
+	echo -n "Stopping $DESC: "
+	start-stop-daemon -K -x "$DAEMON" -p $PIDFILE
+	echo "$NAME."
+}
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+        start
+        ;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|reload}" >&2
+	exit 1
+	;;
+esac
+exit 0
