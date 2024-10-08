@@ -45,7 +45,7 @@ start() {
 		--http.port 8545 \
 		--log.stdout.format json \
 		--log.file.max-files 0 \
-		--metrics 0.0.0.0:9001 \
+		--metrics 0.0.0.0:9091 \
 		2>&1 | tee ${LOGFILE}"
 	echo "$NAME."
 }
