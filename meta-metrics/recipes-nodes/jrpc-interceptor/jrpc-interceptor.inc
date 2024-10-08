@@ -41,16 +41,20 @@ do_install:append() {
     install -d ${D}${sysconfdir}/nginx
     install -d ${D}${sysconfdir}/nginx/conf.d
 
-    install -m 0644 ${THISDIR}/nginx.conf ${D}${sysconfdir}/nginx/nginx.conf
-    install -m 0644 ${THISDIR}/default.conf ${D}${sysconfdir}/nginx/conf.d/default.conf
+    install -m 0644 ${THISDIR}/nginx.conf ${D}${sysconfdir}/nginx/jrpc-interceptor-nginx.conf
+    install -m 0644 ${THISDIR}/default.conf ${D}${sysconfdir}/nginx/conf.d/jrpc-interceptor-default.conf
 }
 
-FILES:${PN} += "${sysconfdir}/nginx/nginx.conf"
+FILES:${PN} += "${sysconfdir}/nginx/jrpc-interceptor-nginx.conf"
 FILES:${PN} += "${sysconfdir}/nginx/conf.d/default.conf"
 
 pkg_postinst:${PN}:append() {
     if [ -n "$D" ]; then
         exit 0
     fi
+    if [ -f /etc/nginx/nginx.conf ]; then
+        mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
+    fi
+    ln -sf /etc/nginx/jrpc-interceptor-nginx.conf /etc/nginx/nginx.conf
     systemctl restart nginx || true
 }
