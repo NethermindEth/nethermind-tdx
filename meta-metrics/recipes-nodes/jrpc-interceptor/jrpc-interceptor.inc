@@ -33,11 +33,7 @@ do_install:append() {
     install -d ${D}${bindir}
     install -d ${D}${sysconfdir}/init.d
     install -m 0755 ${THISDIR}/init ${D}${sysconfdir}/init.d/jrpc-interceptor
-}
 
-FILES:${PN} += "${sysconfdir}/init.d/jrpc-interceptor"
-
-do_install:append() {
     install -d ${D}${sysconfdir}/nginx
     install -d ${D}${sysconfdir}/nginx/conf.d
 
@@ -45,6 +41,7 @@ do_install:append() {
     install -m 0644 ${THISDIR}/default.conf ${D}${sysconfdir}/nginx/conf.d/jrpc-interceptor-default.conf
 }
 
+FILES:${PN} += "${sysconfdir}/init.d/jrpc-interceptor"
 FILES:${PN} += "${sysconfdir}/nginx/jrpc-interceptor-nginx.conf"
 FILES:${PN} += "${sysconfdir}/nginx/conf.d/default.conf"
 
