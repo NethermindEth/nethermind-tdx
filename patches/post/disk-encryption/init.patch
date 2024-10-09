@@ -1,6 +1,14 @@
---- post/disk-encryption/init.old	2024-09-12 21:03:35.793471700 -0300
-+++ post/disk-encryption/init.new	2024-09-12 21:50:43.598377106 -0300
-@@ -86,15 +86,21 @@
+--- post/disk-encryption/init.old	2024-10-09 17:09:46.006649058 +0100
++++ post/disk-encryption/init.new	2024-10-04 15:17:58.903093751 +0100
+@@ -22,7 +22,6 @@
+ 
+ log() {
+     echo "$(date): $1" | tee -a $LOGFILE /dev/kmsg
+-    echo "$1" > /var/volatile/system-api.fifo
+ }
+ 
+ generate_key() {
+@@ -87,15 +86,21 @@
  
  start() {
      log "Starting $DESC"
@@ -25,7 +33,7 @@
          return 1
      fi
  
-@@ -115,13 +121,13 @@
+@@ -116,13 +121,13 @@
          log "Existing key retrieved from TPM."
      fi
  

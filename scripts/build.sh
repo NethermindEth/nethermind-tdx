@@ -31,7 +31,8 @@ else
     cd "/$BUILD_DIR"
 fi
 
-repo init -u https://github.com/flashbots/yocto-manifests.git -b tdx-rbuilder
+# Based on the tdx-rbuilder branch
+repo init -u https://github.com/flashbots/yocto-manifests.git -b 3e03f7223af84c4b687dda753e74734e5d2d8548
 
 # Apply pre-sync patches
 for patch_dir in $PATCHES_DIR/pre/*; do
