@@ -1,7 +1,7 @@
 .PHONY: build gen-measurements
 
 build:
-	cd srcs/poky/ && bitbake cvm-image-azure-tdx-gcp
+	cd srcs/poky/ && bitbake core-image-minimal
 
 gen-measurements:
 	mkdir -p measurements

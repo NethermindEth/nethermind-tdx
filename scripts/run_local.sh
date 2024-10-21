@@ -40,7 +40,7 @@ ln -s "$PWD/tmp/work/x86_64-linux/qemu-helper-native/1.0/recipe-sysroot-native/u
     "$PWD/tmp/work/x86_64-linux/qemu-helper-native/1.0/recipe-sysroot-native/usr/bin/tdx" ||
     true
 
-runqemu cvm-image-azure \
+runqemu core-image-minimal \
     wic \
     nographic \
     kvm \

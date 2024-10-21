@@ -1,11 +1,11 @@
 --- post/Makefile/Makefile.old	2024-10-21 16:15:20.237278946 +0200
-+++ post/Makefile/Makefile.new	2024-10-21 16:15:15.907279927 +0200
++++ post/Makefile/Makefile.new	2024-10-21 21:08:03.209895304 +0200
 @@ -1,7 +1,7 @@
  .PHONY: build gen-measurements
  
  build:
 -	cd srcs/poky/ && bitbake cvm-image-azure
-+	cd srcs/poky/ && bitbake cvm-image-azure-tdx-gcp
++	cd srcs/poky/ && bitbake core-image-minimal
  
  gen-measurements:
  	mkdir -p measurements

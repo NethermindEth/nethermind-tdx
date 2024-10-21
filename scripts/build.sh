@@ -78,7 +78,7 @@ source setup
 make build || true
 
 # Copy artifacts to artifacts directory
-cp --dereference srcs/poky/build/tmp/deploy/images/tdx/* $ARTIFACTS_DIR/.
+cp --dereference srcs/poky/build/tmp/deploy/images/tdx-gcp/* $ARTIFACTS_DIR/.
 
 # Clean up .NET build processes if not in container
 if [ "$DOCKER" = false ]; then
