@@ -58,3 +58,5 @@ for patch in $CURRENT_PATH/srcs/yocto-scripts/patches/patch-*; do
     patch -N -f -s $CURRENT_PATH/srcs/poky/build/conf/$filename -i $patch 2>/dev/null || true
     verbose_output "Applied patch to $CURRENT_PATH/srcs/poky/build/conf/$filename"
 done
+
+sed -i 's/MACHINE ?= "tdx"/MACHINE ?= "tdx-gcp"/' $CURRENT_PATH/srcs/poky/build/conf/local.conf

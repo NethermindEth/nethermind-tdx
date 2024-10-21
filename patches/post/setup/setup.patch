@@ -1,5 +1,5 @@
---- post/setup/setup.old	2024-09-03 21:06:00.831520031 -0300
-+++ post/setup/setup.new	2024-09-13 23:46:15.527670229 -0300
+--- post/setup/setup.old	2024-09-04 02:06:00.831520031 +0200
++++ post/setup/setup.new	2024-10-21 15:44:51.037792130 +0200
 @@ -28,15 +28,20 @@
  verbose_output "Sourced the oe-init-build-env script"
  
@@ -25,7 +25,7 @@
  
  # Return to the original directory
  popd
-@@ -49,6 +54,7 @@
+@@ -49,6 +54,9 @@
      verbose_output "Processing patch file $patch"
  
      # Apply the patch to the corresponding file in srcs/poky/build/conf/
@@ -34,3 +34,5 @@
 +    patch -N -f -s $CURRENT_PATH/srcs/poky/build/conf/$filename -i $patch 2>/dev/null || true
      verbose_output "Applied patch to $CURRENT_PATH/srcs/poky/build/conf/$filename"
  done
++
++sed -i 's/MACHINE ?= "tdx"/MACHINE ?= "tdx-gcp"/' $CURRENT_PATH/srcs/poky/build/conf/local.conf
