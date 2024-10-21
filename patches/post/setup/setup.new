@@ -60,3 +60,6 @@ for patch in $CURRENT_PATH/srcs/yocto-scripts/patches/patch-*; do
 done
 
 sed -i 's/MACHINE ?= "tdx"/MACHINE ?= "tdx-gcp"/' $CURRENT_PATH/srcs/poky/build/conf/local.conf
+if ! grep -q "INITRAMFS_MAXSIZE = 700000" $CURRENT_PATH/srcs/poky/build/conf/local.conf; then
+    echo "INITRAMFS_MAXSIZE = 700000" >> $CURRENT_PATH/srcs/poky/build/conf/local.conf
+fi
