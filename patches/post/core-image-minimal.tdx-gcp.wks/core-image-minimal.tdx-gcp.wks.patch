@@ -1,0 +1,8 @@
+--- post/core-image-minimal.tdx-gcp.wks/core-image-minimal.tdx-gcp.wks.old	2024-10-21 15:20:45.018283145 +0200
++++ post/core-image-minimal.tdx-gcp.wks/core-image-minimal.tdx-gcp.wks.new	2024-10-21 15:20:47.238282420 +0200
+@@ -4,4 +4,4 @@
+ 
+ part /boot --source bootimg-efi --sourceparams="loader=grub-efi,initrd=${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES}" --ondisk sda --label boot --active --align 1024
+ 
+-bootloader --ptable gpt --timeout=0 --append="console=ttyS0,38400n8 scsi_mod.use_blk_mq=Y console=tty0 ramdisk_size=402653184"
++bootloader --ptable gpt --timeout=0 --append="console=ttyS0,38400n8 scsi_mod.use_blk_mq=Y console=tty0 ramdisk_size=402653184 swiotlb=262144"

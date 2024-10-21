@@ -1,5 +1,5 @@
---- pre/default.xml/default.xml.old	2024-10-09 17:12:43.036599979 +0100
-+++ pre/default.xml/default.xml.new	2024-10-09 17:06:21.176704542 +0100
+--- pre/default.xml/default.xml.old	2024-10-21 15:04:37.988612362 +0200
++++ pre/default.xml/default.xml.new	2024-10-21 15:07:55.908544120 +0200
 @@ -1,6 +1,7 @@
  <?xml version="1.0" encoding="UTF-8"?>
  <manifest>
@@ -19,7 +19,7 @@
    <project remote="flashbots"       revision="main"             name="meta-evm"                        path="srcs/poky/meta-evm"/>
    <project remote="flashbots"       revision="master"           name="meta-rust-bin"                   path="srcs/poky/meta-rust-bin"/>
 +  -->
-+  <project remote="flashbots"       revision="46cdcb085940434d2823441240bb3d63c88dd0db"                name="meta-confidential-compute"       path="srcs/poky/meta-confidential-compute"/>
++  <project remote="flashbots"       revision="f506b32cad304c18f33327d79c5d321b15e6eab7"                name="meta-confidential-compute"       path="srcs/poky/meta-confidential-compute"/>
    <project remote="flashbots"       revision="main"             name="meta-observability"              path="srcs/poky/meta-observability"/>
 -  <project remote="flashbots"       revision="main"             name="meta-custom-podman"              path="srcs/poky/meta-custom-podman"/>
 +  <project remote="jeremy-prater"   revision="trunk"            name="meta-dotnet"                     path="srcs/poky/meta-dotnet"/>
