@@ -1,0 +1,26 @@
+..........................................................................
+.                                WARNING
+.
+. This file is a kernel configuration fragment, and not a full kernel
+. configuration file.  The final kernel configuration is made up of
+. an assembly of processed fragments, each of which is designed to
+. capture a specific part of the final configuration (e.g. platform
+. configuration, feature configuration, and board specific hardware
+. configuration).  For more information on kernel configuration, please
+. consult the product documentation.
+.
+..........................................................................
+
+CONFIG_GVE=y
+CONFIG_NET_VENDOR_GOOGLE=y
+CONFIG_PCI_MSI=y
+CONFIG_SWIOTLB=y
+
+CONFIG_NVME_CORE=y
+CONFIG_BLK_DEV_NVME=y
+CONFIG_NVME_MULTIPATH=y
+CONFIG_NVME_VERBOSE_ERRORS=y
+CONFIG_NVME_FC=y
+CONFIG_NVME_TCP=y
+CONFIG_NVME_HOST_AUTH=y
+CONFIG_NVME_TARGET=y
