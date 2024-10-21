@@ -1,5 +1,5 @@
 --- post/setup/setup.old	2024-09-04 02:06:00.831520031 +0200
-+++ post/setup/setup.new	2024-10-21 21:11:45.859838398 +0200
++++ post/setup/setup.new	2024-10-21 23:21:30.397972901 +0200
 @@ -28,15 +28,20 @@
  verbose_output "Sourced the oe-init-build-env script"
  
@@ -25,7 +25,7 @@
  
  # Return to the original directory
  popd
-@@ -49,6 +54,12 @@
+@@ -49,6 +54,15 @@
      verbose_output "Processing patch file $patch"
  
      # Apply the patch to the corresponding file in srcs/poky/build/conf/
@@ -38,4 +38,7 @@
 +sed -i 's/MACHINE ?= "tdx"/MACHINE ?= "tdx-gcp"/' $CURRENT_PATH/srcs/poky/build/conf/local.conf
 +if ! grep -q 'INITRAMFS_MAXSIZE = "700000"' $CURRENT_PATH/srcs/poky/build/conf/local.conf; then
 +    echo 'INITRAMFS_MAXSIZE = "700000"' >> $CURRENT_PATH/srcs/poky/build/conf/local.conf
++fi
++if ! grep -q 'DISTRO_FEATURES:append = " tpm2"' $CURRENT_PATH/srcs/poky/build/conf/local.conf; then
++    echo 'DISTRO_FEATURES:append = " tpm2"' >> $CURRENT_PATH/srcs/poky/build/conf/local.conf
 +fi

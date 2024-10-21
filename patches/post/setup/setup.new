@@ -63,3 +63,6 @@ sed -i 's/MACHINE ?= "tdx"/MACHINE ?= "tdx-gcp"/' $CURRENT_PATH/srcs/poky/build/
 if ! grep -q 'INITRAMFS_MAXSIZE = "700000"' $CURRENT_PATH/srcs/poky/build/conf/local.conf; then
     echo 'INITRAMFS_MAXSIZE = "700000"' >> $CURRENT_PATH/srcs/poky/build/conf/local.conf
 fi
+if ! grep -q 'DISTRO_FEATURES:append = " tpm2"' $CURRENT_PATH/srcs/poky/build/conf/local.conf; then
+    echo 'DISTRO_FEATURES:append = " tpm2"' >> $CURRENT_PATH/srcs/poky/build/conf/local.conf
+fi
