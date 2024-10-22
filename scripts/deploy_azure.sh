@@ -98,6 +98,11 @@ declare -A NSG_RULES=(
         --destination-port-ranges 22 \
         --access Allow \
         --protocol Tcp"
+    ["TCP4000"]=" \
+        --priority 109 \
+        --destination-port-ranges 4000 \
+        --access Allow \
+        --protocol Tcp"
     ["TCP8545"]=" \
         --priority 110 \
         --destination-port-ranges 8545 \
