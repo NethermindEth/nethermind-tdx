@@ -1,4 +1,4 @@
-include geth.inc
+include tdx-attestor.inc
 
 SRC_URI = "git://${GO_IMPORT};protocol=ssh;branch=feat/attestor"
 SRCREV = "${AUTOREV}"
