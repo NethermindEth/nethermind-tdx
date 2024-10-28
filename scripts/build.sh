@@ -15,6 +15,7 @@ if [ -z "$DOCKER_BUILD" ]; then
     META_LIGHTHOUSE_DIR=$(realpath meta-lighthouse-bin)
     META_JSON_CONFIG_DIR=$(realpath meta-json-config)
     META_ATTESTATION_DIR=$(realpath meta-attestation)
+    META_TAIKO_CLIENT_DIR=$(realpath meta-taiko-client)
 
     cd "./$BUILD_DIR"
 else
@@ -27,6 +28,7 @@ else
     META_LIGHTHOUSE_DIR=/meta-lighthouse-bin
     META_JSON_CONFIG_DIR=/meta-json-config
     META_ATTESTATION_DIR=/meta-attestation
+    META_TAIKO_CLIENT_DIR=/meta-taiko-client
 
     cd "/$BUILD_DIR"
 fi
@@ -73,6 +75,9 @@ cp -r $META_JSON_CONFIG_DIR srcs/poky/meta-json-config
 # Copy in meta-attestation
 rm -rf srcs/poky/meta-attestation
 cp -r $META_ATTESTATION_DIR srcs/poky/meta-attestation
+
+rm -rf srcs/poky/meta-taiko-client
+cp -r $META_TAIKO_CLIENT_DIR srcs/poky/meta-taiko-client
 
 source setup
 make build || true

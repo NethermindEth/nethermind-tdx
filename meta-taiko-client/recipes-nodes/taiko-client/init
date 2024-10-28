@@ -1,0 +1,81 @@
+### BEGIN INIT INFO
+# Provides:
+# Required-Start:	$remote_fs $syslog $networking
+# Required-Stop:	$remote_fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:		1
+# Short-Description:	Start and stop the taiko_client daemon for driver and proposer.
+### END INIT INFO
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/taiko-client
+NAME=taiko_client
+DESC="Taiko client"
+DRIVER_PIDFILE=/var/run/taiko_client_driver.pid
+DRIVER_LOGFILE=/var/log/taiko_client_driver.log
+PROPOSER_PIDFILE=/var/run/taiko_client_proposer.pid
+PROPOSER_LOGFILE=/var/log/taiko_client_proposer.log
+
+start() {
+    echo -n "Starting $DESC driver:"
+
+    mount -o remount,size=90% /var/volatile
+
+    start-stop-daemon -S -p $DRIVER_PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
+        driver \
+            --l1.ws ${L1_ENDPOINT_WS} \
+            --l2.ws ws://localhost:8546 \
+            --l1.beacon ${L1_BEACON_HTTP} \
+            --l2.auth http://l2_execution_engine:8551 \
+            --taikoL1 ${TAIKO_L1_ADDRESS} \
+            --taikoL2 ${TAIKO_L2_ADDRESS} \
+            --jwtSecret /var/volatile/jwtsecret \
+            2>&1 | tee ${DRIVER_LOGFILE}"
+    echo "$NAME(driver)."
+
+    echo -n "Starting $DESC proposer:"
+    start-stop-deamon -S -p $PROPOSER_PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
+        proposer \
+            --l1.ws ${L1_ENDPOINT_WS} \
+            --l2.http http://l2_execution_engine:8545 \
+            --l2.auth http://l2_execution_engine:8551 \
+            --taikoL1 ${TAIKO_L1_ADDRESS} \
+            --taikoL2 ${TAIKO_L2_ADDRESS} \
+            --taikoToken ${TAIKO_TOKEN_L1_ADDRESS} \
+            --jwtSecret /var/volatile/jwtsecret \
+            --l1.proposerPrivKey ${L1_PROPOSER_PRIVATE_KEY} \
+            --l2.suggestedFeeRecipient ${L2_SUGGESTED_FEE_RECIPIENT} \
+            2>&1 | tee ${PROPOSER_LOGFILE}"
+    echo "$NAME(proposer)."
+}
+
+stop() {
+    echo -n "Stopping $DESC driver:"
+    start-stop-daemon -K -x "$DAEMON" -p $DRIVER_PIDFILE
+    echo "$NAME(driver)."
+
+    echo -n "Stopping $DESC proposer:"
+    start-stop-daemon -K -x "$DAEMON" -p $PROPOSER_PIDFILE
+    echo "$NAME(proposer)."
+}
+
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart|reload)
+        stop
+        start
+        ;;
+    *)
+      N=/etc/init.d/$NAME
+      echo "Usage: $N {start|stop|restart|reload}" >&2
+      exit 1
+      ;;
+esac
+exit 0
