@@ -84,6 +84,10 @@ setup-docker:
 setup-lighthouse:
 	./scripts/setup_lighthouse.sh
 
+.PHONY: setup-taiko
+setup-taiko:
+	./scripts/setup_taiko.sh
+
 .PHONY: setup-go
 setup-go:
 	./scripts/setup_go.sh
