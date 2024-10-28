@@ -4,7 +4,7 @@ set -e
 
 # Script to setup swtpm on ubuntu
 
-# sudo apt install swtpm swtpm-tools -y
+sudo apt install swtpm swtpm-tools -y
 
 mkdir /tmp/tdxqemu-tpm || true
 mkdir tpmstatedir || true
