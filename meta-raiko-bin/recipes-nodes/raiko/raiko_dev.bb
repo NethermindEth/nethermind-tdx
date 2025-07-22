@@ -5,7 +5,6 @@ BINARY = "raiko"
 SRC_URI += "file://${BINARY}"
 SRC_URI += "file://init"
 SRC_URI += "file://raiko-config.sh"
-SRC_URI += "file://chain_spec_list.json"
 SRC_URI += "file://chain_spec_list_default.json"
 S = "${WORKDIR}"
 
