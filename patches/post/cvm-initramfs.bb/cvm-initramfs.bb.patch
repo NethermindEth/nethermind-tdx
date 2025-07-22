@@ -1,11 +1,11 @@
---- post/cvm-initramfs.bb/cvm-initramfs.bb.old	2024-10-04 15:08:56.263249878 +0100
-+++ post/cvm-initramfs.bb/cvm-initramfs.bb.new	2024-10-04 15:13:13.473176403 +0100
+--- post/cvm-initramfs.bb/cvm-initramfs.bb.old	2024-10-22 16:51:14.920404557 +0200
++++ post/cvm-initramfs.bb/cvm-initramfs.bb.new	2025-07-22 16:29:40.577029526 +0200
 @@ -7,7 +7,7 @@
  
  CVM_DEPS = "busybox-mdev init-ifupdown initscripts base-files base-passwd netbase busybox-udhcpd"
  
 -PACKAGE_INSTALL = "ca-certificates sysvinit busybox-udhcpd date-sync logrotate cronie ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
-+PACKAGE_INSTALL = "ca-certificates sysvinit busybox-udhcpd date-sync logrotate cronie nethermind lighthouse json-config cvm-reverse-proxy-server ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
++PACKAGE_INSTALL = "ca-certificates sysvinit busybox-udhcpd date-sync logrotate cronie nethermind lighthouse raiko json-config cvm-reverse-proxy-server ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
  
  INITRAMFS_MAXSIZE = "20000000"
  

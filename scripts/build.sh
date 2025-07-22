@@ -13,6 +13,7 @@ if [ -z "$DOCKER_BUILD" ]; then
     ARTIFACTS_DIR=$(realpath $ARTIFACTS_DIR)
     META_NETHERMIND_DIR=$(realpath meta-nethermind)
     META_LIGHTHOUSE_DIR=$(realpath meta-lighthouse-bin)
+    META_RAIKO_DIR=$(realpath meta-raiko-bin)
     META_JSON_CONFIG_DIR=$(realpath meta-json-config)
     META_ATTESTATION_DIR=$(realpath meta-attestation)
 
@@ -25,6 +26,7 @@ else
     ARTIFACTS_DIR="/$ARTIFACTS_DIR"
     META_NETHERMIND_DIR=/meta-nethermind
     META_LIGHTHOUSE_DIR=/meta-lighthouse-bin
+    META_RAIKO_DIR=/meta-raiko-bin
     META_JSON_CONFIG_DIR=/meta-json-config
     META_ATTESTATION_DIR=/meta-attestation
 
@@ -65,6 +67,10 @@ cp -r $META_NETHERMIND_DIR srcs/poky/meta-nethermind
 # Copy in meta-lighthouse-bin
 rm -rf srcs/poky/meta-lighthouse-bin
 cp -r $META_LIGHTHOUSE_DIR srcs/poky/meta-lighthouse-bin
+
+# Copy in meta-raiko-bin
+rm -rf srcs/poky/meta-raiko-bin
+cp -r $META_RAIKO_DIR srcs/poky/meta-raiko-bin
 
 # Copy in meta-json-config
 rm -rf srcs/poky/meta-json-config

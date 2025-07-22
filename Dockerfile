@@ -32,6 +32,7 @@ RUN chmod +x /usr/bin/measure
 ADD ./patches /patches
 ADD ./meta-nethermind /meta-nethermind
 ADD ./meta-lighthouse-bin /meta-lighthouse-bin
+ADD ./meta-raiko-bin /meta-raiko-bin
 ADD ./meta-json-config /meta-json-config
 ADD ./meta-attestation /meta-attestation
 

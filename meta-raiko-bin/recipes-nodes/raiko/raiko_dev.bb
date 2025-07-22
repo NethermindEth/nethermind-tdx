@@ -1,0 +1,63 @@
+DESCRIPTION = "Copy raiko binary to the image"
+LICENSE = "CLOSED"
+FILESEXTRAPATHS:prepend := "${THISDIR}:"
+BINARY = "raiko"
+SRC_URI += "file://${BINARY}"
+SRC_URI += "file://init"
+SRC_URI += "file://raiko-config.sh"
+SRC_URI += "file://chain_spec_list.json"
+SRC_URI += "file://chain_spec_list_default.json"
+S = "${WORKDIR}"
+
+INITSCRIPT_NAME = "${BINARY}"
+INITSCRIPT_PARAMS = "defaults 97"
+
+inherit update-rc.d
+
+do_install() {
+	install -d ${D}${bindir}
+	install -m 0777 ${BINARY} ${D}${bindir}
+	install -d ${D}${sysconfdir}/init.d
+	cp init ${D}${sysconfdir}/init.d/${BINARY}
+	chmod 755 ${D}${sysconfdir}/init.d/${BINARY}
+	
+	# Install raiko configuration files to /etc/raiko/
+	install -d ${D}${sysconfdir}/raiko
+	if [ -f chain_spec_list.json ]; then
+		install -m 0644 chain_spec_list.json ${D}${sysconfdir}/raiko/
+	fi
+	if [ -f chain_spec_list_default.json ]; then
+		install -m 0644 chain_spec_list_default.json ${D}${sysconfdir}/raiko/
+	fi
+	
+	# Install raiko config helper script
+	install -m 0755 raiko-config.sh ${D}${sysconfdir}/raiko/
+}
+FILES_${PN} += "${bindir} ${sysconfdir}/raiko"
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
+INHIBIT_PACKAGE_STRIP = "1"
+
+python () {
+    network = d.getVar("NODE_NETWORK")
+    
+    if network is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            if network is None:
+                network = origenv.getVar("NODE_NETWORK")
+        
+    if network:
+        d.setVar("NODE_NETWORK", network)
+    else:
+        # default to holesky
+        d.setVar("NODE_NETWORK", "holesky")
+}
+
+# set the network config
+do_install:append() {
+    install -d ${D}${sysconfdir}
+    
+    # Create configuration file
+    echo -n "" > ${D}${sysconfdir}/raiko.conf
+    echo "export NODE_NETWORK='${NODE_NETWORK}'" >> ${D}${sysconfdir}/raiko.conf
+}

@@ -1,0 +1,77 @@
+### BEGIN INIT INFO
+# Provides:		raiko
+# Required-Start:	$remote_fs $syslog $networking
+# Required-Stop:	$remote_fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:		1
+# Short-Description:	Start and stop the raiko daemon
+### END INIT INFO
+#
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/raiko
+NAME=raiko
+DESC="Raiko ZK Proof Service"
+PIDFILE=/var/run/raiko.pid
+LOGFILE=/var/log/raiko.log
+
+
+start() {
+	echo -n "Starting $DESC: "
+
+	# Source JSON configuration (provides dynamic config from Azure metadata)
+	if [ -f /etc/json-config ]; then
+		source /etc/json-config
+		echo "Loaded JSON configuration"
+	else
+		echo "Warning: No JSON configuration found"
+	fi
+
+	# Source static configuration
+	source /etc/raiko.conf
+
+	# Source and run TDX configuration functions
+	if [ -f /etc/raiko/raiko-config.sh ]; then
+		source /etc/raiko/raiko-config.sh
+		prepare_tdx_config
+	else
+		echo "Error: Raiko TDX config script not found"
+		exit 1
+	fi
+
+	echo "Running raiko in TDX mode"
+
+	if [ ! -f "$RAIKO_CHAIN_SPEC_PATH" ]; then
+		echo "Error: Chain spec file not found at $RAIKO_CHAIN_SPEC_PATH"
+		exit 1
+	fi
+
+	mount -o remount,size=90% /var/volatile
+	start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
+		2>&1 | tee ${LOGFILE}"
+	echo "$NAME."
+}
+
+stop() {
+	echo -n "Stopping $DESC: "
+	start-stop-daemon -K -x "$DAEMON" -p $PIDFILE
+	echo "$NAME."
+}
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+        start
+        ;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|reload}" >&2
+	exit 1
+	;;
+esac
+exit 0

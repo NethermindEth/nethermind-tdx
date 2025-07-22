@@ -5,6 +5,7 @@
 /build/
 /artifacts/
 /lighthouse/
+/raiko/
 /tpmstatedir/
 /measured-boot/
 /cvm-reverse-proxy/
