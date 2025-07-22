@@ -5,7 +5,7 @@
 set -e
 
 if [ ! -d "raiko" ]; then
-    git clone https://github.com/NethermindEth/raiko
+    git clone https://github.com/NethermindEth/raiko -b feat/tdx
 fi
 
 cd raiko
