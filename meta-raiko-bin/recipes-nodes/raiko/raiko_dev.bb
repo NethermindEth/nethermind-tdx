@@ -4,8 +4,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}:"
 BINARY = "raiko"
 SRC_URI += "file://${BINARY}"
 SRC_URI += "file://init"
-SRC_URI += "file://raiko-config.sh"
-SRC_URI += "file://chain_spec_list_default.json"
+SRC_URI += "file://chain_spec_list.json"
 S = "${WORKDIR}"
 
 INITSCRIPT_NAME = "${BINARY}"
@@ -25,12 +24,6 @@ do_install() {
 	if [ -f chain_spec_list.json ]; then
 		install -m 0644 chain_spec_list.json ${D}${sysconfdir}/raiko/
 	fi
-	if [ -f chain_spec_list_default.json ]; then
-		install -m 0644 chain_spec_list_default.json ${D}${sysconfdir}/raiko/
-	fi
-	
-	# Install raiko config helper script
-	install -m 0755 raiko-config.sh ${D}${sysconfdir}/raiko/
 }
 FILES_${PN} += "${bindir} ${sysconfdir}/raiko"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
