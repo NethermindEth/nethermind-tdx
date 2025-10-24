@@ -6,7 +6,7 @@ Requires=network-setup.service
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/runtime-init
-ExecStartPost=/usr/bin/tdx-init setup
+ExecStartPost=/usr/bin/tdx-init setup /etc/tdx-init/config.yaml
 RemainAfterExit=yes
 Restart=on-failure
 RestartSec=5

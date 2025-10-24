@@ -1,0 +1,20 @@
+
+ssh:
+  strategy: "webserver"
+  strategy_config:
+    server_url: "0.0.0.0:8080"
+  dir: "/root/.ssh"
+  key_path: "/etc/root_key"
+  store_at: "disk_persistent"
+
+keys:
+  key_persistent:
+    strategy: "random"
+    tpm: true
+
+disks:
+  disk_persistent:
+    strategy: "largest"
+    format: "on_initialize"
+    encryption_key: "key_persistent"
+    mount_at: "/persistent"
