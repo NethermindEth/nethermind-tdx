@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euxo pipefail
+
+services/tdx-init/build.sh
+services/tdxs/build.sh
+services/raiko/build.sh
+services/taiko-client/build.sh
+services/nethermind/build.sh

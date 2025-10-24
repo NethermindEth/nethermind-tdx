@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+tdxs_own() {
+    [ -e $1 ] && { chown root:tdx $1 && chmod 660 $1; } || true
+}
+
+openssl rand -hex 32 | tr -d "\n" | tee /tmp/surge_jwt.hex
+chown :eth /tmp/surge_jwt.hex
+chmod 644 /tmp/surge_jwt.hex
+
+mkdir -p /persistent/nethermind-surge/{logs,db,keystore}
+chown :eth /persistent/nethermind-surge
+chmod 755 /persistent/nethermind-surge
+chmod 755 /persistent/nethermind-surge/{logs,db,keystore}
+
+tdxs_own /dev/tpm0
+tdxs_own /dev/tpmrm0
+tdxs_own /dev/tdx_guest
+tdxs_own /sys/kernel/security/tpm0/binary_bios_measurements

@@ -1,0 +1,15 @@
+{
+    "network": "surge_dev",
+    "l1_network": "surge_dev_l1",
+    "graffiti":"0x0000000000000000000000000000000000000000000000000000000000000000",
+    "tdx": {
+        "instance_ids": {
+            "HEKLA": 0,
+            "ONTAKE": 0,
+            "PACAYA": 0
+        },
+        "socket_path": "/var/tdxs.sock",
+        "bootstrap": false,
+        "prove": true
+    }
+}

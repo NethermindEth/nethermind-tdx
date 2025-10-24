@@ -1,0 +1,40 @@
+[Unit]
+Description=Nethermind Surge node
+Documentation=https://docs.nethermind.io
+After=runtime-init.service taiko-client.service
+Requires=runtime-init.service
+
+[Service]
+User=nethermind-surge
+Group=eth
+EnvironmentFile=/etc/nethermind-surge/.env.devnet
+WorkingDirectory=/home/nethermind-surge
+ExecStart=/usr/bin/nethermind \
+    --config=/etc/nethermind-surge/config_surge.json \
+    --datadir=/persistent/nethermind-surge \
+    --Init.ChainSpecPath=/etc/nethermind-surge/devnet_chainspec.json \
+    --Init.GenesisHash=${L2_GENESIS_HASH} \
+    --Init.DiscoveryEnabled=false \
+    --Metrics.Enabled=true \
+    --Metrics.ExposePort=${L2_METRICS_PORT} \
+    --JsonRpc.Enabled=true \
+    --JsonRpc.EnabledModules=[debug,eth,net,web3,txpool,rpc,subscribe,trace,personal,proof,parity,health] \
+    --JsonRpc.Host=0.0.0.0 \
+    --JsonRpc.Port=${L2_HTTP_PORT} \
+    --JsonRpc.WebSocketsPort=${L2_WS_PORT} \
+    --JsonRpc.JwtSecretFile=/tmp/surge_jwt.hex \
+    --JsonRpc.EngineHost=0.0.0.0 \
+    --JsonRpc.EnginePort=${L2_ENGINE_API_PORT} \
+    --Network.DiscoveryPort=${L2_NETWORK_DISCOVERY_PORT} \
+    --Network.P2PPort=${L2_NETWORK_DISCOVERY_PORT} \
+    --Sync.FastSync=false \
+    --Sync.SnapSync=false \
+    --HealthChecks.Enabled=true \
+    --log=${NETHERMIND_LOG_LEVEL} \
+    --logger-config=/etc/nethermind-surge/NLog.config \
+    --plugins-dir=/etc/nethermind-surge/plugins
+Restart=on-failure
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=default.target
