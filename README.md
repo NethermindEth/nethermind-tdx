@@ -38,8 +38,8 @@ In order to build images, you'll need to install [Lima](https://lima-vm.io/) for
    ```
 
 **Run QEMU** (OVMF can be based on EDK2):
-    ```bash
-    qemu-system-x86_64 \
+   ```bash
+   qemu-system-x86_64 \
 	-kernel build/tdx-debian.efi \
 	-netdev user,id=net0,hostfwd=tcp::2222-:22,hostfwd=tcp::8080-:8080 \
 	-device virtio-net-pci,netdev=net0 \
@@ -53,4 +53,4 @@ In order to build images, you'll need to install [Lima](https://lima-vm.io/) for
 	-m 16384M \
 	-nographic \
 	-bios OVMF.fd
-    ```
+   ```
