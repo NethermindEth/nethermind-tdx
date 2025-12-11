@@ -63,6 +63,11 @@ if [ -f "id_ed25519.pub" ]; then
     mkosi-chroot chmod 0600 "/root/.ssh/authorized_keys"
 fi
 
+mkdir -p /persistent/nethermind-surge/{logs,db,keystore}
+chown -R nethermind-surge:eth /persistent/nethermind-surge
+chmod 755 /persistent/nethermind-surge
+chmod 755 /persistent/nethermind-surge/{logs,db,keystore}
+
 # # Lock the root account
 # mkosi-chroot passwd -l root
 
