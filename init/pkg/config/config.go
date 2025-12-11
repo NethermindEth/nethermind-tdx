@@ -83,8 +83,8 @@ func (c *Config) Validate() error {
 		if disk.Format == "" {
 			disk.Format = "on_initialize"
 		}
-		if disk.Format != "always" && disk.Format != "on_initialize" && disk.Format != "never" {
-			return fmt.Errorf("disks.%s.format must be 'always', 'on_initialize', or 'never'", name)
+		if disk.Format != "always" && disk.Format != "on_initialize" && disk.Format != "never" && disk.Format != "on_fail" {
+			return fmt.Errorf("disks.%s.format must be 'always', 'on_initialize', 'on_fail', or 'never'", name)
 		}
 		if disk.MountAt == "" {
 			return fmt.Errorf("disks.%s.mount_at is required", name)

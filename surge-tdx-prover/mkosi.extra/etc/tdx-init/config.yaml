@@ -15,6 +15,6 @@ keys:
 disks:
   disk_persistent:
     strategy: "largest"
-    format: "on_initialize"
+    format: "on_fail"
     encryption_key: "key_persistent"
     mount_at: "/persistent"

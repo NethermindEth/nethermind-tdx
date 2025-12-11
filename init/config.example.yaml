@@ -49,6 +49,7 @@ disks:
     # When to format the disk
     # - 'always': Format on every run (DESTRUCTIVE!)
     # - 'on_initialize': Format only if not already initialized (default)
+    # - 'on_fail': Format only if mounting the existing disk fails
     # - 'never': Never format, only mount existing filesystems
     format: "on_initialize"
     

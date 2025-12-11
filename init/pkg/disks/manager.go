@@ -75,14 +75,35 @@ func (dm *Manager) SetupDisk(ctx context.Context, name string) error {
 		}
 	} else if isLuks {
 		if err := dm.mountExistingDisk(ctx, disk); err != nil {
-			return fmt.Errorf("failed to mount existing disk %s: %w", name, err)
+			if disk.Config.Format == "on_fail" {
+				log.Printf("Failed to mount existing disk %s, reformatting: %v", name, err)
+				if err := dm.formatDisk(ctx, disk); err != nil {
+					return fmt.Errorf("failed to format disk %s after mount failure: %w", name, err)
+				}
+			} else {
+				return fmt.Errorf("failed to mount existing disk %s: %w", name, err)
+			}
 		}
 	} else if disk.Config.EncryptionKey == "" {
 		if err := dm.mountPlainDisk(disk); err != nil {
-			return fmt.Errorf("failed to mount plain disk %s: %w", name, err)
+			if disk.Config.Format == "on_fail" {
+				log.Printf("Failed to mount plain disk %s, reformatting: %v", name, err)
+				if err := dm.formatPlainDisk(disk); err != nil {
+					return fmt.Errorf("failed to format disk %s after mount failure: %w", name, err)
+				}
+			} else {
+				return fmt.Errorf("failed to mount plain disk %s: %w", name, err)
+			}
 		}
 	} else {
-		return fmt.Errorf("disk %s requires formatting but format strategy prevents it", name)
+		if disk.Config.Format == "on_fail" {
+			log.Printf("Disk %s has no LUKS, formatting with encryption", name)
+			if err := dm.formatDisk(ctx, disk); err != nil {
+				return fmt.Errorf("failed to format disk %s: %w", name, err)
+			}
+		} else {
+			return fmt.Errorf("disk %s requires formatting but format strategy prevents it", name)
+		}
 	}
 
 	return nil
