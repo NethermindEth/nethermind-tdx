@@ -3,7 +3,7 @@ set -euxo pipefail
 
 source scripts/build_rust_package.sh
 
-RAIKO_VERSION="main"
+RAIKO_VERSION="feat/tdx"
 RAIKO_GIT_URL="https://github.com/NethermindEth/raiko.git"
 
 build_rust_package \
