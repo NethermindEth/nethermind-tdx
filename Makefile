@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 VERSION := $(shell git describe --tags --always --dirty="-dev")
-SHELL := /bin/bash
+SHELL := /usr/bin/env bash
 WRAPPER := scripts/env_wrapper.sh
 
 ##@ Help
@@ -44,7 +44,8 @@ build: check-perms setup ## Build the specified module
 		exit 1; \
 	fi; \
 	profiles=""; \
-	if [ "$(DEV)" = "true" ]; then profiles="devtools"; fi; \
+	image_id="$(IMAGE)"; \
+	if [ "$(DEV)" = "true" ]; then profiles="devtools"; image_id="$(IMAGE)-dev"; fi; \
 	if [ "$(AZURE)" = "true" ]; then \
 		if [ -n "$$profiles" ]; then profiles="$$profiles,azure"; else profiles="azure"; fi; \
 	fi; \
@@ -52,27 +53,29 @@ build: check-perms setup ## Build the specified module
 		if [ -n "$$profiles" ]; then profiles="$$profiles,gcp"; else profiles="gcp"; fi; \
 	fi; \
 	if [ -n "$$profiles" ]; then \
-		$(WRAPPER) mkosi --force --profile=$$profiles -I $(IMAGE).conf; \
+		$(WRAPPER) mkosi --force --image-id $$image_id --profile=$$profiles -I $(IMAGE).conf; \
 	else \
-		$(WRAPPER) mkosi --force -I $(IMAGE).conf; \
+		$(WRAPPER) mkosi --force --image-id $$image_id -I $(IMAGE).conf; \
 	fi
 
 ##@ Utilities
 
-# Run measured-boot on the EFI file
-measure: ## Export TDX measurements for the built image
-	@if [ ! -f build/tdx-debian.efi ]; then \
-		echo "Error: build/tdx-debian.efi not found. Run 'make build' first."; \
-		exit 1; \
-	fi
-	@$(WRAPPER) measured-boot build/tdx-debian.efi build/measurements.json --direct-uki
+measure: ## Export TDX measurements for the built EFI file
+	@$(WRAPPER) measured-boot $(FILE) build/measurements.json --direct-uki
 	echo "Measurements exported to build/measurements.json"
+
+measure-gcp: ## Export TDX measurements for GCP
+	@$(WRAPPER) dstack-mr -uki $(FILE) -json > build/gcp_measurements.json
+	echo "GCP Measurements exported to build/gcp_measurements.json"
 
 # Clean build artifacts
 clean: ## Remove cache and build artifacts
 	rm -rf build/ mkosi.builddir/ mkosi.cache/ lima-nix/
-	@if command -v limactl >/dev/null 2>&1 && limactl list | grep -q '^tee-builder'; then \
-		echo "Stopping and deleting lima VM 'tee-builder'..."; \
-		limactl stop tee-builder || true; \
-		limactl delete tee-builder || true; \
+	@REPO_DIR="$$(pwd)"; \
+	REPO_HASH="$$(echo -n "$$REPO_DIR" | sha256sum | cut -c1-8)"; \
+	LIMA_VM="tee-builder-$$REPO_HASH"; \
+	if command -v limactl >/dev/null 2>&1 && limactl list | grep -q "^$$LIMA_VM"; then \
+		echo "Stopping and deleting Lima VM '$$LIMA_VM'..."; \
+		limactl stop "$$LIMA_VM" || true; \
+		limactl delete "$$LIMA_VM" || true; \
 	fi

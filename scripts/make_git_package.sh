@@ -8,12 +8,10 @@ make_git_package() {
     local git_url="$3"
     local build_cmd="$4"
     # All remaining arguments are artifact mappings in src:dest format
-    
-    local safe_version="${version//\//_}"
 
     mkdir -p "$DESTDIR/usr/bin"
-    local cache_dir="$BUILDDIR/${package}-${safe_version}"
-    
+    local cache_dir="$BUILDDIR/${package}-${version}"
+
     # Use cached artifacts if available
     if [ -n "$cache_dir" ] && [ -d "$cache_dir" ] && [ "$(ls -A "$cache_dir" 2>/dev/null)" ]; then
         echo "Using cached artifacts for $package version $version"
@@ -21,11 +19,17 @@ make_git_package() {
             local src="${artifact_map%%:*}"
             local dest="${artifact_map#*:}"
             mkdir -p "$(dirname "$DESTDIR$dest")"
-            cp "$cache_dir/$(echo "$src" | tr '/' '_')" "$DESTDIR$dest"
+            local cached_name="$(echo "$src" | tr '/' '_')"
+            if [ -d "$cache_dir/$cached_name" ]; then
+                mkdir -p "$DESTDIR$dest"
+                cp -r "$cache_dir/$cached_name"/* "$DESTDIR$dest/"
+            else
+                cp "$cache_dir/$cached_name" "$DESTDIR$dest"
+            fi
         done
         return 0
     fi
-    
+
     # Build from source
     local build_dir="$BUILDROOT/build/$package"
     git clone --depth 1 --branch "$version" "$git_url" "$build_dir"
@@ -37,11 +41,22 @@ make_git_package() {
         local dest="${artifact_map#*:}"
 
         # Copy the built artifact to the destination
-        mkdir -p "$(dirname "$DESTDIR$dest")"
-        cp "$build_dir/$src" "$DESTDIR$dest"
-    
+        if [ -d "$build_dir/$src" ]; then
+            mkdir -p "$DESTDIR$dest"
+            cp -r "$build_dir/$src"/* "$DESTDIR$dest/"
+        else
+            mkdir -p "$(dirname "$DESTDIR$dest")"
+            cp "$build_dir/$src" "$DESTDIR$dest"
+        fi
+
         # Cache artifact
         mkdir -p "$cache_dir"
-        cp "$build_dir/$src" "$cache_dir/$(echo "$src" | tr '/' '_')"
+        local cached_name="$(echo "$src" | tr '/' '_')"
+        if [ -d "$build_dir/$src" ]; then
+            mkdir -p "$cache_dir/$cached_name"
+            cp -r "$build_dir/$src"/* "$cache_dir/$cached_name/"
+        else
+            cp "$build_dir/$src" "$cache_dir/$cached_name"
+        fi
     done
 }
