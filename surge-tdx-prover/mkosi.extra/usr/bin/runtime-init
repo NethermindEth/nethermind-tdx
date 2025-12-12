@@ -1,20 +1,44 @@
 #!/bin/bash
 set -e
 
+exec 2>&1
+echo "=== runtime-init starting at $(date) ==="
+echo "Running as user: $(id)"
+
 tdxs_own() {
-    [ -e $1 ] && { chown root:tdx $1 && chmod 660 $1; } || true
+    echo "tdxs_own: checking $1"
+    [ -e $1 ] && { chown root:tdx $1 && chmod 660 $1; echo "  -> set ownership"; } || echo "  -> does not exist"
 }
 
+echo "=== Checking groups ==="
+getent group eth || echo "eth group: NOT FOUND"
+getent passwd nethermind-surge || echo "nethermind-surge user: NOT FOUND"
+
+echo "=== Checking /persistent mount ==="
+mount | grep persistent || echo "/persistent NOT MOUNTED"
+ls -la /persistent/ || echo "Cannot list /persistent"
+
+echo "=== Creating JWT ==="
 openssl rand -hex 32 | tr -d "\n" | tee /tmp/surge_jwt.hex
-chown :eth /tmp/surge_jwt.hex
+echo ""
+chown :eth /tmp/surge_jwt.hex && echo "chown jwt -> success" || echo "chown jwt -> FAILED"
 chmod 644 /tmp/surge_jwt.hex
 
+echo "=== Creating nethermind-surge directories ==="
 mkdir -p /persistent/nethermind-surge/{logs,db,keystore}
-chown :eth /persistent/nethermind-surge
+ls -la /persistent/nethermind-surge/
+
+chown -R nethermind-surge:eth /persistent/nethermind-surge && echo "chown dirs -> success" || echo "chown dirs -> FAILED"
 chmod 755 /persistent/nethermind-surge
 chmod 755 /persistent/nethermind-surge/{logs,db,keystore}
 
+echo "=== Final state ==="
+ls -la /persistent/nethermind-surge/
+
+echo "=== TPM/TDX devices ==="
 tdxs_own /dev/tpm0
 tdxs_own /dev/tpmrm0
 tdxs_own /dev/tdx_guest
 tdxs_own /sys/kernel/security/tpm0/binary_bios_measurements
+
+echo "=== runtime-init finished ==="
