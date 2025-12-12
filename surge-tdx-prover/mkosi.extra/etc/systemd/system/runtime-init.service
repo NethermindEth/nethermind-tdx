@@ -8,8 +8,6 @@ Type=oneshot
 ExecStart=/usr/bin/tdx-init setup /etc/tdx-init/config.yaml
 ExecStartPost=/usr/bin/runtime-init
 RemainAfterExit=yes
-Restart=on-failure
-RestartSec=5
 
 [Install]
 WantedBy=minimal.target
