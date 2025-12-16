@@ -72,7 +72,7 @@ build_dotnet_package() {
         "-p:BuildTimestamp=0"
         "-p:Commit=0000000000000000000000000000000000000000"
         "-p:PublishSingleFile=true"
-        "-p:PublishReadyToRun=true"
+        "-p:PublishReadyToRun=false"
         "-p:DebugType=none"
         "-p:Deterministic=true"
         "-p:ContinuousIntegrationBuild=true"

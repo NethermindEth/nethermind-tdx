@@ -30,6 +30,9 @@ for group in "${!groups[@]}"; do
     done
 done
 
+# Add nethermind-surge to tdx group so it can access /var/tdxs.sock
+mkosi-chroot usermod -a -G tdx nethermind-surge
+
 mkdir "$BUILDROOT/etc/systemd/system/minimal.target.wants"
 for service in "${services[@]}"; do
     mkosi-chroot systemctl enable "$service"
