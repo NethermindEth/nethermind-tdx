@@ -3,7 +3,7 @@ set -euxo pipefail
 
 declare -A groups=(
     ["eth"]="nethermind-surge,taiko-client"
-    ["tdx"]="tdxs,raiko"
+    ["tdx"]="tdxs,raiko,nethermind-surge"
 )
 
 services=(
@@ -26,7 +26,12 @@ for group in "${!groups[@]}"; do
     
     IFS=',' read -ra users <<< "${groups[$group]}"
     for user in "${users[@]}"; do
-        mkosi-chroot useradd -r -s /bin/false -G "$group" -m "$user"
+        # Create user if doesn't exist, otherwise add to group
+        if mkosi-chroot id "$user" &>/dev/null; then
+            mkosi-chroot usermod -a -G "$group" "$user"
+        else
+            mkosi-chroot useradd -r -s /bin/false -G "$group" -m "$user"
+        fi
     done
 done
 

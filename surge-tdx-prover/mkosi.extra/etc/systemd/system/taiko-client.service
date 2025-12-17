@@ -7,7 +7,7 @@ Requires=runtime-init.service
 [Service]
 User=taiko-client
 Group=eth
-EnvironmentFile=/etc/nethermind-surge/.env.devnet
+EnvironmentFile=/etc/nethermind-surge/.env.hoodi
 WorkingDirectory=/home/taiko-client
 ExecStart=/usr/bin/taiko-client driver \
     --verbosity 4 \
