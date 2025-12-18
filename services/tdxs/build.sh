@@ -4,7 +4,7 @@ set -euxo pipefail
 source scripts/make_git_package.sh
 
 TDXS_VERSION="master"
-TDXS_GIT_URL="https://github.com/Hyodar/tdxs"
+TDXS_GIT_URL="https://github.com/NethermindEth/tdxs"
 TDXS_BINARY_PATH="/usr/bin/tdxs"
 
 make_git_package \
