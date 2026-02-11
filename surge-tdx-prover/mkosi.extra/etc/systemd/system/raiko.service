@@ -1,8 +1,9 @@
 [Unit]
 Description=Raiko Client
 Documentation=https://docs.surge.wtf/
-After=runtime-init.service tdxs.service
-Requires=runtime-init.service tdxs.service
+After=runtime-init.service 
+Wants=tdxs.service
+Requires=runtime-init.service
 
 [Service]
 User=raiko

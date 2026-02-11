@@ -6,6 +6,8 @@ mkosi.packages/
 mkosi.cache/
 mkosi.builddir/
 *.qcow2
+*.fd
+*.pub 
 .claudesync/
 .claudeignore
 tmp/

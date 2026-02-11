@@ -2,8 +2,7 @@
 set -euxo pipefail
 
 source scripts/build_dotnet_package.sh
-
-NETHERMIND_VERSION="1.32.3"
+NETHERMIND_VERSION="master"
 NETHERMIND_GIT_URL="https://github.com/NethermindEth/nethermind.git"
 NETHERMIND_BINARY_PATH="/usr/bin/nethermind"
 NETHERMIND_NLOG_CONFIG_PATH="/etc/nethermind-surge/NLog.config"

@@ -1,7 +1,8 @@
 [Unit]
 Description=TDXS
 After=runtime-init.service
-Requires=runtime-init.service tdxs.socket
+Requires=runtime-init.service 
+Wants=tdxs.socket
 
 [Service]
 User=tdxs

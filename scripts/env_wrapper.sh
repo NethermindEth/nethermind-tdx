@@ -17,8 +17,6 @@ LIMA_VM="${LIMA_VM:-tee-builder-$REPO_HASH}"
 
 # Check if Lima should be used
 should_use_lima() {
-    # Use Lima by default for now
-    true ||
     # Use Lima on macOS or if FORCE_LIMA is set
     [[ "$OSTYPE" == "darwin"* ]] || [ -n "${FORCE_LIMA:-}" ] ||
     # Use Lima if it's available but Nix is not
@@ -49,7 +47,8 @@ setup_lima() {
 
         echo -e "Creating Lima VM '$LIMA_VM' for $REPO_DIR..."
         # Portable way to expand array on bash 3 & 4
-        limactl create -y --name "$LIMA_VM" ${args[@]+"${args[@]}"} "$REPO_DIR/lima.yaml"
+        # We are using envsubst to inject the repo path into the lima.yaml template, so that each clone gets a unique VM name and config based on its location. 
+        PWD="$(pwd)" envsubst < "$REPO_DIR/lima.yaml" | limactl create -y --name "$LIMA_VM" ${args[@]+"${args[@]}"} -
     fi
 
     # Start VM if not running
