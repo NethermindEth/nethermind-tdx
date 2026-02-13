@@ -43,20 +43,8 @@ Most of the values are self-explanatory, but here are some notes on the less obv
    make help
    ```
 
-### Measuring TDX Boot Process
 
-**Export TDX measurements** for the built image:
-```bash
-# Standard TDX measurements
-make measure FILE=build/surge-tdx-prover_<version>.efi
-
-# GCP-specific measurements
-make measure-gcp FILE=build/surge-tdx-prover_<version>.efi
-```
-
-This generates measurement files in the `build/` directory for attestation and verification.
-
-### Running Images
+### Running Images (Bare Metal)
 
 **Create persistent storage** (for stateful applications):
    ```bash
@@ -115,9 +103,6 @@ This generates measurement files in the `build/` directory for attestation and v
     -device scsi-hd,drive=disk0,bus=scsi0.0,channel=0,scsi-id=0,lun=10
   ```
 
-
-
-
 > [!NOTE]
 >
 > Depending on your Linux distro, these commands may require changing the
@@ -127,25 +112,51 @@ This generates measurement files in the `build/` directory for attestation and v
 > The Homebrew QEMU installation uses `/opt/homebrew/share/qemu/` for firmware files.
 
 
+### Running Images (Azure)
+
+After you build the image on azure machine (or scp the built image to the azure machine), you can run the image with the following command (make sure to run this command on the azure machine where the image is located):
+
+```bash
+go run tools/deploy-azure/main.go deploy \
+	--id {INSTANCE_ID} \
+	--region eastus \
+	--resource-group rg-nte-stage-1 \
+	--storage-gb 100 \
+	--vm-size Standard_EC4es_v6 \
+	--disk-path {PATH_TO_IMAGE}.vhd \
+	--allowed-ip <> \
+	--subscription-id <> \
+	--tenant-id <>
+```
+
+`INSTANCE_ID` is the name of the instance you want to create, and `PATH_TO_IMAGE` is the path to the built image on the azure machine.
+All the values in `<>` should be replaced with actual values from your Azure account and configuration.
+
+
 ### After Booting configuration
 
 #### Inject your SSH
 
 After booting, runtime-init will make some preparations and wait for the ssh public key to be provided. This period could take some time.
 
-You can then send the ssh public key to the instance with the following command (replace `{YOUR_PUBLIC_KEY}` with the actual path to your public key, e.g., `~/.ssh/id_ed25519.pub`):
+You can then send the ssh public key to the instance with the following command:
   ```bash
-  curl -X POST http://localhost:8080 \
-  -H "Content-Type: text/plain" \
-  -d "$(awk '{print $2}' {YOUR_PUBLIC_KEY}.pub)"
+  curl -X POST -d "$(cut -d" " -f2 ~/.ssh/id_ed25519.pub)" http://{INSTANCE_IP}:8080
   ```
+
+`INSTANCE_IP` is the public IP address of the instance you want to connect to. In azure deployment, the script will tell you it's ip. In local deployment with qemu, it should be `localhost` since we forwarded the port to localhost.
 
 #### Connecting to the instance
 
-After you send the public key, you should be able to ssh into the instance with:
+After you send the public key, you should be able to ssh into the bare metal instance with:
   ```bash
   ssh -p 2222 root@localhost
   ```
+or into the azure instance with:
+  ```bash
+  ssh root@{INSTANCE_IP}
+  ```
+
 
 #### Bootstrapping the TDX Prover
 
@@ -225,6 +236,19 @@ try to disable apparmor's restriction:
 - If you encounter `bootctl: unrecognized option '--root=/buildroot'`, you'll need to upgrade to a newer version of systemd (at least v250), which is only supported by recent versions of Ubuntu.
 
 ## Utilities
+
+### Measuring TDX Boot Process
+
+**Export TDX measurements** for the built image:
+```bash
+# Standard TDX measurements
+make measure FILE=build/surge-tdx-prover_<version>.efi
+
+# GCP-specific measurements
+make measure-gcp FILE=build/surge-tdx-prover_<version>.efi
+```
+
+This generates measurement files in the `build/` directory for attestation and verification.
 
 ### Unpacking Images
 

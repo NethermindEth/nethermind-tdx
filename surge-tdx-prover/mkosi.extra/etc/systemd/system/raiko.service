@@ -8,7 +8,7 @@ Requires=runtime-init.service
 [Service]
 User=raiko
 Group=tdx
-EnvironmentFile=/etc/nethermind-surge/.env.devnet
+EnvironmentFile=/etc/nethermind-surge/.env
 WorkingDirectory=/home/raiko
 ExecStart=/usr/bin/raiko \
     --config-path=/etc/nethermind-surge/raiko_config.json \
