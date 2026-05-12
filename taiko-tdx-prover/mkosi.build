@@ -1,0 +1,27 @@
+#!/bin/bash
+# Build script orchestration for the taiko variant (raiko2 + shasta).
+# Version/URL pins for shared service builders live here, so each variant
+# stays self-contained at a glance.
+set -euxo pipefail
+
+# --- Shared services: pin versions used by the taiko variant ----------------
+export NETHERMIND_VERSION="master"
+export NETHERMIND_GIT_URL="https://github.com/NethermindEth/nethermind.git"
+
+# raiko2 is private and is vendored as a git submodule at
+# services/raiko2/src. Pin its revision with: `make submodules` (or `git
+# submodule update --remote services/raiko2/src` to fast-forward to the
+# tracked branch).
+
+export TAIKO_CLIENT_VERSION="main"
+export TAIKO_CLIENT_GIT_URL="https://github.com/taikoxyz/taiko-mono/"
+
+export TDXS_VERSION="master"
+export TDXS_GIT_URL="https://github.com/NethermindEth/tdxs"
+# ----------------------------------------------------------------------------
+
+services/tdx-init/build.sh
+services/tdxs/build.sh
+services/raiko2/build.sh
+services/taiko-client/build.sh
+services/nethermind/build.sh

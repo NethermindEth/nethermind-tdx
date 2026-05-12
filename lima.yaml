@@ -22,6 +22,9 @@ mounts:
   - location: "${PWD}"
     mountPoint: /home/debian/mnt
     writable: true
+  - location: "${PWD}/../raiko2"
+    mountPoint: /home/debian/raiko2
+    writable: false
 ssh:
   forwardAgent: true
 provision:

@@ -1,0 +1,47 @@
+# Raiko2 TDX prover configuration.
+# Values populated from env.json during build (post-merge schema, May 2026).
+
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[rpc]
+pairs = [
+  { network = "{{surge_tdx_prover.network}}", l1_network = "{{surge_tdx_prover.l1_network}}", l1_rpc = "{{surge_tdx_prover.l1_rpc}}", l2_rpc = "http://localhost:8547", l2_provider = "geth_local_witness" },
+]
+
+[rpc.client]
+timeout_ms = 600000
+concurrency_limit = 32
+
+[rpc.client.retry]
+max_attempts = 3
+initial_backoff_ms = 1000
+compute_units_per_second = 1000
+
+[runtime]
+root = "/home/raiko2/runtime"
+inactive_ttl_secs = 7200
+
+[prover]
+guest_system = "tdx"
+runner = "local"
+
+[prover.tdx]
+instance_id = 0
+socket_path = "/var/tdxs.sock"
+
+# SP1 is not used by this TDX prover, but the readiness check applies SP1 defaults
+# (prover=network, mode=prove, verify=true) which fails for pairs without SP1
+# verifier config. Force SP1 to execute-only so all SP1 checks become no-ops.
+[prover.sp1]
+prover = "local"
+mode = "execute"
+verify = false
+
+[queue]
+backend = "memory"
+namespace = "raiko2:queue"
+workers = 1
+maintenance_interval_ms = 200
+task_timeout_secs = 14400

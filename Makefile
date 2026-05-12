@@ -19,15 +19,29 @@ v: ## Show the version
 
 build build-dev: check-module
 
+# Known image variants:
+#   taiko-tdx-prover  - current taiko / raiko2 / shasta build (default)
+#   surge-tdx-prover  - legacy surge / raiko / pacaya build (snapshotted from
+#                       commit 338f176)
+SUPPORTED_IMAGES := taiko-tdx-prover surge-tdx-prover
+
 check-module:
 ifndef IMAGE
-	$(error IMAGE is not set. Please specify IMAGE=<image> when running make build or make build-dev)
+	$(error IMAGE is not set. Please specify IMAGE=<image> when running make build or make build-dev. Supported: $(SUPPORTED_IMAGES))
 endif
+	@case " $(SUPPORTED_IMAGES) " in \
+		*" $(IMAGE) "*) ;; \
+		*) echo "Error: unknown IMAGE='$(IMAGE)'. Supported: $(SUPPORTED_IMAGES)"; exit 1 ;; \
+	esac
 
-.PHONY: all build build-dev setup measure clean check-perms check-module
+.PHONY: all build build-dev setup measure clean check-perms check-module submodules
 
 # Default target
 all: build
+
+# Pull / update vendored submodules (currently: raiko2 at services/raiko2/src).
+submodules: ## Initialize and update git submodules (raiko2)
+	@git submodule update --init --recursive --remote services/raiko2/src
 
 # Ensure repo was cloned with correct permissions
 check-perms: ## Check repository permissions
@@ -43,20 +57,17 @@ build: check-perms setup ## Build the specified module
 		echo "Error: Cannot set both AZURE=true and GCP=true at the same time"; \
 		exit 1; \
 	fi; \
-	profiles=""; \
+	case "$(IMAGE)" in \
+		surge-tdx-prover) variant_profile="surge" ;; \
+		taiko-tdx-prover) variant_profile="taiko" ;; \
+	esac; \
+	profiles="$$variant_profile"; \
 	image_id="$(IMAGE)"; \
-	if [ "$(DEV)" = "true" ]; then profiles="devtools"; image_id="$(IMAGE)-dev"; fi; \
-	if [ "$(AZURE)" = "true" ]; then \
-		if [ -n "$$profiles" ]; then profiles="$$profiles,azure"; else profiles="azure"; fi; \
-	fi; \
-	if [ "$(GCP)" = "true" ]; then \
-		if [ -n "$$profiles" ]; then profiles="$$profiles,gcp"; else profiles="gcp"; fi; \
-	fi; \
-	if [ -n "$$profiles" ]; then \
-		$(WRAPPER) mkosi --force --image-id $$image_id --profile=$$profiles -I $(IMAGE).conf; \
-	else \
-		$(WRAPPER) mkosi --force --image-id $$image_id -I $(IMAGE).conf; \
-	fi
+	if [ "$(DEV)" = "true" ]; then profiles="$$profiles,devtools"; image_id="$(IMAGE)-dev"; fi; \
+	if [ "$(AZURE)" = "true" ]; then profiles="$$profiles,azure"; fi; \
+	if [ "$(GCP)" = "true" ]; then profiles="$$profiles,gcp"; fi; \
+	$(WRAPPER) mkosi --force --image-id $$image_id --profile=$$profiles -I tdx-prover.conf
+
 
 ##@ Utilities
 

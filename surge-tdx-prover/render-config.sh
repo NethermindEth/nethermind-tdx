@@ -3,7 +3,7 @@ set -euxo pipefail
 
 ENV_FILE="env.json"
 if [ ! -f "$ENV_FILE" ]; then
-    echo "Error: env.json not found"
+    echo "Error: $ENV_FILE not found"
     exit 1
 fi
 

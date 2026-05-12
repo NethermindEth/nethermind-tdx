@@ -3,8 +3,10 @@ set -euxo pipefail
 
 source scripts/make_git_package.sh
 
-TAIKO_CLIENT_VERSION="surge-shasta"
-TAIKO_CLIENT_GIT_URL="https://github.com/NethermindEth/surge-taiko-mono/"
+# Version + URL are pinned by the calling variant's mkosi.build (see
+# {surge,taiko}-tdx-prover/mkosi.build). Fall back to taiko defaults.
+TAIKO_CLIENT_VERSION="${TAIKO_CLIENT_VERSION:-main}"
+TAIKO_CLIENT_GIT_URL="${TAIKO_CLIENT_GIT_URL:-https://github.com/taikoxyz/taiko-mono/}"
 TAIKO_CLIENT_BINARY_PATH="/usr/bin/taiko-client"
 
 make_git_package \

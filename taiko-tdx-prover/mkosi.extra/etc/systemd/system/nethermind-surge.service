@@ -1,19 +1,18 @@
 [Unit]
 Description=Nethermind Surge node
 Documentation=https://docs.nethermind.io
-After=runtime-init.service taiko-client.service
+After=runtime-init.service 
 Requires=runtime-init.service
 
 [Service]
 User=nethermind-surge
 Group=eth
-EnvironmentFile=/etc/nethermind-surge/.env.hoodi
+EnvironmentFile=/etc/nethermind-surge/.env
 WorkingDirectory=/home/nethermind-surge
 ExecStart=/usr/bin/nethermind \
     --config=/etc/nethermind-surge/config_surge.json \
     --datadir=/persistent/nethermind-surge \
-    --Init.ChainSpecPath=/etc/nethermind-surge/hoodi_chainspec.json \
-    --Init.GenesisHash=${L2_GENESIS_HASH} \
+    --Init.ChainSpecPath=/etc/nethermind-surge/nethermind_chainspec.json \
     --Init.DiscoveryEnabled=false \
     --Metrics.Enabled=true \
     --Metrics.ExposePort=${L2_METRICS_PORT} \
@@ -33,7 +32,7 @@ ExecStart=/usr/bin/nethermind \
     --log=${EL_LOG_LEVEL} \
     --logger-config=/etc/nethermind-surge/NLog.config \
     --Surge.L1EthApiEndpoint=${L1_ENDPOINT_HTTP} \
-    --Surge.TaikoInboxAddress=${TAIKO_INBOX} \
+    --Surge.TaikoInboxAddress=${SHASTA_INBOX} \
     --plugins-dir=/etc/nethermind-surge/plugins
 Restart=on-failure
 LimitNOFILE=1000000
