@@ -7,15 +7,18 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
-# Find and process all mustache templates in mkosi.extra directory
-find taiko-tdx-prover/mkosi.extra -type f -name "*.mustache" | while read -r template; do
-    rel_path="${template#taiko-tdx-prover/mkosi.extra/}"
-    output_path="$BUILDROOT/${rel_path%.mustache}"
-
-    mustache "$ENV_FILE" "$template" > "$output_path"
-    chmod 644 "$output_path"
-
-    rm "$BUILDROOT/$rel_path"
+# Render mustache templates from shared and variant extra trees into the image.
+# Uses process substitution (<()) so set -e propagates failures correctly.
+for extra_dir in mkosi.extra taiko-tdx-prover/mkosi.extra; do
+    [ -d "$extra_dir" ] || continue
+    while IFS= read -r -d '' template; do
+        rel="${template#$extra_dir/}"
+        output_path="$BUILDROOT/${rel%.mustache}"
+        mkdir -p "$(dirname "$output_path")"
+        mustache "$ENV_FILE" "$template" > "$output_path"
+        chmod 644 "$output_path"
+        rm -f "$BUILDROOT/$rel"
+    done < <(find "$extra_dir" -type f -name '*.mustache' -print0 2>/dev/null)
 done
 
 # NOTE: raiko2 uses TOML config and CLI args for all configuration.

@@ -1,7 +1,7 @@
 [Unit]
 Description=Raiko2 TDX Prover
 Documentation=https://docs.surge.wtf/
-After=runtime-init.service nethermind-surge.service
+After=runtime-init.service nethermind-surge.service tdxs.service
 Wants=tdxs.service
 Requires=runtime-init.service nethermind-surge.service
 StartLimitIntervalSec=600
