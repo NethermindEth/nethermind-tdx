@@ -26,11 +26,11 @@ build_rust_package \
 if [ ! -d "$CACHED_ELF" ] || [ ! -f "$CACHED_SPEC" ]; then
     BUILD_STAGE="$BUILDROOT/build/raiko2"
     rm -rf "$CACHED_ELF" && mkdir -p "$CACHED_ELF"
-    cp -a "$BUILD_STAGE/crates/guests/elf/." "$CACHED_ELF/"
+    cp -r "$BUILD_STAGE/crates/guests/elf/." "$CACHED_ELF/"
     install -m 644 "$BUILD_STAGE/config/chain_spec_list_default.json" "$CACHED_SPEC"
 fi
 
 mkdir -p "$DESTDIR/usr/share/raiko2/elf" "$DESTDIR/etc/raiko2"
-cp -a "$CACHED_ELF/." "$DESTDIR/usr/share/raiko2/elf/"
+cp -r "$CACHED_ELF/." "$DESTDIR/usr/share/raiko2/elf/"
 install -m 644 "$CACHED_SPEC" "$DESTDIR/etc/raiko2/chain_spec_list.json"
 install -d -m 0750 "$DESTDIR/home/raiko2"
