@@ -1,4 +1,0 @@
-[submodule "services/raiko2/src"]
-	path = services/raiko2/src
-	url = git@github.com:taikoxyz/raiko2.git
-	branch = feat/tdx-prover

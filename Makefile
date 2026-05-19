@@ -34,14 +34,10 @@ endif
 		*) echo "Error: unknown IMAGE='$(IMAGE)'. Supported: $(SUPPORTED_IMAGES)"; exit 1 ;; \
 	esac
 
-.PHONY: all build build-dev setup measure clean check-perms check-module submodules
+.PHONY: all build build-dev setup measure clean check-perms check-module
 
 # Default target
 all: build
-
-# Pull / update vendored submodules (currently: raiko2 at services/raiko2/src).
-submodules: ## Initialize and update git submodules (raiko2)
-	@git submodule update --init --recursive --remote services/raiko2/src
 
 # Ensure repo was cloned with correct permissions
 check-perms: ## Check repository permissions

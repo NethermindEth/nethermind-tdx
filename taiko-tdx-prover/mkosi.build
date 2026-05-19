@@ -8,10 +8,8 @@ set -euxo pipefail
 export NETHERMIND_VERSION="master"
 export NETHERMIND_GIT_URL="https://github.com/NethermindEth/nethermind.git"
 
-# raiko2 is private and is vendored as a git submodule at
-# services/raiko2/src. Pin its revision with: `make submodules` (or `git
-# submodule update --remote services/raiko2/src` to fast-forward to the
-# tracked branch).
+export RAIKO2_VERSION="feat/tdx-prover"
+export RAIKO2_GIT_URL="https://github.com/taikoxyz/raiko2.git"
 
 export TAIKO_CLIENT_VERSION="main"
 export TAIKO_CLIENT_GIT_URL="https://github.com/taikoxyz/taiko-mono/"

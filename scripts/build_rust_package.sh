@@ -49,20 +49,30 @@ build_rust_package() {
         "-L /usr/lib/x86_64-linux-gnu"
     )
 
-    # Build inside mkosi chroot
-    mkosi-chroot bash -c "
-        export RUSTFLAGS='${rustflags[*]} ${extra_rustflags}' \
-               CARGO_PROFILE_RELEASE_LTO='thin' \
-               CARGO_PROFILE_RELEASE_CODEGEN_UNITS='1' \
-               CARGO_PROFILE_RELEASE_PANIC='abort' \
-               CARGO_PROFILE_RELEASE_INCREMENTAL='false' \
-               CARGO_PROFILE_RELEASE_OPT_LEVEL='3' \
-               CARGO_TERM_COLOR='never' \
-               CARGO_HOME='/build/.cargo'
-        cd '/build/$package_name'
-        cargo fetch
-        cargo build --release --frozen ${extra_features:+--features $extra_features} ${workspace_package:+--package $workspace_package}
-    "
+    # Build inside mkosi chroot. Use a heredoc so that:
+    # - outer-shell variables ($package_name, $rustflags, etc.) expand now
+    # - inner-shell variables (\$CARGO_HOME, \$PATH) expand inside the chroot
+    mkosi-chroot bash << CHROOT_EOF
+set -euxo pipefail
+export RUSTUP_HOME='/build/.rustup'
+export CARGO_HOME='/build/.cargo'
+export PATH="\$CARGO_HOME/bin:\$PATH"
+export RUSTFLAGS='${rustflags[*]} ${extra_rustflags}'
+export CARGO_PROFILE_RELEASE_LTO='thin'
+export CARGO_PROFILE_RELEASE_CODEGEN_UNITS='1'
+export CARGO_PROFILE_RELEASE_PANIC='abort'
+export CARGO_PROFILE_RELEASE_INCREMENTAL='false'
+export CARGO_PROFILE_RELEASE_OPT_LEVEL='3'
+export CARGO_TERM_COLOR='never'
+if [ ! -x "\$CARGO_HOME/bin/rustup" ]; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+        | sh -s -- -y --no-modify-path --default-toolchain none
+fi
+cd '/build/${package_name}'
+rustup show
+cargo fetch
+cargo build --release --frozen ${extra_features:+--features ${extra_features}} ${workspace_package:+--package ${workspace_package}}
+CHROOT_EOF
 
     # Cache and install the built binary
     install -m 755 "$build_dir/target/release/$binary_name" "$cached_binary"

@@ -22,8 +22,8 @@ for extra_dir in mkosi.extra surge-tdx-prover/mkosi.extra; do
 done
 
 # TODO: remove this once not necessary anymore
-# L1_CONTRACT=$(jq -r '.surge_tdx_prover.l1_contract' "$ENV_FILE")
-# L2_CONTRACT=$(jq -r '.surge_tdx_prover.l2_contract' "$ENV_FILE")
+# L1_CONTRACT=$(jq -r '.tdx_prover.l1_contract' "$ENV_FILE")
+# L2_CONTRACT=$(jq -r '.tdx_prover.l2_contract' "$ENV_FILE")
 # grep -q "0xa3c616dd54F6BB35a736cD6968c8EF7176faCACc" "$BUILDROOT/usr/bin/raiko" || { echo "Error: Expected default L1 contract address not found"; exit 1; }
 # grep -q "0x7633740000000000000000000000000000010001" "$BUILDROOT/usr/bin/raiko" || { echo "Error: Expected default L2 contract address not found"; exit 1; }
 # sed -i "s/0xa3c616dd54F6BB35a736cD6968c8EF7176faCACc/$L1_CONTRACT/g" "$BUILDROOT/usr/bin/raiko"
