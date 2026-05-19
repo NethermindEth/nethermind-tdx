@@ -19,8 +19,8 @@ LIMA_VM="${LIMA_VM:-tee-builder-$REPO_HASH}"
 should_use_lima() {
     # Use Lima on macOS or if FORCE_LIMA is set
     [[ "$OSTYPE" == "darwin"* ]] || [ -n "${FORCE_LIMA:-}" ] ||
-    # Use Lima if it's available but Nix is not
-    (command -v limactl &>/dev/null && ! command -v nix &>/dev/null)
+    # Use Lima if it's available (regardless of Nix)
+    command -v limactl &>/dev/null
 }
 
 # Setup Lima if needed
