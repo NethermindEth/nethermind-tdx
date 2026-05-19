@@ -7,8 +7,15 @@ RAIKO2_VERSION="${RAIKO2_VERSION:-feat/tdx-prover}"
 RAIKO2_GIT_URL="${RAIKO2_GIT_URL:-https://github.com/taikoxyz/raiko2.git}"
 
 SAFE_VERSION="${RAIKO2_VERSION//\//_}"
+CACHED_BIN="$BUILDDIR/raiko2-${SAFE_VERSION}"
 CACHED_ELF="$BUILDDIR/raiko2-elf-${SAFE_VERSION}"
 CACHED_SPEC="$BUILDDIR/raiko2-spec-${SAFE_VERSION}.json"
+
+# All three artifacts must exist together. If ELFs or spec are missing,
+# drop the binary cache so build_rust_package triggers a fresh clone+build.
+if [ ! -d "$CACHED_ELF" ] || [ ! -f "$CACHED_SPEC" ]; then
+    rm -f "$CACHED_BIN"
+fi
 
 # Build and cache the binary (same pattern as services/raiko/build.sh).
 build_rust_package \
