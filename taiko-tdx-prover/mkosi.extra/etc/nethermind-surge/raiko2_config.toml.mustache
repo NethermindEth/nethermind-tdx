@@ -7,7 +7,7 @@ port = 8080
 
 [rpc]
 pairs = [
-  { network = "{{tdx_prover.network}}", l1_network = "{{tdx_prover.l1_network}}", l1_rpc = "{{tdx_prover.l1_rpc}}", l2_rpc = "http://localhost:8547", l2_provider = "geth_local_witness" },
+  { network = "{{tdx_prover.network}}", l1_network = "{{tdx_prover.l1_network}}", l1_rpc = "{{tdx_prover.l1_rpc}}", l2_rpc = "http://localhost:8547", l2_provider = "geth_local_witness", l1_beacon_rpc = "{{tdx_prover.l1_beacon_rpc}}", l1_genesis_time = {{tdx_prover.l1_genesis_time}} },
 ]
 
 [rpc.client]
