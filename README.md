@@ -187,6 +187,14 @@ Afterwards tdx instance should be bootstrapped:
   ```
 This request will bootstrap tdx prover and return data needed for registration of the TDX Prover, such as the quote and the public key.
 
+For the **taiko** image (`taiko-tdx-prover`), the same bootstrap payload is also exposed
+by raiko2 at `GET /v3/proof/tdx/bootstrap`. The next steps — deploying the on-chain
+`TdxVerifier` (and Automata DCAP on custom devnets) and registering this prover on-chain —
+are documented in:
+
+- [taiko-mono — TDX prover deployment](https://github.com/taikoxyz/taiko-mono/blob/main/packages/protocol/docs/tdx_deployment.md) (image → smart contracts → registration overview)
+- [raiko2 — Registering a TDX prover on-chain](https://github.com/taikoxyz/raiko2/blob/main/docs/tdx_register.md) (`cargo run -p xtask -- register-tdx`, `--trust` vs `--register`, key/image rotation)
+
 ## Building Without Lima (Unsupported)
 
 ### Prerequisites
