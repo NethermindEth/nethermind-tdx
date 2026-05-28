@@ -3,7 +3,7 @@ set -euxo pipefail
 
 declare -A groups=(
     ["eth"]="nethermind-surge,taiko-client"
-    ["tdx"]="tdxs,raiko2,nethermind-surge"
+    ["tdx"]="tdxs,reth-tdx,nethermind-surge"
 )
 
 services=(
@@ -14,8 +14,8 @@ services=(
     "dropbear.service"
     "nethermind-surge.service"
     "taiko-client.service"
-    "raiko2.service"
-    "raiko2-bootstrap.service"
+    "reth-tdx.service"
+    "reth-tdx-bootstrap.service"
     "tdxs.service"
     "tdxs.socket"
     # "nethermind.service"
@@ -36,7 +36,7 @@ for group in "${!groups[@]}"; do
     done
 done
 
-mkosi-chroot chown raiko2:raiko2 /home/raiko2
+mkosi-chroot chown reth-tdx:reth-tdx /home/reth-tdx
 
 mkdir "$BUILDROOT/etc/systemd/system/minimal.target.wants"
 for service in "${services[@]}"; do

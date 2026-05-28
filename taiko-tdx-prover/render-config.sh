@@ -21,5 +21,14 @@ for extra_dir in mkosi.extra taiko-tdx-prover/mkosi.extra; do
     done < <(find "$extra_dir" -type f -name '*.mustache' -print0 2>/dev/null)
 done
 
-# NOTE: raiko2 uses TOML config and CLI args for all configuration.
-# No binary patching needed.
+# Upstream tdxs supports only 'azure', 'tdx', 'simulator'. We additionally accept
+# 'gcp' in env.json for clarity (GCP CVMs expose raw /dev/tdx_guest, so the wire
+# behavior is identical to bare-metal tdx). Translate it on the way out.
+TDXS_CONFIG="$BUILDROOT/etc/tdxs/config.yaml"
+if [ -f "$TDXS_CONFIG" ]; then
+    sed -i -E 's/^([[:space:]]*type:[[:space:]]*)gcp[[:space:]]*$/\1tdx/' "$TDXS_CONFIG"
+fi
+
+# NOTE: reth-tdx reads all configuration from CLI flags + env vars set by the
+# systemd unit (see /etc/systemd/system/reth-tdx.service). No binary patching
+# needed.
