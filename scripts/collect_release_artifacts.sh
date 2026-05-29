@@ -56,7 +56,9 @@ SUMS="build/${BASE}.SHA256SUMS"
 # `make measure` runs measured-boot through env_wrapper.sh and writes
 # build/measurements.json. Rename to the per-image filename afterwards so
 # we don't clobber previous runs.
-make measure "FILE=$EFI"
+# Redirect stdout to stderr so progress lines from measured-boot and the
+# Makefile echo don't leak into $GITHUB_OUTPUT (which expects key=value only).
+make measure "FILE=$EFI" >&2
 mv build/measurements.json "$MEASUREMENTS"
 
 # Augment the measurements file with image-side registration metadata so
@@ -78,7 +80,7 @@ m["registration"] = {
 }
 
 json.dump(m, open(mfile, "w"), indent=2)
-print(f"Augmented {mfile} with registration block")
+print(f"Augmented {mfile} with registration block", file=__import__('sys').stderr)
 EOF
 
 # Use the directory-relative form so the SHA256SUMS file is portable.
