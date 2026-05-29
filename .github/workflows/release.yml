@@ -134,6 +134,14 @@ jobs:
           set -euxo pipefail
           make build IMAGE="$IMAGE" AZURE=true DEV=true
 
+      - name: Fix build directory ownership
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          # mkosi runs via `unshare --setuid=0`, which leaves build/ owned by
+          # root in the host namespace. Re-own it so the collect step (running
+          # as the unprivileged runner user) can write measurements.json.
+          sudo chown -R "$USER:$USER" build/
+
       - name: Collect release artifacts
         id: artifacts
         run: |
