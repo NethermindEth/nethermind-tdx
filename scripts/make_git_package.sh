@@ -30,9 +30,13 @@ make_git_package() {
         return 0
     fi
 
-    # Build from source
+    # Build from source. `$version` can be a branch name or a commit SHA.
     local build_dir="$BUILDROOT/build/$package"
-    git clone --depth 1 --branch "$version" "$git_url" "$build_dir"
+    rm -rf "$build_dir"
+    git init -q "$build_dir"
+    git -C "$build_dir" remote add origin "$git_url"
+    git -C "$build_dir" fetch --depth 1 origin "$version"
+    git -C "$build_dir" checkout -q FETCH_HEAD
     mkosi-chroot bash -c "cd '/build/$package' && $build_cmd"
 
     # Copy artifacts to image and cache

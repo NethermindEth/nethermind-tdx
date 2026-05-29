@@ -36,10 +36,15 @@ build_rust_package() {
         return
     fi
 
-    # Clone the repository
+    # Clone the repository. `$version` is allowed to be either a branch name
+    # or an exact commit SHA — `git clone --depth 1 --branch` only accepts the
+    # former, so go through fetch+checkout which handles both.
     local build_dir="$BUILDROOT/build/$package_name"
-    mkdir -p "$build_dir"
-    git clone --depth 1 --branch "$version" "$git_url" "$build_dir"
+    rm -rf "$build_dir"
+    git init -q "$build_dir"
+    git -C "$build_dir" remote add origin "$git_url"
+    git -C "$build_dir" fetch --depth 1 origin "$version"
+    git -C "$build_dir" checkout -q FETCH_HEAD
 
     # Define Rust flags for reproducibility
     local rustflags=(
