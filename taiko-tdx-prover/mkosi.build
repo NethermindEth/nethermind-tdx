@@ -5,16 +5,16 @@
 set -euxo pipefail
 
 # --- Shared services: pin versions used by the taiko variant ----------------
-export NETHERMIND_VERSION="master"
+export NETHERMIND_VERSION="285d4576b80317d9f29030a66e1fd19cc9de7843"
 export NETHERMIND_GIT_URL="https://github.com/NethermindEth/nethermind.git"
 
-export RETH_TDX_VERSION="main"
+export RETH_TDX_VERSION="82b22af7d25e7ccd8fc02cffbea1722a46252031"
 export RETH_TDX_GIT_URL="https://github.com/NethermindEth/reth-tdx.git"
 
-export TAIKO_CLIENT_VERSION="main"
+export TAIKO_CLIENT_VERSION="2a258a47bc22d2ab32c48df2662d324a8c4071a3"
 export TAIKO_CLIENT_GIT_URL="https://github.com/taikoxyz/taiko-mono/"
 
-export TDXS_VERSION="master"
+export TDXS_VERSION="df890f7d378367cec8104328f685bdb9cb92e286"
 export TDXS_GIT_URL="https://github.com/NethermindEth/tdxs"
 # ----------------------------------------------------------------------------
 
