@@ -1,5 +1,19 @@
 #!/bin/bash
+# Build script orchestration for the surge variant (legacy raiko + pacaya/hoodi).
+# Version/URL pins for shared service builders live here, so each variant
+# stays self-contained at a glance.
 set -euxo pipefail
+
+# --- Shared services: pin versions used by the surge variant ----------------
+export NETHERMIND_VERSION="1.32.3"
+export NETHERMIND_GIT_URL="https://github.com/NethermindEth/nethermind.git"
+
+export TAIKO_CLIENT_VERSION="feat/tdx-proving"
+export TAIKO_CLIENT_GIT_URL="https://github.com/NethermindEth/surge-taiko-mono/"
+
+export TDXS_VERSION="master"
+export TDXS_GIT_URL="https://github.com/Hyodar/tdxs"
+# ----------------------------------------------------------------------------
 
 services/tdx-init/build.sh
 services/tdxs/build.sh

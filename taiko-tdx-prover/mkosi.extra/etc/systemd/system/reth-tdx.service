@@ -1,0 +1,30 @@
+[Unit]
+Description=reth-tdx remote TDX prover
+Documentation=https://github.com/NethermindEth/nethermind-tdx
+After=runtime-init.service nethermind-surge.service tdxs.service
+Wants=tdxs.service
+Requires=runtime-init.service nethermind-surge.service
+StartLimitIntervalSec=600
+StartLimitBurst=30
+
+[Service]
+User=reth-tdx
+Group=tdx
+EnvironmentFile=/etc/nethermind-surge/.env
+Environment=RETH_TDX_HOME=/home/reth-tdx
+WorkingDirectory=/home/reth-tdx
+# Wait for the local L2 to start serving JSON-RPC before booting reth-tdx —
+# the proving handlers rely on `eth_getBlockByNumber` and reject requests for
+# blocks the node hasn't synced yet.
+ExecStartPre=/bin/sh -c 'until curl -sf -X POST http://localhost:${L2_HTTP_PORT} -H "content-type: application/json" -d "{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}" -o /dev/null; do echo "waiting for nethermind-surge on :${L2_HTTP_PORT}..."; sleep 5; done'
+ExecStart=/usr/bin/reth-tdx \
+    --l2-chain-id ${L2_CHAINID} \
+    --verifier ${SHASTA_VERIFIER} \
+    --tdxs-socket /var/tdxs.sock \
+    --home /home/reth-tdx \
+    serve --bind 0.0.0.0:8080
+Restart=on-failure
+RestartSec=15
+
+[Install]
+WantedBy=default.target

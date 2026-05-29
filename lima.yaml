@@ -19,9 +19,12 @@ containerd:
   user: false
 mountTypesUnsupported: [9p]
 mounts:
-  - location: "." # cwd of `limactl start` command
+  - location: "${PWD}"
     mountPoint: /home/debian/mnt
     writable: true
+  - location: "${PWD}/../raiko2"
+    mountPoint: /home/debian/raiko2
+    writable: false
 ssh:
   forwardAgent: true
 provision:
@@ -36,6 +39,9 @@ provision:
     script: |
       #!/bin/bash
       set -euo pipefail
+
+      # Configure git
+      git config --global --add safe.directory /home/debian/mnt
 
       mkdir -p ~/.config/nix
       echo 'experimental-features = nix-command flakes' > ~/.config/nix/nix.conf

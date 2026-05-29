@@ -1,0 +1,25 @@
+[Unit]
+Description=reth-tdx Bootstrap Display
+Documentation=https://github.com/NethermindEth/nethermind-tdx
+After=reth-tdx.service
+Requires=reth-tdx.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Wait until the HTTP server is reachable, then dump the public bootstrap
+# record to the journal (so operators can scrape it via `journalctl`) and to
+# a stable on-disk path that `xtask register-tdx` can read.
+ExecStart=/bin/sh -c 'for i in $(seq 1 60); do \
+    if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then break; fi; \
+    sleep 1; \
+  done; \
+  curl -fsS http://127.0.0.1:8080/bootstrap \
+    | tee /home/reth-tdx/bootstrap.json \
+    | sed "s/.*/reth-tdx bootstrap: &/"'
+
+User=reth-tdx
+Group=tdx
+
+[Install]
+WantedBy=default.target

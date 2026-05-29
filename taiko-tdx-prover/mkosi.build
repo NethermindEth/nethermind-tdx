@@ -1,0 +1,25 @@
+#!/bin/bash
+# Build script orchestration for the taiko variant (reth-tdx + shasta).
+# Version/URL pins for shared service builders live here, so each variant
+# stays self-contained at a glance.
+set -euxo pipefail
+
+# --- Shared services: pin versions used by the taiko variant ----------------
+export NETHERMIND_VERSION="master"
+export NETHERMIND_GIT_URL="https://github.com/NethermindEth/nethermind.git"
+
+export RETH_TDX_VERSION="main"
+export RETH_TDX_GIT_URL="https://github.com/NethermindEth/reth-tdx.git"
+
+export TAIKO_CLIENT_VERSION="main"
+export TAIKO_CLIENT_GIT_URL="https://github.com/taikoxyz/taiko-mono/"
+
+export TDXS_VERSION="master"
+export TDXS_GIT_URL="https://github.com/NethermindEth/tdxs"
+# ----------------------------------------------------------------------------
+
+services/tdx-init/build.sh
+services/tdxs/build.sh
+services/reth-tdx/build.sh
+services/taiko-client/build.sh
+services/nethermind/build.sh

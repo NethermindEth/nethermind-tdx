@@ -2,9 +2,10 @@
 set -euxo pipefail
 
 source scripts/build_dotnet_package.sh
-
-NETHERMIND_VERSION="1.32.3"
-NETHERMIND_GIT_URL="https://github.com/NethermindEth/nethermind.git"
+# Version + URL are pinned by the calling variant's mkosi.build (see
+# {surge,taiko}-tdx-prover/mkosi.build). Fall back to taiko defaults.
+NETHERMIND_VERSION="${NETHERMIND_VERSION:-master}"
+NETHERMIND_GIT_URL="${NETHERMIND_GIT_URL:-https://github.com/NethermindEth/nethermind.git}"
 NETHERMIND_BINARY_PATH="/usr/bin/nethermind"
 NETHERMIND_NLOG_CONFIG_PATH="/etc/nethermind-surge/NLog.config"
 NETHERMIND_PLUGINS_PATH="/etc/nethermind-surge/plugins"
