@@ -125,11 +125,10 @@ if should_use_lima; then
         )
     fi
 
-    # ZSTD_NBTHREADS=1 and the wrapper PATH are repeated here because ssh
-    # strips env vars set by the outer shell. The wrapper PATH is prepended
-    # AFTER `nix develop` finishes setting up the shell env so it takes
-    # precedence over the flake's zstd binary.
-    lima_exec "cd ~/mnt && /home/debian/.nix-profile/bin/nix develop -c bash -c 'export ZSTD_NBTHREADS=1 PATH=\"\$HOME/mnt/scripts/wrappers:\$PATH\"; exec ${cmd[*]@Q}'"
+    # Prepend the zstd-shim wrapper dir to PATH via a helper script (rather
+    # than `bash -c '...'` inline) so we don't fight nested quoting from
+    # ${cmd[*]@Q}. The helper sets PATH + ZSTD_NBTHREADS and execs the rest.
+    lima_exec "cd ~/mnt && /home/debian/.nix-profile/bin/nix develop -c /home/debian/mnt/scripts/with_zstd_shim.sh ${cmd[*]@Q}"
 
     if is_mkosi_cmd; then
         lima_exec "mkdir -p ~/mnt/build; mv '$mkosi_output'/* ~/mnt/build/ || true"
@@ -144,9 +143,9 @@ else
         export PATH="$WRAPPERS_DIR:$PATH"
         exec "${cmd[@]}"
     else
-        # Prepend the wrapper dir INSIDE the nix shell so it takes precedence
-        # over the flake's zstd. Re-exporting from outside doesn't help
-        # because nix develop prepends its own bins ahead of the inherited PATH.
-        exec nix develop -c bash -c "export PATH=\"$WRAPPERS_DIR:\$PATH\"; exec ${cmd[*]@Q}"
+        # Use the helper script so the PATH is reset INSIDE the nix shell
+        # (a bare PATH export outside `nix develop` is overridden by nix's
+        # own PATH prepend).
+        exec nix develop -c "$REPO_DIR/scripts/with_zstd_shim.sh" "${cmd[@]}"
     fi
 fi
