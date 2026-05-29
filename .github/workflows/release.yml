@@ -1,0 +1,197 @@
+name: Release taiko-tdx-prover (Azure VHD)
+
+# Builds `make build IMAGE=taiko-tdx-prover AZURE=true DEV=true`, extracts the
+# measured-boot reference values for the resulting EFI, and publishes both to a
+# GitHub release. Operators consume the release to:
+#
+#   1. Deploy the VHD to an Azure TDX VM
+#      (see tools/deploy-azure / README §"Running Images (Azure)").
+#   2. Compare the live quote against measurements.json (mrSeam, mrTd,
+#      teeTcbSvn, PCRs) before they trust the running image.
+#   3. Register the prover on-chain with
+#      `cargo run -p xtask -- register-tdx --trust --register ...`
+#      (see raiko2 docs/tdx_register.md).
+#
+# Manual trigger only — pick a tag and a runner from the Actions UI.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v0.1.0). Created if it does not already exist.'
+        required: true
+        type: string
+      runner:
+        description: 'Runner label (default ubuntu-22.04; pick a self-hosted label for fat-disk builds).'
+        required: false
+        type: string
+        default: 'ubuntu-22.04'
+      prerelease:
+        description: 'Mark the release as a pre-release.'
+        required: false
+        type: boolean
+        default: false
+      image:
+        description: 'mkosi image variant (locked to taiko-tdx-prover for the standard release flow).'
+        required: false
+        type: choice
+        default: 'taiko-tdx-prover'
+        options:
+          - taiko-tdx-prover
+          - surge-tdx-prover
+      env_file:
+        description: 'env.json source file committed in the repo (e.g. env.taiko-devnet.json). Copied to env.json before the build.'
+        required: false
+        type: string
+        default: 'env.taiko-devnet.json'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ${{ inputs.runner }}
+    env:
+      IMAGE: ${{ inputs.image }}
+      # env_wrapper.sh auto-detects Lima on macOS. On Linux runners we want it
+      # to fall through to a plain `nix develop -c` instead, so make sure no
+      # stray limactl ends up on PATH and FORCE_LIMA is empty.
+      FORCE_LIMA: ''
+    steps:
+      - name: Free disk space (GitHub-hosted runners only)
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          set -euxo pipefail
+          # mkosi caches debian snapshots + builds two intermediate disk
+          # images (ESP + raw -> VHD). The hosted runner ships with ~14 GiB
+          # free; trimming the unused toolchains buys ~30 GiB extra.
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /opt/ghc \
+            /opt/hostedtoolcache \
+            /usr/local/.ghcup \
+            /usr/local/share/boost
+          sudo apt-get clean
+          df -h /
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # mkosi.version runs `git describe`; we need full history + tags so
+          # the build version matches the release tag instead of a short SHA.
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - name: Cache mkosi build dirs
+        uses: actions/cache@v4
+        with:
+          path: |
+            mkosi.cache
+            mkosi.builddir
+          key: mkosi-${{ inputs.image }}-${{ runner.os }}-${{ hashFiles('flake.lock', 'tdx-prover.conf', 'base/mkosi.conf', 'mkosi.profiles/**/mkosi.conf') }}
+          restore-keys: |
+            mkosi-${{ inputs.image }}-${{ runner.os }}-
+
+      - name: Prepare env.json
+        run: |
+          set -euxo pipefail
+          ENV_SOURCE="${{ inputs.env_file }}"
+          if [ ! -f "$ENV_SOURCE" ]; then
+            echo "Error: env_file '$ENV_SOURCE' not found in the repository."
+            echo "Committed env files available:"
+            ls env*.json 2>/dev/null || echo "  (none)"
+            exit 1
+          fi
+          cp "$ENV_SOURCE" env.json
+          echo "Using $ENV_SOURCE as env.json"
+          # Show which chain this image targets (helps audit the release).
+          python3 -c "import json; d=json.load(open('env.json'))['tdx_prover']; print('  chain:   L1={} L2={}'.format(d['l1_chainid'],d['l2_chainid'])); print('  inbox:   '+d['shasta_inbox']); print('  verifier:'+d['shasta_verifier'])"
+
+      - name: Build VHD (AZURE=true DEV=true)
+        run: |
+          set -euxo pipefail
+          make build IMAGE="$IMAGE" AZURE=true DEV=true
+
+      - name: Collect release artifacts
+        id: artifacts
+        run: |
+          set -euxo pipefail
+          scripts/collect_release_artifacts.sh "${IMAGE}-dev" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Resolve image version
+        id: version
+        run: |
+          set -euxo pipefail
+          # collect_release_artifacts.sh emits the filename stem (e.g.
+          # taiko-tdx-prover-dev_2026-05-29.abcdef). Strip the `<image>-dev_`
+          # prefix to get the mkosi version string for the release body.
+          base='${{ steps.artifacts.outputs.base }}'
+          echo "version=${base#${IMAGE}-dev_}" >> "$GITHUB_OUTPUT"
+
+      - name: Show artifact sizes
+        run: |
+          set -euxo pipefail
+          ls -lh \
+            '${{ steps.artifacts.outputs.vhd }}' \
+            '${{ steps.artifacts.outputs.measurements }}' \
+            '${{ steps.artifacts.outputs.sums }}'
+          cat '${{ steps.artifacts.outputs.sums }}'
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.tag }} — ${{ inputs.image }} (Azure VHD, DEV)
+          target_commitish: ${{ github.sha }}
+          prerelease: ${{ inputs.prerelease }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          body: |
+            **Image**: `${{ steps.artifacts.outputs.base }}`
+            **Source commit**: `${{ github.sha }}`
+            **mkosi version**: `${{ steps.version.outputs.version }}`
+            **Build flags**: `make build IMAGE=${{ inputs.image }} AZURE=true DEV=true`
+            **Profile**: `${{ inputs.image == 'taiko-tdx-prover' && 'taiko' || 'surge' }} + azure + devtools`
+            **Chain config**: `${{ inputs.env_file }}`
+
+            ## Files
+
+            - `${{ steps.artifacts.outputs.base }}.vhd` — Azure-compatible
+              fixed VHD. Upload to Azure storage and create a TDX VM with
+              `go run tools/deploy-azure/main.go deploy --disk-path …` (see
+              repo README §"Running Images (Azure)").
+            - `${{ steps.artifacts.outputs.base }}.measurements.json` —
+              expected measured-boot reference values (UKI, PCRs). Use to
+              verify the live attestation quote before trusting the VM.
+            - `${{ steps.artifacts.outputs.base }}.SHA256SUMS` — sha256 of
+              the VHD and measurements file.
+
+            ## Registering this image on-chain
+
+            After booting the VM, fetch its bootstrap quote and register it on
+            the `AzureTdxVerifier` (see [raiko2 docs/tdx_register.md](https://github.com/taikoxyz/raiko2/blob/main/docs/tdx_register.md)):
+
+            ```bash
+            cargo run -p xtask -- register-tdx \
+              --verifier <0x…AzureTdxVerifier> \
+              --rpc <L1 RPC> \
+              --private-key <owner key> \
+              --reth-tdx-url http://<VM IP>:8080 \
+              --trusted-params-index <slot> \
+              --trust --register
+            ```
+
+            `--trust` extracts `mrSeam`, `mrTd`, `teeTcbSvn`, and the PCR
+            digests from the running VM's quote. Cross-check those against
+            this release's `measurements.json` before broadcasting to confirm
+            the live VM is running this exact image.
+          files: |
+            ${{ steps.artifacts.outputs.vhd }}
+            ${{ steps.artifacts.outputs.measurements }}
+            ${{ steps.artifacts.outputs.sums }}
