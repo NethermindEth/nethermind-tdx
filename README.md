@@ -82,7 +82,7 @@ Trigger it from the **Actions → Release taiko-tdx-prover (Azure VHD)** page by
 clicking **Run workflow** and supplying:
 
 - `tag` — release tag, e.g. `v0.1.0` (created if it doesn't exist)
-- `runner` — defaults to `ubuntu-22.04`; pick a self-hosted label if the
+- `runner` — defaults to `ubuntu-24.04`; pick a self-hosted label if the
   hosted runner is too tight on disk
 - `prerelease` — mark as a pre-release (optional)
 - `image` — `taiko-tdx-prover` (default) or `surge-tdx-prover`

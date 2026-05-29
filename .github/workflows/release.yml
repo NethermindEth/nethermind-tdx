@@ -22,10 +22,10 @@ on:
         required: true
         type: string
       runner:
-        description: 'Runner label (default ubuntu-22.04; pick a self-hosted label for fat-disk builds).'
+        description: 'Runner label (default ubuntu-24.04; pick a self-hosted label for fat-disk builds).'
         required: false
         type: string
-        default: 'ubuntu-22.04'
+        default: 'ubuntu-24.04'
       prerelease:
         description: 'Mark the release as a pre-release.'
         required: false
