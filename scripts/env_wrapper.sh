@@ -80,6 +80,12 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
+# Force single-threaded zstd so initrd compression is byte-deterministic.
+# Multi-threaded zstd partitions the input by available cores, so an Azure
+# host with 12 cores produces a different (but valid) compressed blob from
+# a 4-core CI runner, which changes the initrd hash and PCR[11].
+export ZSTD_NBTHREADS=1
+
 cmd=("$@")
 
 is_mkosi_cmd() {
@@ -113,7 +119,9 @@ if should_use_lima; then
         )
     fi
 
-    lima_exec "cd ~/mnt && /home/debian/.nix-profile/bin/nix develop -c ${cmd[*]@Q}"
+    # ZSTD_NBTHREADS=1 is repeated here because ssh strips env vars set by
+    # the outer shell; inject it directly into the remote command.
+    lima_exec "cd ~/mnt && ZSTD_NBTHREADS=1 /home/debian/.nix-profile/bin/nix develop -c ${cmd[*]@Q}"
 
     if is_mkosi_cmd; then
         lima_exec "mkdir -p ~/mnt/build; mv '$mkosi_output'/* ~/mnt/build/ || true"
