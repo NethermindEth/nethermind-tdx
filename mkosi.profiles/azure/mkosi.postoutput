@@ -10,40 +10,6 @@ if [ ! -f "$EFI_FILE" ]; then
     exit 1
 fi
 
-# Recompress the .initrd section with single-threaded zstd so the EFI is
-# bit-reproducible across hosts. mkosi's compressor_command hardcodes
-# `zstd -T0` (use all threads), so a 12-core Azure host and a 4-core CI
-# runner partition the input differently and produce different (but valid)
-# compressed bytes. ZSTD_NBTHREADS can't override the explicit `-T0` flag.
-#
-# Extract → decompress → recompress with -T1 → splice back. measured-boot
-# is then run on the patched EFI and produces deterministic PCR predictions.
-echo "Normalizing .initrd section with single-threaded zstd..."
-ZTMP="$(mktemp -d)"
-trap 'rm -rf "$ZTMP"' EXIT
-objcopy --dump-section=.initrd="$ZTMP/initrd.orig" "$EFI_FILE"
-zstdcat "$ZTMP/initrd.orig" | zstd -q -3 -T1 --stdout > "$ZTMP/initrd.norm"
-
-# Pad the new compressed initrd to the original section size so `--update-section`
-# accepts it without changing the PE section header layout. `--remove + --add-section`
-# fails on PE binaries with "section below image base" because the synthetic VMA
-# objcopy picks falls below the image base address. Updating in place is safe:
-# - PE header / section table unchanged → ImageBase + VMA layout untouched
-# - section data: valid zstd frame + trailing zeros (zstd stops at end-of-frame
-#   so the kernel sees the same decompressed initrd)
-ORIG_SIZE=$(stat -c %s "$ZTMP/initrd.orig")
-NEW_SIZE=$(stat -c %s "$ZTMP/initrd.norm")
-if [ "$NEW_SIZE" -gt "$ORIG_SIZE" ]; then
-    echo "Error: recompressed initrd ($NEW_SIZE) exceeds original ($ORIG_SIZE);" >&2
-    echo "       cannot pad upward without resizing the PE section." >&2
-    exit 1
-fi
-truncate -s "$ORIG_SIZE" "$ZTMP/initrd.norm"
-
-objcopy --update-section=.initrd="$ZTMP/initrd.norm" "$EFI_FILE"
-echo "  original .initrd: $(stat -c %s "$ZTMP/initrd.orig") bytes"
-echo "  normalized      : $(stat -c %s "$ZTMP/initrd.norm") bytes"
-
 echo "Converting $EFI_FILE to VHD format..."
 
 # Create working directory

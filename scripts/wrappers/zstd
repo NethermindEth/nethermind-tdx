@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# zstd wrapper that forces -T1 (single-threaded) for reproducibility.
+#
+# mkosi 25.3's compressor_command (mkosi/__init__.py:2351) hardcodes
+# `zstd -q -<level> -T0 --stdout -`. The `-T0` flag tells zstd to use as
+# many threads as the host has CPUs, which partitions the input by core
+# count and produces a different (but valid) compressed blob on a 12-core
+# Azure host vs a 4-core CI runner. ZSTD_NBTHREADS is ignored because the
+# explicit `-T0` argument wins.
+#
+# This wrapper sits ahead of the real zstd on PATH, rewrites any
+# `-T<N>` / `--threads=<N>` arg to `-T1`, and forwards the rest to the
+# real binary. mkosi sees a single-threaded zstd and produces a
+# byte-deterministic .initrd.
+set -e
+
+# Locate the real zstd binary by walking PATH, skipping this wrapper.
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REAL=""
+old_ifs="$IFS"
+IFS=:
+for dir in $PATH; do
+    [ -z "$dir" ] && continue
+    [ "$(cd "$dir" 2>/dev/null && pwd -P)" = "$SELF_DIR" ] && continue
+    if [ -x "$dir/zstd" ]; then REAL="$dir/zstd"; break; fi
+done
+IFS="$old_ifs"
+
+if [ -z "$REAL" ]; then
+    echo "zstd wrapper: real zstd not found in PATH" >&2
+    exit 127
+fi
+
+# Rewrite -T<N> / --threads=<N> args to -T1. Forward everything else.
+new_args=()
+for arg in "$@"; do
+    case "$arg" in
+        -T*|--threads=*) new_args+=("-T1") ;;
+        *)               new_args+=("$arg") ;;
+    esac
+done
+
+exec "$REAL" "${new_args[@]}"

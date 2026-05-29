@@ -84,7 +84,13 @@ fi
 # Multi-threaded zstd partitions the input by available cores, so an Azure
 # host with 12 cores produces a different (but valid) compressed blob from
 # a 4-core CI runner, which changes the initrd hash and PCR[11].
+#
+# The env var ZSTD_NBTHREADS is ignored by zstd when it's invoked with an
+# explicit -T<N> flag (mkosi hardcodes -T0), so we ALSO prepend a wrapper
+# directory to PATH inside the build environment. The wrapper rewrites any
+# -T<N> arg to -T1 before forwarding to the real zstd binary.
 export ZSTD_NBTHREADS=1
+WRAPPERS_DIR="$REPO_DIR/scripts/wrappers"
 
 cmd=("$@")
 
@@ -119,9 +125,11 @@ if should_use_lima; then
         )
     fi
 
-    # ZSTD_NBTHREADS=1 is repeated here because ssh strips env vars set by
-    # the outer shell; inject it directly into the remote command.
-    lima_exec "cd ~/mnt && ZSTD_NBTHREADS=1 /home/debian/.nix-profile/bin/nix develop -c ${cmd[*]@Q}"
+    # ZSTD_NBTHREADS=1 and the wrapper PATH are repeated here because ssh
+    # strips env vars set by the outer shell. The wrapper PATH is prepended
+    # AFTER `nix develop` finishes setting up the shell env so it takes
+    # precedence over the flake's zstd binary.
+    lima_exec "cd ~/mnt && /home/debian/.nix-profile/bin/nix develop -c bash -c 'export ZSTD_NBTHREADS=1 PATH=\"\$HOME/mnt/scripts/wrappers:\$PATH\"; exec ${cmd[*]@Q}'"
 
     if is_mkosi_cmd; then
         lima_exec "mkdir -p ~/mnt/build; mv '$mkosi_output'/* ~/mnt/build/ || true"
@@ -133,8 +141,12 @@ if should_use_lima; then
     echo "Note: Lima VM '$LIMA_VM' is still running. To stop it, run: limactl stop $LIMA_VM"
 else
     if in_nix_env; then
+        export PATH="$WRAPPERS_DIR:$PATH"
         exec "${cmd[@]}"
     else
-        exec nix develop -c "${cmd[@]}"
+        # Prepend the wrapper dir INSIDE the nix shell so it takes precedence
+        # over the flake's zstd. Re-exporting from outside doesn't help
+        # because nix develop prepends its own bins ahead of the inherited PATH.
+        exec nix develop -c bash -c "export PATH=\"$WRAPPERS_DIR:\$PATH\"; exec ${cmd[*]@Q}"
     fi
 fi
