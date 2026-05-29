@@ -10,6 +10,29 @@ if [ ! -f "$EFI_FILE" ]; then
     exit 1
 fi
 
+# Recompress the .initrd section with single-threaded zstd so the EFI is
+# bit-reproducible across hosts. mkosi's compressor_command hardcodes
+# `zstd -T0` (use all threads), so a 12-core Azure host and a 4-core CI
+# runner partition the input differently and produce different (but valid)
+# compressed bytes. ZSTD_NBTHREADS can't override the explicit `-T0` flag.
+#
+# Extract → decompress → recompress with -T1 → splice back. measured-boot
+# is then run on the patched EFI and produces deterministic PCR predictions.
+echo "Normalizing .initrd section with single-threaded zstd..."
+ZTMP="$(mktemp -d)"
+trap 'rm -rf "$ZTMP"' EXIT
+objcopy --dump-section=.initrd="$ZTMP/initrd.orig" "$EFI_FILE"
+zstdcat "$ZTMP/initrd.orig" | zstd -q -3 -T1 --stdout > "$ZTMP/initrd.norm"
+# Remove + add (rather than --update-section) so the section header reflects
+# the new (smaller) compressed size — single-thread zstd typically achieves
+# a slightly better ratio than the multi-thread output mkosi emits.
+objcopy --remove-section=.initrd \
+        --add-section=.initrd="$ZTMP/initrd.norm" \
+        --set-section-flags=.initrd=contents,alloc,load,readonly,data \
+        "$EFI_FILE"
+echo "  original .initrd: $(stat -c %s "$ZTMP/initrd.orig") bytes"
+echo "  normalized      : $(stat -c %s "$ZTMP/initrd.norm") bytes"
+
 echo "Converting $EFI_FILE to VHD format..."
 
 # Create working directory
