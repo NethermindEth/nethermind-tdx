@@ -71,6 +71,43 @@ Most of the values are self-explanatory, but here are some notes on the less obv
    make help
    ```
 
+#### Publishing a release (CI)
+
+The repository ships a manual workflow that runs
+`make build IMAGE=taiko-tdx-prover AZURE=true DEV=true`, generates the
+measured-boot reference values for the resulting EFI, and publishes both as a
+GitHub release.
+
+Trigger it from the **Actions → Release taiko-tdx-prover (Azure VHD)** page by
+clicking **Run workflow** and supplying:
+
+- `tag` — release tag, e.g. `v0.1.0` (created if it doesn't exist)
+- `runner` — defaults to `ubuntu-22.04`; pick a self-hosted label if the
+  hosted runner is too tight on disk
+- `prerelease` — mark as a pre-release (optional)
+- `image` — `taiko-tdx-prover` (default) or `surge-tdx-prover`
+- `env_file` — env JSON to bake into the image (default `env.taiko-devnet.json`)
+
+The release contains three files (all named after the build, e.g.
+`taiko-tdx-prover-dev_2026-05-29.abcdef.*`):
+
+| File                  | Purpose                                                                                                 |
+|-----------------------|---------------------------------------------------------------------------------------------------------|
+| `…vhd`                | Azure-compatible fixed VHD, ready for `tools/deploy-azure/main.go deploy --disk-path …`                 |
+| `…measurements.json`  | `measured-boot` reference values (UKI digest + expected PCRs) — compare against the live quote          |
+| `…SHA256SUMS`         | sha256 of the two files above                                                                           |
+
+The measurements file is what an operator cross-checks against the running
+VM's quote (`mrSeam`, `mrTd`, `teeTcbSvn`, PCR digests) before broadcasting
+`cargo run -p xtask -- register-tdx --trust --register …`
+(see [raiko2 docs/tdx_register.md](https://github.com/taikoxyz/raiko2/blob/main/docs/tdx_register.md)).
+
+To reproduce the same artifact set locally after a successful `make build`:
+
+```bash
+scripts/collect_release_artifacts.sh taiko-tdx-prover-dev
+```
+
 
 ### Running Images (Bare Metal)
 
