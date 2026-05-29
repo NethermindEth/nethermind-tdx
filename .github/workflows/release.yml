@@ -113,6 +113,22 @@ jobs:
           # Show which chain this image targets (helps audit the release).
           python3 -c "import json; d=json.load(open('env.json'))['tdx_prover']; print('  chain:   L1={} L2={}'.format(d['l1_chainid'],d['l2_chainid'])); print('  inbox:   '+d['shasta_inbox']); print('  verifier:'+d['shasta_verifier'])"
 
+      - name: Enable unprivileged user namespaces
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          set -euxo pipefail
+          # Ubuntu 24.04 restricts unprivileged user namespaces by default via
+          # AppArmor (kernel.apparmor_restrict_unprivileged_userns=1). mkosi's
+          # `unshare --map-auto --map-current-user --setuid=0 --setgid=0` flow
+          # fails with "setgroups failed: Operation not permitted" without
+          # this. Drop the restriction on the runner; it's ephemeral.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          # Diagnostic: confirm subuid/subgid are populated for the runner
+          # user (mkosi's `--map-auto` reads from these via newuidmap/newgidmap).
+          getent passwd "$USER" | cut -d: -f1
+          grep -E "^$USER:" /etc/subuid || echo "WARN: no subuid range for $USER"
+          grep -E "^$USER:" /etc/subgid || echo "WARN: no subgid range for $USER"
+
       - name: Build VHD (AZURE=true DEV=true)
         run: |
           set -euxo pipefail
