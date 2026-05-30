@@ -51,23 +51,15 @@
     };
     mkosi = system: let
       pkgsForSystem = import nixpkgs {inherit system;};
-      # Wrap zstd to force -T1 for reproducible compression. mkosi's
-      # compressor_command hardcodes `-T0` (use all CPU threads), so the
-      # same source produces different (but valid) compressed bytes on a
-      # 12-core Azure host vs a 4-core CI runner. The nix-store mkosi
-      # binary rewrites PATH on entry, so a host-side PATH shim is
-      # ineffective — we have to swap the dep at the nix-derivation level.
-      zstd-shim = pkgsForSystem.writeShellScriptBin "zstd" ''
-        new_args=()
-        for arg in "$@"; do
-          case "$arg" in
-            -T*|--threads=*) new_args+=("-T1") ;;
-            *)               new_args+=("$arg") ;;
-          esac
-        done
-        exec ${pkgsForSystem.zstd}/bin/zstd "''${new_args[@]}"
-      '';
-      mkosi-unwrapped = pkgsForSystem.mkosi.override {
+      # mkosi 25.3's compressor_command hardcodes `zstd -T0` (use all CPU
+      # threads), so a 12-core Azure host and a 4-core CI runner produce
+      # different (but valid) compressed bytes for the same input cpio,
+      # which changes PCR[4]/PCR[9]/PCR[11].
+      #
+      # We patch the mkosi source at the nix-derivation level to force
+      # `-T1` (single-threaded). The substitution is one byte in one file,
+      # but it's the difference between reproducible PCRs and not.
+      mkosi-unwrapped = (pkgsForSystem.mkosi.override {
         extraDeps = with pkgsForSystem;
           [
             apt
@@ -82,7 +74,7 @@
             cryptsetup
             gptfdisk
             util-linux
-            zstd-shim
+            zstd
             which
             qemu-utils
             parted
@@ -90,7 +82,13 @@
             jq
           ]
           ++ [reprepro];
-      };
+      }).overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          # Force single-threaded zstd for reproducible compression.
+          substituteInPlace mkosi/__init__.py \
+            --replace-fail '"-T0"' '"-T1"'
+        '';
+      });
     in
       # Create a wrapper script that runs mkosi with unshare
       # Unshare is needed to create files owned by multiple uids/gids
