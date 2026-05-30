@@ -51,6 +51,22 @@
     };
     mkosi = system: let
       pkgsForSystem = import nixpkgs {inherit system;};
+      # Wrap zstd to force -T1 for reproducible compression. mkosi's
+      # compressor_command hardcodes `-T0` (use all CPU threads), so the
+      # same source produces different (but valid) compressed bytes on a
+      # 12-core Azure host vs a 4-core CI runner. The nix-store mkosi
+      # binary rewrites PATH on entry, so a host-side PATH shim is
+      # ineffective — we have to swap the dep at the nix-derivation level.
+      zstd-shim = pkgsForSystem.writeShellScriptBin "zstd" ''
+        new_args=()
+        for arg in "$@"; do
+          case "$arg" in
+            -T*|--threads=*) new_args+=("-T1") ;;
+            *)               new_args+=("$arg") ;;
+          esac
+        done
+        exec ${pkgsForSystem.zstd}/bin/zstd "''${new_args[@]}"
+      '';
       mkosi-unwrapped = pkgsForSystem.mkosi.override {
         extraDeps = with pkgsForSystem;
           [
@@ -66,7 +82,7 @@
             cryptsetup
             gptfdisk
             util-linux
-            zstd
+            zstd-shim
             which
             qemu-utils
             parted
