@@ -28,8 +28,13 @@ fi
 
 if ! cmd_exists nix; then
     missing+=("nix" "nix-features")
-elif ! nix config show experimental-features 2>/dev/null | grep -q "flakes.*nix-command"; then
-    missing+=("nix-features")
+else
+    # Accept either order ("flakes nix-command" or "nix-command flakes").
+    # Determinate Nix and upstream Nix print them differently.
+    feats="$(nix config show experimental-features 2>/dev/null)"
+    if ! echo "$feats" | grep -q "nix-command" || ! echo "$feats" | grep -q "flakes"; then
+        missing+=("nix-features")
+    fi
 fi
 
 # Exit silently if no dependencies are missing
