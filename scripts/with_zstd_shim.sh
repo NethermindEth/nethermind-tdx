@@ -1,22 +1,20 @@
 #!/usr/bin/env bash
-# Wrapper that prepends scripts/wrappers/ (containing a zstd shim) to PATH
-# and injects --extra-search-path into mkosi commands so mkosi's sandbox
-# uses the Nix-installed zstd. Without this, mkosi falls back to whatever
-# /usr/bin/zstd the host distro ships, which differs between Debian trixie
-# (1.5.7) and Ubuntu 24.04 (1.5.5) and produces different compressed bytes
-# for the same input — breaking cross-host reproducibility.
+# When invoking mkosi, inject `--extra-search-path=<dir>` pointing at the
+# Nix-installed zstd's bin directory. mkosi's bwrap sandbox uses
+# extra-search-path entries when resolving binaries, so this makes mkosi
+# pick the SAME zstd version on every host regardless of what the host
+# distro ships at /usr/bin/zstd (Lima Debian trixie has 1.5.7, the GH
+# Ubuntu 24.04 runner has 1.5.5 — two versions produce different
+# compressed bytes for the same input, breaking PCR reproducibility).
+#
+# Requires the flake.nix devShell to expose zstd via nativeBuildInputs so
+# `command -v zstd` resolves to the Nix-pinned binary inside `nix develop`.
 #
 # Usage: with_zstd_shim.sh <command> [args...]
 set -e
 
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-export PATH="$HERE/wrappers:$PATH"
 export ZSTD_NBTHREADS=1
 
-# Locate the Nix-installed zstd. `command -v zstd` resolves via PATH which,
-# inside `nix develop`, points at the flake-pinned zstd derivation. Skip the
-# injection if zstd ends up under /usr — mkosi's path parser rejects /usr
-# entries by design.
 if [ "$#" -gt 0 ]; then
     case "$1" in
         mkosi|*/mkosi)
@@ -25,7 +23,6 @@ if [ "$#" -gt 0 ]; then
             if [ -n "$ZSTD_BIN" ]; then
                 ZSTD_DIR="$(dirname "$(readlink -f "$ZSTD_BIN")")"
             fi
-            # Diagnostic: emit to stderr so it shows up in CI logs.
             echo "[with_zstd_shim] zstd=$ZSTD_BIN dir=$ZSTD_DIR" >&2
             case "$ZSTD_DIR" in
                 ""|/usr/*)
