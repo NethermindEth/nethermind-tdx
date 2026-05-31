@@ -51,15 +51,16 @@
     };
     mkosi = system: let
       pkgsForSystem = import nixpkgs {inherit system;};
-      # mkosi 25.3's compressor_command hardcodes `zstd -T0` (use all CPU
-      # threads), so a 12-core Azure host and a 4-core CI runner produce
-      # different (but valid) compressed bytes for the same input cpio,
-      # which changes PCR[4]/PCR[9]/PCR[11].
-      #
-      # We patch the mkosi source at the nix-derivation level to force
-      # `-T1` (single-threaded). The substitution is one byte in one file,
-      # but it's the difference between reproducible PCRs and not.
-      mkosi-unwrapped = (pkgsForSystem.mkosi.override {
+      # We previously patched mkosi to force `zstd -T1`, but empirical
+      # testing showed `-T0` and `-T1` produce byte-identical output on
+      # the same zstd version. Cross-host divergence comes from mkosi's
+      # sandbox falling back to /usr/bin/zstd, which differs between Lima
+      # Debian (1.5.7) and Ubuntu 24.04 (1.5.5). The fix is to inject
+      # `--extra-search-path` pointing at the nix zstd via
+      # scripts/with_zstd_shim.sh — see that file for details. The
+      # overrideAttrs.postPatch approach broke the nixpkgs wrapping that
+      # generates `mkosi-sandbox`, so we keep mkosi-unwrapped vanilla.
+      mkosi-unwrapped = pkgsForSystem.mkosi.override {
         extraDeps = with pkgsForSystem;
           [
             apt
@@ -82,13 +83,7 @@
             jq
           ]
           ++ [reprepro];
-      }).overrideAttrs (old: {
-        postPatch = (old.postPatch or "") + ''
-          # Force single-threaded zstd for reproducible compression.
-          substituteInPlace mkosi/__init__.py \
-            --replace-fail '"-T0"' '"-T1"'
-        '';
-      });
+      };
     in
       # Create a wrapper script that runs mkosi with unshare
       # Unshare is needed to create files owned by multiple uids/gids
