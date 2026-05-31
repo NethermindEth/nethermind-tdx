@@ -21,13 +21,21 @@ if [ "$#" -gt 0 ]; then
     case "$1" in
         mkosi|*/mkosi)
             ZSTD_BIN="$(command -v zstd 2>/dev/null || true)"
+            ZSTD_DIR=""
             if [ -n "$ZSTD_BIN" ]; then
                 ZSTD_DIR="$(dirname "$(readlink -f "$ZSTD_BIN")")"
-                case "$ZSTD_DIR" in
-                    /usr/*) ;;
-                    *) set -- "$1" "--extra-search-path=$ZSTD_DIR" "${@:2}" ;;
-                esac
             fi
+            # Diagnostic: emit to stderr so it shows up in CI logs.
+            echo "[with_zstd_shim] zstd=$ZSTD_BIN dir=$ZSTD_DIR" >&2
+            case "$ZSTD_DIR" in
+                ""|/usr/*)
+                    echo "[with_zstd_shim] not injecting --extra-search-path (empty or /usr)" >&2
+                    ;;
+                *)
+                    echo "[with_zstd_shim] injecting --extra-search-path=$ZSTD_DIR" >&2
+                    set -- "$1" "--extra-search-path=$ZSTD_DIR" "${@:2}"
+                    ;;
+            esac
             ;;
     esac
 fi
