@@ -101,10 +101,18 @@
           ${mkosi-unwrapped}/bin/mkosi "$@"
       '';
   in {
-    devShells = builtins.listToAttrs (map (system: {
+    devShells = builtins.listToAttrs (map (system: let
+      pkgsForSystem = import nixpkgs {inherit system;};
+    in {
       name = system;
+      # `pkgsForSystem.zstd` is exposed at the devShell level so the path is
+      # resolvable from `which zstd` inside `nix develop`; scripts/with_zstd_shim.sh
+      # uses it to inject --extra-search-path into mkosi so mkosi's bwrap
+      # sandbox uses the SAME zstd binary on every host (otherwise mkosi
+      # falls back to /usr/bin/zstd, which varies between Lima Debian
+      # trixie and the GH Ubuntu runner — causing different initrd bytes).
       value.default = pkgs.mkShell {
-        nativeBuildInputs = [(mkosi system) measured-boot measured-boot-gcp];
+        nativeBuildInputs = [(mkosi system) measured-boot measured-boot-gcp pkgsForSystem.zstd];
         shellHook = ''
           mkdir -p mkosi.packages mkosi.cache mkosi.builddir ~/.cache/mkosi
           touch mkosi.builddir/debian-backports.sources
