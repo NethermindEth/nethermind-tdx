@@ -17,10 +17,13 @@ LIMA_VM="${LIMA_VM:-tee-builder-$REPO_HASH}"
 
 # Check if Lima should be used
 should_use_lima() {
-    # Use Lima on macOS or if FORCE_LIMA is set
-    [[ "$OSTYPE" == "darwin"* ]] || [ -n "${FORCE_LIMA:-}" ] ||
-    # Use Lima if it's available (regardless of Nix)
-    command -v limactl &>/dev/null
+    # Use Lima on macOS or when FORCE_LIMA is explicitly set. On Linux,
+    # default to running mkosi directly even if limactl is installed —
+    # nesting mkosi's bwrap sandbox inside a Lima VM breaks /nix/store
+    # bind-mounts during kernel rebuilds (`/scripts/mkosi-chroot: exec
+    # mkosi-sandbox: not found`). Native Linux execution is what CI does
+    # and what the cross-host reproducibility verification relies on.
+    [[ "$OSTYPE" == "darwin"* ]] || [ -n "${FORCE_LIMA:-}" ]
 }
 
 # Setup Lima if needed
