@@ -12,3 +12,4 @@ mkosi.builddir/
 .claudeignore
 tmp/
 .env
+mkosi.tools/
