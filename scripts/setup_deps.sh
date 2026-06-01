@@ -29,10 +29,12 @@ fi
 if ! cmd_exists nix; then
     missing+=("nix" "nix-features")
 else
-    # Accept either order ("flakes nix-command" or "nix-command flakes").
-    # Determinate Nix and upstream Nix print them differently.
-    feats="$(nix config show experimental-features 2>/dev/null)"
-    if ! echo "$feats" | grep -q "nix-command" || ! echo "$feats" | grep -q "flakes"; then
+    # Verify features are actually usable rather than parsing config files —
+    # Determinate Nix enables them via `extra-experimental-features` in
+    # /etc/nix/nix.conf (root-owned), which doesn't appear in
+    # `nix config show experimental-features`. A functional test is simpler
+    # and works across all Nix install styles.
+    if ! nix --extra-experimental-features 'nix-command flakes' flake --help > /dev/null 2>&1; then
         missing+=("nix-features")
     fi
 fi
