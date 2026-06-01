@@ -36,6 +36,12 @@ ExecStart=/usr/bin/nethermind \
     --plugins-dir=/etc/nethermind-surge/plugins
 Restart=on-failure
 LimitNOFILE=1000000
+# ASP.NET DataProtection calls Path.GetTempFileName() which requires a
+# writable TMPDIR. The service runs as nethermind-surge which may not have
+# write access to /tmp/ on the minimal image tmpfs. Use the persistent
+# data directory instead.
+RuntimeDirectory=nethermind-surge
+Environment=TMPDIR=/run/nethermind-surge
 
 [Install]
 WantedBy=default.target
