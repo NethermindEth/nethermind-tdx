@@ -14,3 +14,8 @@
 set -euxo pipefail
 
 find "$BUILDROOT" -xdev \( -type f -o -type d \) -exec chmod g-w,o-w {} +
+
+# /tmp must be world-writable with the sticky bit (1777) so unprivileged
+# services can create temp files. Restore it explicitly after the find
+# above stripped the write bits.
+chmod 1777 "$BUILDROOT/tmp"

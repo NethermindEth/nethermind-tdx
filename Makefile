@@ -65,6 +65,37 @@ build: check-perms setup ## Build the specified module
 	$(WRAPPER) mkosi --force --image-id $$image_id --profile=$$profiles -I tdx-prover.conf
 
 
+##@ Release
+
+# GitHub repository hosting the releases.
+RELEASE_REPO := NethermindEth/nethermind-tdx
+
+download: ## Download VHD + measurements from a release tag into build/. Usage: make download TAG=v0.1.0 [IMAGE=taiko-tdx-prover-dev]
+ifndef TAG
+	$(error TAG is not set. Usage: make download TAG=v0.1.0)
+endif
+	@mkdir -p build
+	@IMAGE_FILTER="$(or $(IMAGE),taiko-tdx-prover-dev)"; \
+	echo "Fetching release $(TAG) from $(RELEASE_REPO) (filter: $$IMAGE_FILTER)..."; \
+	assets=$$(gh api "repos/$(RELEASE_REPO)/releases/tags/$(TAG)" \
+		--jq '.assets[] | select(.name | startswith("'"$$IMAGE_FILTER"'")) | "\(.name) \(.browser_download_url)"'); \
+	if [ -z "$$assets" ]; then \
+		echo "Error: no assets matching '$$IMAGE_FILTER' found in release $(TAG)."; \
+		echo "Available assets:"; \
+		gh api "repos/$(RELEASE_REPO)/releases/tags/$(TAG)" --jq '.assets[].name'; \
+		exit 1; \
+	fi; \
+	echo "$$assets" | while IFS=' ' read -r name url; do \
+		case "$$name" in \
+			*.vhd|*.measurements.json|*.SHA256SUMS) \
+				echo "  Downloading $$name ..."; \
+				curl -fsSL -o "build/$$name" "$$url"; \
+				;; \
+		esac; \
+	done; \
+	echo "Done. Files in build/:"; \
+	ls -lh build/*"$$IMAGE_FILTER"* 2>/dev/null || true
+
 ##@ Utilities
 
 measure: ## Export TDX measurements for the built EFI file

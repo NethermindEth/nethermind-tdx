@@ -56,10 +56,6 @@ rm -f "$BUILDROOT"/etc/dropbear/dropbear_*_host_key*
 mkosi-chroot systemctl disable ssh.service ssh.socket
 mkosi-chroot systemctl mask ssh.service ssh.socket
 
-# /tmp must be world-writable with the sticky bit so unprivileged services
-# (e.g. nethermind-surge running as its own user) can create temp files.
-chmod 1777 "$BUILDROOT/tmp"
-
 # Install SSH public key if available
 if [ -f "id_ed25519.pub" ]; then
     mkdir -p "$BUILDROOT/etc/dropbear"
