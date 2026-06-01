@@ -9,6 +9,7 @@ StartLimitBurst=30
 
 [Service]
 User=reth-tdx
+TimeoutStartSec=infinity
 Group=tdx
 EnvironmentFile=/etc/nethermind-surge/.env
 Environment=RETH_TDX_HOME=/home/reth-tdx
@@ -16,7 +17,10 @@ WorkingDirectory=/home/reth-tdx
 # Wait for the local L2 to start serving JSON-RPC before booting reth-tdx —
 # the proving handlers rely on `eth_getBlockByNumber` and reject requests for
 # blocks the node hasn't synced yet.
-ExecStartPre=/bin/sh -c 'until curl -sf -X POST http://localhost:${L2_HTTP_PORT} -H "content-type: application/json" -d "{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}" -o /dev/null; do echo "waiting for nethermind-surge on :${L2_HTTP_PORT}..."; sleep 5; done'
+# NOTE: avoid JSON body in ExecStartPre — systemd strips backslash-escapes
+# even inside single-quoted Exec= strings, corrupting the payload. Use the
+# /health endpoint instead (requires HealthChecks.Enabled=true on nethermind).
+ExecStartPre=/bin/sh -c 'until curl -sf http://localhost:${L2_HTTP_PORT}/health -o /dev/null; do echo "waiting for nethermind-surge on :${L2_HTTP_PORT}..."; sleep 5; done'
 ExecStart=/usr/bin/reth-tdx \
     --l2-chain-id ${L2_CHAINID} \
     --verifier ${SHASTA_VERIFIER} \
