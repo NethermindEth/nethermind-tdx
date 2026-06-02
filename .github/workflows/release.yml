@@ -195,26 +195,6 @@ jobs:
               verify the live attestation quote before trusting the VM.
             - `${{ steps.artifacts.outputs.base }}.SHA256SUMS` — sha256 of
               the VHD and measurements file.
-
-            ## Registering this image on-chain
-
-            After booting the VM, fetch its bootstrap quote and register it on
-            the `AzureTdxVerifier` (see [raiko2 docs/tdx_register.md](https://github.com/taikoxyz/raiko2/blob/main/docs/tdx_register.md)):
-
-            ```bash
-            cargo run -p xtask -- register-tdx \
-              --verifier <0x…AzureTdxVerifier> \
-              --rpc <L1 RPC> \
-              --private-key <owner key> \
-              --reth-tdx-url http://<VM IP>:8080 \
-              --trusted-params-index <slot> \
-              --trust --register
-            ```
-
-            `--trust` extracts `mrSeam`, `mrTd`, `teeTcbSvn`, and the PCR
-            digests from the running VM's quote. Cross-check those against
-            this release's `measurements.json` before broadcasting to confirm
-            the live VM is running this exact image.
           files: |
             ${{ steps.artifacts.outputs.vhd }}
             ${{ steps.artifacts.outputs.measurements }}

@@ -6,7 +6,29 @@ Based on the Flashbots toolkit, this provides a minimal, hardened Linux image de
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Option A — Use a pre-built image from the release page (recommended)
+
+Pre-built Azure VHD images are published on the
+[Releases](https://github.com/NethermindEth/nethermind-tdx/releases) page.
+Each release includes:
+
+| File | Purpose |
+|---|---|
+| `…vhd` | Azure-compatible fixed VHD, ready to deploy directly |
+| `…measurements.json` | `measured-boot` reference PCR values for on-chain verification |
+| `…SHA256SUMS` | SHA-256 checksums for both files above |
+
+Download the `.vhd` for your target chain (e.g. `taiko-tdx-prover-dev_2026-06-01.…vhd`),
+then skip ahead to [Running Images (Azure)](#running-images-azure).
+
+---
+
+### Option B — Build your own image
+
+Build from source when you need a custom configuration, a different chain env,
+or a fully reproducible local build.
+
+#### Prerequisites
 
 In order to build images, you'll need to install [Lima](https://lima-vm.io/) for your operating system. Building images without Lima is possible, but due to inconsistencies between distributions, it is not supported for generating official reproducible images.
 
@@ -182,7 +204,9 @@ Replace `<IMAGE>_<version>` with the actual filename from the `build/` directory
 
 ### Running Images (Azure)
 
-After you build the image on azure machine (or scp the built image to the azure machine), you can run the image with the following command (make sure to run this command on the azure machine where the image is located):
+Get the `.vhd` either from the [Releases page](https://github.com/NethermindEth/nethermind-tdx/releases)
+(Option A) or from your local `build/` directory after `make build` (Option B),
+then copy it to the Azure machine and run:
 
 ```bash
 go run tools/deploy-azure/main.go deploy \
