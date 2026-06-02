@@ -225,6 +225,71 @@ go run tools/deploy-azure/main.go deploy \
 All the values in `<>` should be replaced with actual values from your Azure account and configuration.
 
 
+### Running Images (Google Cloud)
+
+The same image runs as an Intel **TDX Confidential VM** on GCE. The flow mirrors
+Azure: build a GCP image (`make build … GCP=true` produces a `.tar.gz` containing
+`disk.raw` instead of a `.vhd`), then a deploy tool uploads it, registers a GCE
+image, and launches a confidential VM.
+
+**1. Build the GCP image:**
+
+```bash
+make build IMAGE=taiko-tdx-prover GCP=true
+# → build/taiko-tdx-prover_<version>.tar.gz   (contains disk.raw)
+# add DEV=true for the debug image: make build IMAGE=taiko-tdx-prover GCP=true DEV=true
+```
+
+**2. Prerequisites (one-time):**
+
+- `gcloud auth application-default login` — the deploy tool uses Application
+  Default Credentials.
+- Enable the **Compute Engine** and **Cloud Storage** APIs on the project.
+- A **GCS bucket you own** — the tar.gz is staged there to create the GCE image,
+  then the staging object is removed automatically (`--keep-staging` to keep it).
+
+**3. Deploy** (convenience wrapper auto-finds the newest `build/*.tar.gz`):
+
+```bash
+scripts/deploy_gcp.sh \
+  --id   my-prover-1 \
+  --project  {GCP_PROJECT} \
+  --bucket   {GCS_BUCKET} \
+  --zone     us-central1-a \
+  --machine-type c3-standard-4 \
+  --allowed-ip {YOUR_IP}/32
+```
+
+Or call the Go tool directly:
+
+```bash
+go run ./tools/deploy-gcp deploy \
+  --id my-prover-1 \
+  --project {GCP_PROJECT} \
+  --bucket  {GCS_BUCKET} \
+  --disk-path build/taiko-tdx-prover_<version>.tar.gz \
+  --zone us-central1-a \
+  --machine-type c3-standard-4 \
+  --storage-gb 100 \
+  --allowed-ip {YOUR_IP}/32
+```
+
+> [!IMPORTANT]
+> Intel TDX on GCE is only available on the **C3 machine family** (e.g.
+> `c3-standard-4/8/22/44`) in TDX-enabled zones. C3 VMs use **gVNIC** networking
+> and the image is tagged accordingly (`TDX_CAPABLE`, `UEFI_COMPATIBLE`,
+> `GVNIC`). Confidential VMs cannot live-migrate, so the instance is created with
+> `onHostMaintenance=TERMINATE` + `automaticRestart=true`.
+
+The deploy tool prints the external IP and the SSH-key injection command on
+success. Tear everything down (instance, image, data disk, firewall rules,
+staging object) with:
+
+```bash
+go run ./tools/deploy-gcp delete my-prover-1
+```
+
+
 ### After Booting configuration
 
 #### Inject your SSH

@@ -13,3 +13,4 @@ mkosi.builddir/
 tmp/
 .env
 mkosi.tools/
+graphify-out/
