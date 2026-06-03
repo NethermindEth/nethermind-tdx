@@ -10,6 +10,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -112,6 +113,7 @@ func main() {
 	deployCmd.Flags().String("subnetwork", "", "Subnetwork (defaults to the network's auto subnet in the chosen region)")
 	deployCmd.Flags().String("bucket", "", "GCS bucket used to stage the image (required; user-managed)")
 	deployCmd.Flags().Bool("keep-staging", false, "Keep the uploaded tar.gz in the bucket after image creation")
+	deployCmd.Flags().Bool("skip-firewall", false, "Skip creating firewall rules (use when service account lacks compute.firewalls.create; ensure VPC already allows the required ports)")
 
 	for _, name := range []string{"id", "disk-path", "project", "bucket"} {
 		_ = deployCmd.MarkFlagRequired(name)
@@ -172,6 +174,7 @@ func deployCommand(cmd *cobra.Command, _ []string) error {
 	subnetwork, _ := cmd.Flags().GetString("subnetwork")
 	bucket, _ := cmd.Flags().GetString("bucket")
 	keepStaging, _ := cmd.Flags().GetBool("keep-staging")
+	skipFirewall, _ := cmd.Flags().GetBool("skip-firewall")
 
 	// Region is derived from zone (e.g. us-central1-a -> us-central1) and is
 	// used to name the default auto-subnetwork.
@@ -251,9 +254,16 @@ func deployCommand(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to create data disk: %w", err)
 	}
 
-	fmt.Println("🔒 Creating firewall rules...")
-	if err := createFirewallRules(client, deployment, allowedIP); err != nil {
-		return fmt.Errorf("failed to create firewall rules: %w", err)
+	if skipFirewall {
+		fmt.Println("⚠️  Skipping firewall rules (--skip-firewall). Ensure the VPC already allows ports 22, 8080, 30303, etc.")
+		deployment.FirewallSSHName = ""
+		deployment.FirewallSvcsName = ""
+		deployment.FirewallP2PName = ""
+	} else {
+		fmt.Println("🔒 Creating firewall rules...")
+		if err := createFirewallRules(client, deployment, allowedIP); err != nil {
+			return fmt.Errorf("failed to create firewall rules: %w", err)
+		}
 	}
 
 	fmt.Println("🖥️  Creating confidential VM...")
@@ -367,9 +377,29 @@ func createImage(client *GCPClient, d DeploymentInfo) error {
 	}
 	op, err := client.images.Insert(client.ctx, req)
 	if err != nil {
+		if isAlreadyExists(err) {
+			fmt.Printf("   (image %s already exists, skipping)\n", d.ImageName)
+			return nil
+		}
 		return err
 	}
 	return op.Wait(client.ctx)
+}
+
+// isAlreadyExists reports whether a GCP API error is a 409 conflict (resource
+// already exists). Used to make deploy idempotent on partial retries.
+func isAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	// The GCP Go client wraps errors; the canonical check is googleapi.Error.Code
+	// but we avoid importing google.golang.org/api/googleapi directly.
+	type coder interface{ Code() int }
+	var c coder
+	if errors.As(err, &c) {
+		return c.Code() == 409
+	}
+	return strings.Contains(err.Error(), "409") || strings.Contains(err.Error(), "alreadyExists")
 }
 
 func createDataDisk(client *GCPClient, d DeploymentInfo, sizeGB int64) error {
@@ -388,6 +418,10 @@ func createDataDisk(client *GCPClient, d DeploymentInfo, sizeGB int64) error {
 	}
 	op, err := client.disks.Insert(client.ctx, req)
 	if err != nil {
+		if isAlreadyExists(err) {
+			fmt.Printf("   (disk %s already exists, skipping)\n", d.DataDiskName)
+			return nil
+		}
 		return err
 	}
 	return op.Wait(client.ctx)
@@ -566,7 +600,15 @@ func deleteCommand(_ *cobra.Command, args []string) error {
 	fmt.Printf("  - Instance:        %s\n", d.InstanceName)
 	fmt.Printf("  - Boot image:      %s\n", d.ImageName)
 	fmt.Printf("  - Data disk:       %s\n", d.DataDiskName)
-	fmt.Printf("  - Firewall rules:  %s, %s, %s\n", d.FirewallSSHName, d.FirewallSvcsName, d.FirewallP2PName)
+	fwNames := []string{}
+	for _, fw := range []string{d.FirewallSSHName, d.FirewallSvcsName, d.FirewallP2PName} {
+		if fw != "" {
+			fwNames = append(fwNames, fw)
+		}
+	}
+	if len(fwNames) > 0 {
+		fmt.Printf("  - Firewall rules:  %s\n", strings.Join(fwNames, ", "))
+	}
 	if d.StagingObject != "" {
 		fmt.Printf("  - Staging object:  gs://%s/%s\n", d.Bucket, d.StagingObject)
 	}
@@ -598,6 +640,9 @@ func deleteCommand(_ *cobra.Command, args []string) error {
 	}
 
 	for _, fw := range []string{d.FirewallSSHName, d.FirewallSvcsName, d.FirewallP2PName} {
+		if fw == "" {
+			continue
+		}
 		fmt.Printf("  Deleting firewall %s...\n", fw)
 		if err := deleteFirewall(client, d.ProjectID, fw); err != nil {
 			fmt.Printf("  ⚠️  Failed to delete firewall %s: %v\n", fw, err)
