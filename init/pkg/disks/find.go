@@ -110,10 +110,7 @@ func FindLargestDisk() (string, error) {
 
 		deviceName := fields[3]
 
-		hasSCSI := strings.HasPrefix(deviceName, "sd")
-		hasSdNumber := strings.ContainsAny(deviceName[len(deviceName)-1:], "0123456789")
-
-		if !hasSCSI || hasSdNumber {
+		if !isWholeDisk(deviceName) {
 			continue
 		}
 
@@ -135,7 +132,7 @@ func FindLargestDisk() (string, error) {
 	}
 
 	if largestDevice == "" {
-		return "", fmt.Errorf("no SCSI disk found")
+		return "", fmt.Errorf("no whole disk found")
 	}
 
 	return largestDevice, nil
