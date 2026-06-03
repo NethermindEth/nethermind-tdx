@@ -1,4 +1,0 @@
-# Rename the GCP gVNIC interface to eth0 so network-setup.service works
-# without modification. The gve driver is the Google Virtual NIC driver used
-# on C3/TDX-capable machine families.
-SUBSYSTEM=="net", ACTION=="add", DRIVERS=="gve", NAME="eth0"
