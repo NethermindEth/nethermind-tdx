@@ -6,7 +6,7 @@ Wants=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/lib/network-setup-gcp.sh
+ExecStart=/bin/sh /usr/local/lib/network-setup-gcp.sh
 RemainAfterExit=yes
 
 [Install]
