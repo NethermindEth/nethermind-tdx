@@ -1,13 +1,13 @@
-name: Release taiko-tdx-prover (Azure VHD)
+name: Release taiko-tdx-prover
 
-# Builds `make build IMAGE=taiko-tdx-prover AZURE=true DEV=true`, extracts the
-# measured-boot reference values for the resulting EFI, and publishes both to a
-# GitHub release. Operators consume the release to:
+# Builds Azure VHD (AZURE=true DEV=true) and GCP tar.gz (GCP=true DEV=true)
+# images in parallel, extracts measured-boot PCR values and TDX RTMR values,
+# and publishes all artifacts to a GitHub release. Operators consume the
+# release to:
 #
-#   1. Deploy the VHD to an Azure TDX VM
-#      (see tools/deploy-azure / README §"Running Images (Azure)").
-#   2. Compare the live quote against measurements.json (mrSeam, mrTd,
-#      teeTcbSvn, PCRs) before they trust the running image.
+#   1. Deploy the image to an Azure or GCP TDX VM
+#      (see tools/deploy-azure / tools/deploy-gcp / README).
+#   2. Compare the live quote against measurements.json before trusting the VM.
 #   3. Register the prover on-chain with
 #      `cargo run -p xtask -- register-tdx --trust --register ...`
 #      (see raiko2 docs/tdx_register.md).
@@ -32,7 +32,7 @@ on:
         type: boolean
         default: false
       image:
-        description: 'mkosi image variant (locked to taiko-tdx-prover for the standard release flow).'
+        description: 'mkosi image variant.'
         required: false
         type: choice
         default: 'taiko-tdx-prover'
@@ -49,22 +49,42 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  # Lightweight job: creates the release shell so both build jobs can upload
+  # to it in parallel without racing to create the same release.
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.tag }} — ${{ inputs.image }}
+          target_commitish: ${{ github.sha }}
+          prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: true
+          body: |
+            **Source commit**: `${{ github.sha }}`
+            **Chain config**: `${{ inputs.env_file }}`
+
+            Azure (`${{ inputs.image }}-dev`) and GCP (`${{ inputs.image }}-gcp-dev`)
+            artifacts are uploaded by parallel build jobs — they may appear a few
+            minutes after the release is created.
+
+  build-azure:
+    needs: create-release
     runs-on: ${{ inputs.runner }}
     env:
       IMAGE: ${{ inputs.image }}
-      # env_wrapper.sh auto-detects Lima on macOS. On Linux runners we want it
-      # to fall through to a plain `nix develop -c` instead, so make sure no
-      # stray limactl ends up on PATH and FORCE_LIMA is empty.
       FORCE_LIMA: ''
     steps:
       - name: Free disk space (GitHub-hosted runners only)
         if: ${{ runner.environment == 'github-hosted' }}
         run: |
           set -euxo pipefail
-          # mkosi caches debian snapshots + builds two intermediate disk
-          # images (ESP + raw -> VHD). The hosted runner ships with ~14 GiB
-          # free; trimming the unused toolchains buys ~30 GiB extra.
           sudo rm -rf \
             /usr/share/dotnet \
             /usr/local/lib/android \
@@ -75,11 +95,8 @@ jobs:
           sudo apt-get clean
           df -h /
 
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          # mkosi.version runs `git describe`; we need full history + tags so
-          # the build version matches the release tag instead of a short SHA.
           fetch-depth: 0
 
       - name: Install Nix
@@ -94,9 +111,9 @@ jobs:
           path: |
             mkosi.cache
             mkosi.builddir
-          key: mkosi-${{ inputs.image }}-${{ runner.os }}-${{ hashFiles('flake.lock', 'tdx-prover.conf', 'base/mkosi.conf', 'mkosi.profiles/**/mkosi.conf') }}
+          key: mkosi-azure-${{ inputs.image }}-${{ runner.os }}-${{ hashFiles('flake.lock', 'tdx-prover.conf', 'base/mkosi.conf', 'mkosi.profiles/**/mkosi.conf') }}
           restore-keys: |
-            mkosi-${{ inputs.image }}-${{ runner.os }}-
+            mkosi-azure-${{ inputs.image }}-${{ runner.os }}-
 
       - name: Prepare env.json
         run: |
@@ -104,32 +121,22 @@ jobs:
           ENV_SOURCE="${{ inputs.env_file }}"
           if [ ! -f "$ENV_SOURCE" ]; then
             echo "Error: env_file '$ENV_SOURCE' not found in the repository."
-            echo "Committed env files available:"
             ls env*.json 2>/dev/null || echo "  (none)"
             exit 1
           fi
           cp "$ENV_SOURCE" env.json
-          echo "Using $ENV_SOURCE as env.json"
-          # Show which chain this image targets (helps audit the release).
           python3 -c "import json; d=json.load(open('env.json'))['tdx_prover']; print('  chain:   L1={} L2={}'.format(d['l1_chainid'],d['l2_chainid'])); print('  inbox:   '+d['shasta_inbox']); print('  verifier:'+d['shasta_verifier'])"
 
       - name: Enable unprivileged user namespaces
         if: ${{ runner.environment == 'github-hosted' }}
         run: |
           set -euxo pipefail
-          # Ubuntu 24.04 restricts unprivileged user namespaces by default via
-          # AppArmor (kernel.apparmor_restrict_unprivileged_userns=1). mkosi's
-          # `unshare --map-auto --map-current-user --setuid=0 --setgid=0` flow
-          # fails with "setgroups failed: Operation not permitted" without
-          # this. Drop the restriction on the runner; it's ephemeral.
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
-          # Diagnostic: confirm subuid/subgid are populated for the runner
-          # user (mkosi's `--map-auto` reads from these via newuidmap/newgidmap).
           getent passwd "$USER" | cut -d: -f1
           grep -E "^$USER:" /etc/subuid || echo "WARN: no subuid range for $USER"
           grep -E "^$USER:" /etc/subgid || echo "WARN: no subgid range for $USER"
 
-      - name: Build VHD (AZURE=true DEV=true)
+      - name: Build Azure VHD (AZURE=true DEV=true)
         run: |
           set -euxo pipefail
           make build IMAGE="$IMAGE" AZURE=true DEV=true
@@ -137,12 +144,9 @@ jobs:
       - name: Fix build directory ownership
         if: ${{ runner.environment == 'github-hosted' }}
         run: |
-          # mkosi runs via `unshare --setuid=0`, which leaves build/ owned by
-          # root in the host namespace. Re-own it so the collect step (running
-          # as the unprivileged runner user) can write measurements.json.
           sudo chown -R "$USER:$USER" build/
 
-      - name: Collect release artifacts
+      - name: Collect Azure release artifacts
         id: artifacts
         run: |
           set -euxo pipefail
@@ -151,63 +155,41 @@ jobs:
       - name: Resolve image version
         id: version
         run: |
-          set -euxo pipefail
-          # collect_release_artifacts.sh emits the filename stem (e.g.
-          # taiko-tdx-prover-dev_2026-05-29.abcdef). Strip the `<image>-dev_`
-          # prefix to get the mkosi version string for the release body.
           base='${{ steps.artifacts.outputs.base }}'
           echo "version=${base#${IMAGE}-dev_}" >> "$GITHUB_OUTPUT"
 
       - name: Show artifact sizes
         run: |
-          set -euxo pipefail
           ls -lh \
             '${{ steps.artifacts.outputs.vhd }}' \
             '${{ steps.artifacts.outputs.measurements }}' \
             '${{ steps.artifacts.outputs.sums }}'
           cat '${{ steps.artifacts.outputs.sums }}'
 
-      - name: Create GitHub release
+      - name: Upload Azure artifacts to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag }}
-          name: ${{ inputs.tag }} — ${{ inputs.image }} (Azure VHD, DEV)
-          target_commitish: ${{ github.sha }}
-          prerelease: ${{ inputs.prerelease }}
           fail_on_unmatched_files: true
-          generate_release_notes: true
+          append_body: true
           body: |
-            **Image**: `${{ steps.artifacts.outputs.base }}`
-            **Source commit**: `${{ github.sha }}`
-            **mkosi version**: `${{ steps.version.outputs.version }}`
-            **Build flags**: `make build IMAGE=${{ inputs.image }} AZURE=true DEV=true`
-            **Profile**: `${{ inputs.image == 'taiko-tdx-prover' && 'taiko' || 'surge' }} + azure + devtools`
-            **Chain config**: `${{ inputs.env_file }}`
+            ## Azure (`${{ steps.artifacts.outputs.base }}`)
 
-            ## Files
+            Build flags: `make build IMAGE=${{ inputs.image }} AZURE=true DEV=true`
 
-            ## Azure Artifacts
-
-            - `${{ steps.artifacts.outputs.base }}.vhd` — Azure-compatible
-              fixed VHD. Upload to Azure storage and create a TDX VM with
-              `go run tools/deploy-azure/main.go deploy --disk-path …` (see
-              repo README §"Running Images (Azure)").
-            - `${{ steps.artifacts.outputs.base }}.measurements.json` —
-              vTPM PCR reference values. Pass as `--release-url` to
-              `cargo run -p xtask -- register-tdx` to verify the live quote
-              before trusting the VM. Works for both Azure and GCP.
-            - `${{ steps.artifacts.outputs.base }}.SHA256SUMS` — sha256 of
-              the VHD and measurements file.
-
-            GCP artifacts (`.tar.gz`, `.gcp_measurements.json`) are added
-            by the `build-gcp` job that runs in parallel.
+            - `${{ steps.artifacts.outputs.base }}.vhd` — Azure-compatible fixed VHD.
+              Deploy with `go run tools/deploy-azure/main.go deploy --disk-path …`
+            - `${{ steps.artifacts.outputs.base }}.measurements.json` — vTPM PCR
+              reference values. Pass as `--release-url` to `register-tdx` to verify
+              the live quote. Works for both Azure and GCP.
+            - `${{ steps.artifacts.outputs.base }}.SHA256SUMS`
           files: |
             ${{ steps.artifacts.outputs.vhd }}
             ${{ steps.artifacts.outputs.measurements }}
             ${{ steps.artifacts.outputs.sums }}
 
   build-gcp:
-    needs: build-and-release
+    needs: create-release
     runs-on: ${{ inputs.runner }}
     env:
       IMAGE: ${{ inputs.image }}
@@ -227,8 +209,7 @@ jobs:
           sudo apt-get clean
           df -h /
 
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -290,13 +271,11 @@ jobs:
       - name: Resolve image version
         id: version
         run: |
-          set -euxo pipefail
           base='${{ steps.artifacts.outputs.base }}'
           echo "version=${base#${IMAGE}-gcp-dev_}" >> "$GITHUB_OUTPUT"
 
       - name: Show artifact sizes
         run: |
-          set -euxo pipefail
           ls -lh \
             '${{ steps.artifacts.outputs.targz }}' \
             '${{ steps.artifacts.outputs.measurements }}' \
@@ -309,21 +288,20 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           fail_on_unmatched_files: true
+          append_body: true
           body: |
-            ## GCP Artifacts
+            ## GCP (`${{ steps.artifacts.outputs.base }}`)
 
-            - `${{ steps.artifacts.outputs.base }}.tar.gz` — GCP-compatible raw
-              disk image (`disk.raw` inside tar). Upload to a GCS bucket and
-              deploy with `go run tools/deploy-gcp deploy --disk-path …`
-              (see repo README §"Running Images (Google Cloud)").
-            - `${{ steps.artifacts.outputs.base }}.measurements.json` —
-              vTPM PCR reference values. Pass as `--release-url` to
-              `cargo run -p xtask -- register-tdx` to verify the live quote.
-            - `${{ steps.artifacts.outputs.base }}.gcp_measurements.json` —
-              TDX RTMR values (dstack-mr). For future TDX-native on-chain
-              verifier use; not consumed by the current registration flow.
-            - `${{ steps.artifacts.outputs.base }}.SHA256SUMS` — sha256 of
-              all three files above.
+            Build flags: `make build IMAGE=${{ inputs.image }} GCP=true DEV=true`
+
+            - `${{ steps.artifacts.outputs.base }}.tar.gz` — GCP raw disk image
+              (`disk.raw` inside tar). Deploy with
+              `go run tools/deploy-gcp deploy --disk-path …`
+            - `${{ steps.artifacts.outputs.base }}.measurements.json` — vTPM PCR
+              reference values. Pass as `--release-url` to `register-tdx`.
+            - `${{ steps.artifacts.outputs.base }}.gcp_measurements.json` — TDX RTMR
+              values (dstack-mr). Future TDX-native verifier use.
+            - `${{ steps.artifacts.outputs.base }}.SHA256SUMS`
           files: |
             ${{ steps.artifacts.outputs.targz }}
             ${{ steps.artifacts.outputs.measurements }}
