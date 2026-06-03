@@ -14,3 +14,4 @@ tmp/
 .env
 mkosi.tools/
 graphify-out/
+deploy-gcp
