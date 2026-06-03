@@ -5,4 +5,6 @@ transport:
     systemd: true
 
 issuer:
-  type: {{tdx_prover.tdxs_issuer}}
+  # Filled in by render-config.sh from the build profile (azure -> azure,
+  # gcp / bare-metal -> tdx). Do NOT set an issuer in env.json.
+  type: __TDXS_ISSUER__

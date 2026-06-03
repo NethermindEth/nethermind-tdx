@@ -21,12 +21,22 @@ for extra_dir in mkosi.extra taiko-tdx-prover/mkosi.extra; do
     done < <(find "$extra_dir" -type f -name '*.mustache' -print0 2>/dev/null)
 done
 
-# Upstream tdxs supports only 'azure', 'tdx', 'simulator'. We additionally accept
-# 'gcp' in env.json for clarity (GCP CVMs expose raw /dev/tdx_guest, so the wire
-# behavior is identical to bare-metal tdx). Translate it on the way out.
+# The tdxs attestation issuer is derived from the BUILD PROFILE, not env.json:
+#   azure profile            -> "azure" (Azure vTPM-bound TDX quote)
+#   gcp profile / bare-metal -> "tdx"   (native DCAP quote via /dev/tdx_guest;
+#                                        GCP CVMs expose it directly)
+# This keeps the issuer in lockstep with `make build AZURE=true|GCP=true`, so
+# there is no separate `tdxs_issuer` knob in env.json to keep in sync. The
+# template emits the sentinel __TDXS_ISSUER__ which we replace here.
 TDXS_CONFIG="$BUILDROOT/etc/tdxs/config.yaml"
 if [ -f "$TDXS_CONFIG" ]; then
-    sed -i -E 's/^([[:space:]]*type:[[:space:]]*)gcp[[:space:]]*$/\1tdx/' "$TDXS_CONFIG"
+    if [[ "${PROFILES:-}" == *"azure"* ]]; then
+        TDXS_ISSUER="azure"
+    else
+        TDXS_ISSUER="tdx"
+    fi
+    sed -i -E "s/^([[:space:]]*type:[[:space:]]*)__TDXS_ISSUER__[[:space:]]*$/\1${TDXS_ISSUER}/" "$TDXS_CONFIG"
+    echo "render-config: tdxs issuer set to '${TDXS_ISSUER}' (profiles: ${PROFILES:-none})"
 fi
 
 # NOTE: reth-tdx reads all configuration from CLI flags + env vars set by the

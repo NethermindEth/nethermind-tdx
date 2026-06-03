@@ -21,6 +21,18 @@ for extra_dir in mkosi.extra surge-tdx-prover/mkosi.extra; do
     done < <(find "$extra_dir" -type f -name '*.mustache' -print0 2>/dev/null)
 done
 
+# Derive the tdxs attestation issuer from the build profile (see
+# taiko-tdx-prover/render-config.sh for rationale): azure -> azure, else -> tdx.
+TDXS_CONFIG="$BUILDROOT/etc/tdxs/config.yaml"
+if [ -f "$TDXS_CONFIG" ]; then
+    if [[ "${PROFILES:-}" == *"azure"* ]]; then
+        TDXS_ISSUER="azure"
+    else
+        TDXS_ISSUER="tdx"
+    fi
+    sed -i -E "s/^([[:space:]]*type:[[:space:]]*)__TDXS_ISSUER__[[:space:]]*$/\1${TDXS_ISSUER}/" "$TDXS_CONFIG"
+fi
+
 # TODO: remove this once not necessary anymore
 # L1_CONTRACT=$(jq -r '.tdx_prover.l1_contract' "$ENV_FILE")
 # L2_CONTRACT=$(jq -r '.tdx_prover.l2_contract' "$ENV_FILE")
