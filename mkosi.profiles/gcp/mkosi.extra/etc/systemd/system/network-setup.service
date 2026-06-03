@@ -1,0 +1,13 @@
+[Unit]
+Description=Basic Network Setup
+DefaultDependencies=no
+Before=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/network-setup-gcp.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target
