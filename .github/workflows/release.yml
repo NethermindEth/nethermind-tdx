@@ -186,16 +186,146 @@ jobs:
 
             ## Files
 
+            ## Azure Artifacts
+
             - `${{ steps.artifacts.outputs.base }}.vhd` — Azure-compatible
               fixed VHD. Upload to Azure storage and create a TDX VM with
               `go run tools/deploy-azure/main.go deploy --disk-path …` (see
               repo README §"Running Images (Azure)").
             - `${{ steps.artifacts.outputs.base }}.measurements.json` —
-              expected measured-boot reference values (UKI, PCRs). Use to
-              verify the live attestation quote before trusting the VM.
+              vTPM PCR reference values. Pass as `--release-url` to
+              `cargo run -p xtask -- register-tdx` to verify the live quote
+              before trusting the VM. Works for both Azure and GCP.
             - `${{ steps.artifacts.outputs.base }}.SHA256SUMS` — sha256 of
               the VHD and measurements file.
+
+            GCP artifacts (`.tar.gz`, `.gcp_measurements.json`) are added
+            by the `build-gcp` job that runs in parallel.
           files: |
             ${{ steps.artifacts.outputs.vhd }}
             ${{ steps.artifacts.outputs.measurements }}
+            ${{ steps.artifacts.outputs.sums }}
+
+  build-gcp:
+    needs: build-and-release
+    runs-on: ${{ inputs.runner }}
+    env:
+      IMAGE: ${{ inputs.image }}
+      FORCE_LIMA: ''
+    steps:
+      - name: Free disk space (GitHub-hosted runners only)
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          set -euxo pipefail
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /opt/ghc \
+            /opt/hostedtoolcache \
+            /usr/local/.ghcup \
+            /usr/local/share/boost
+          sudo apt-get clean
+          df -h /
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - name: Cache mkosi build dirs
+        uses: actions/cache@v4
+        with:
+          path: |
+            mkosi.cache
+            mkosi.builddir
+          key: mkosi-gcp-${{ inputs.image }}-${{ runner.os }}-${{ hashFiles('flake.lock', 'tdx-prover.conf', 'base/mkosi.conf', 'mkosi.profiles/**/mkosi.conf') }}
+          restore-keys: |
+            mkosi-gcp-${{ inputs.image }}-${{ runner.os }}-
+
+      - name: Prepare env.json
+        run: |
+          set -euxo pipefail
+          ENV_SOURCE="${{ inputs.env_file }}"
+          if [ ! -f "$ENV_SOURCE" ]; then
+            echo "Error: env_file '$ENV_SOURCE' not found in the repository."
+            ls env*.json 2>/dev/null || echo "  (none)"
+            exit 1
+          fi
+          cp "$ENV_SOURCE" env.json
+          python3 -c "import json; d=json.load(open('env.json'))['tdx_prover']; print('  chain:   L1={} L2={}'.format(d['l1_chainid'],d['l2_chainid'])); print('  inbox:   '+d['shasta_inbox']); print('  verifier:'+d['shasta_verifier'])"
+
+      - name: Enable unprivileged user namespaces
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          set -euxo pipefail
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          getent passwd "$USER" | cut -d: -f1
+          grep -E "^$USER:" /etc/subuid || echo "WARN: no subuid range for $USER"
+          grep -E "^$USER:" /etc/subgid || echo "WARN: no subgid range for $USER"
+
+      - name: Build GCP image (GCP=true DEV=true)
+        run: |
+          set -euxo pipefail
+          # GCP+DEV produces image_id "<image>-gcp-dev" (see Makefile), keeping
+          # artifacts distinct from Azure's "<image>-dev" in the same release.
+          make build IMAGE="$IMAGE" GCP=true DEV=true
+
+      - name: Fix build directory ownership
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          sudo chown -R "$USER:$USER" build/
+
+      - name: Collect GCP release artifacts
+        id: artifacts
+        run: |
+          set -euxo pipefail
+          scripts/collect_gcp_release_artifacts.sh "${IMAGE}-gcp-dev" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Resolve image version
+        id: version
+        run: |
+          set -euxo pipefail
+          base='${{ steps.artifacts.outputs.base }}'
+          echo "version=${base#${IMAGE}-gcp-dev_}" >> "$GITHUB_OUTPUT"
+
+      - name: Show artifact sizes
+        run: |
+          set -euxo pipefail
+          ls -lh \
+            '${{ steps.artifacts.outputs.targz }}' \
+            '${{ steps.artifacts.outputs.measurements }}' \
+            '${{ steps.artifacts.outputs.gcp_measurements }}' \
+            '${{ steps.artifacts.outputs.sums }}'
+          cat '${{ steps.artifacts.outputs.sums }}'
+
+      - name: Upload GCP artifacts to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          fail_on_unmatched_files: true
+          body: |
+            ## GCP Artifacts
+
+            - `${{ steps.artifacts.outputs.base }}.tar.gz` — GCP-compatible raw
+              disk image (`disk.raw` inside tar). Upload to a GCS bucket and
+              deploy with `go run tools/deploy-gcp deploy --disk-path …`
+              (see repo README §"Running Images (Google Cloud)").
+            - `${{ steps.artifacts.outputs.base }}.measurements.json` —
+              vTPM PCR reference values. Pass as `--release-url` to
+              `cargo run -p xtask -- register-tdx` to verify the live quote.
+            - `${{ steps.artifacts.outputs.base }}.gcp_measurements.json` —
+              TDX RTMR values (dstack-mr). For future TDX-native on-chain
+              verifier use; not consumed by the current registration flow.
+            - `${{ steps.artifacts.outputs.base }}.SHA256SUMS` — sha256 of
+              all three files above.
+          files: |
+            ${{ steps.artifacts.outputs.targz }}
+            ${{ steps.artifacts.outputs.measurements }}
+            ${{ steps.artifacts.outputs.gcp_measurements }}
             ${{ steps.artifacts.outputs.sums }}

@@ -438,7 +438,7 @@ func createFirewallRules(client *GCPClient, d DeploymentInfo, allowedIP string) 
 	// Split SSH out because it has a narrower source range.
 	ssh := &computepb.Firewall{
 		Name:        proto.String(d.FirewallSSHName),
-		Network:     proto.String(fmt.Sprintf("global/networks/%s", d.Network)),
+		Network:     proto.String(fmt.Sprintf("projects/%s/global/networks/%s", d.ProjectID, d.Network)),
 		Direction:   proto.String("INGRESS"),
 		Priority:    proto.Int32(1000),
 		TargetTags:  []string{tag},
@@ -499,7 +499,7 @@ func createFirewallRules(client *GCPClient, d DeploymentInfo, allowedIP string) 
 
 func createInstance(client *GCPClient, d DeploymentInfo, machineType string) error {
 	netIface := &computepb.NetworkInterface{
-		Network: proto.String(fmt.Sprintf("global/networks/%s", d.Network)),
+		Network: proto.String(fmt.Sprintf("projects/%s/global/networks/%s", d.ProjectID, d.Network)),
 		// C3 (the TDX-capable family) only supports the Google Virtual NIC.
 		// Pin it explicitly so creation doesn't fall back to VIRTIO_NET.
 		NicType: proto.String("GVNIC"),

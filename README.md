@@ -8,18 +8,21 @@ Based on the Flashbots toolkit, this provides a minimal, hardened Linux image de
 
 ### Option A — Use a pre-built image from the release page (recommended)
 
-Pre-built Azure VHD images are published on the
+Pre-built images are published on the
 [Releases](https://github.com/NethermindEth/nethermind-tdx/releases) page.
-Each release includes:
+Each release includes both Azure and GCP artifacts:
 
-| File | Purpose |
-|---|---|
-| `…vhd` | Azure-compatible fixed VHD, ready to deploy directly |
-| `…measurements.json` | `measured-boot` reference PCR values for on-chain verification |
-| `…SHA256SUMS` | SHA-256 checksums for both files above |
+| File | Platform | Purpose |
+|---|---|---|
+| `…vhd` | Azure | Fixed VHD, ready to deploy directly |
+| `…tar.gz` | GCP | Raw disk image (`disk.raw` inside), ready to deploy |
+| `…measurements.json` | Both | vTPM PCR reference values — used by `register-tdx --release-url` to cross-check the live VM's quote before on-chain registration |
+| `…gcp_measurements.json` | GCP | TDX RTMR values (future TDX-native verifier use) |
+| `…SHA256SUMS` | Both | SHA-256 checksums of all files above |
 
-Download the `.vhd` for your target chain (e.g. `taiko-tdx-prover-dev_2026-06-01.…vhd`),
-then skip ahead to [Running Images (Azure)](#running-images-azure).
+Download the image for your target platform and chain, then skip ahead to
+[Running Images (Azure)](#running-images-azure) or
+[Running Images (Google Cloud)](#running-images-google-cloud).
 
 ---
 
@@ -88,6 +91,9 @@ Most of the values are self-explanatory, but here are some notes on the less obv
 
    # Build with GCP compatibility
    make build IMAGE=taiko-tdx-prover GCP=true
+
+   # Build with GCP compatibility and development tools (image id: taiko-tdx-prover-gcp-dev)
+   make build IMAGE=taiko-tdx-prover GCP=true DEV=true
 
    # View all available targets
    make help
@@ -247,20 +253,11 @@ make build IMAGE=taiko-tdx-prover GCP=true
 - Enable the **Compute Engine** and **Cloud Storage** APIs on the project.
 - A **GCS bucket you own** — the tar.gz is staged there to create the GCE image,
   then the staging object is removed automatically (`--keep-staging` to keep it).
+- Know your **VPC network name** — GCP projects do not always have a network
+  named `default`. Run `gcloud compute networks list --project {GCP_PROJECT}` to
+  find it; pass it as `--network <name>`.
 
-**3. Deploy** (convenience wrapper auto-finds the newest `build/*.tar.gz`):
-
-```bash
-scripts/deploy_gcp.sh \
-  --id   my-prover-1 \
-  --project  {GCP_PROJECT} \
-  --bucket   {GCS_BUCKET} \
-  --zone     us-central1-a \
-  --machine-type c3-standard-4 \
-  --allowed-ip {YOUR_IP}/32
-```
-
-Or call the Go tool directly:
+**3. Deploy:**
 
 ```bash
 go run ./tools/deploy-gcp deploy \
@@ -270,9 +267,17 @@ go run ./tools/deploy-gcp deploy \
   --disk-path build/taiko-tdx-prover_<version>.tar.gz \
   --zone us-central1-a \
   --machine-type c3-standard-4 \
+  --network {VPC_NETWORK} \
   --storage-gb 100 \
   --allowed-ip {YOUR_IP}/32
 ```
+
+> [!NOTE]
+> If your service account lacks `compute.firewalls.create` (e.g. in shared-VPC
+> projects), add `--skip-firewall`. In that case, ensure the VPC already has
+> ingress rules for ports **22** (SSH), **8080** (prover init), **8545/8551**
+> (RPC/engine), and **30303** (P2P) — or ask devops to add them.
+
 
 > [!IMPORTANT]
 > Intel TDX on GCE is only available on the **C3 machine family** (e.g.

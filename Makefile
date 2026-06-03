@@ -62,6 +62,7 @@ build: check-perms setup ## Build the specified module
 	if [ "$(DEV)" = "true" ]; then profiles="$$profiles,devtools"; image_id="$(IMAGE)-dev"; fi; \
 	if [ "$(AZURE)" = "true" ]; then profiles="$$profiles,azure"; fi; \
 	if [ "$(GCP)" = "true" ]; then profiles="$$profiles,gcp"; fi; \
+	if [ "$(GCP)" = "true" ] && [ "$(DEV)" = "true" ]; then image_id="$(IMAGE)-gcp-dev"; fi; \
 	$(WRAPPER) mkosi --force --image-id $$image_id --profile=$$profiles -I tdx-prover.conf
 
 
@@ -87,7 +88,7 @@ endif
 	fi; \
 	echo "$$assets" | while IFS=' ' read -r name url; do \
 		case "$$name" in \
-			*.vhd|*.measurements.json|*.SHA256SUMS) \
+			*.vhd|*.tar.gz|*.measurements.json|*.gcp_measurements.json|*.SHA256SUMS) \
 				echo "  Downloading $$name ..."; \
 				curl -fsSL -o "build/$$name" "$$url"; \
 				;; \
