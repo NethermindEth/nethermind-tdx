@@ -113,7 +113,7 @@ func main() {
 	deployCmd.Flags().String("subnetwork", "", "Subnetwork (defaults to the network's auto subnet in the chosen region)")
 	deployCmd.Flags().String("bucket", "", "GCS bucket used to stage the image (required; user-managed)")
 	deployCmd.Flags().Bool("keep-staging", false, "Keep the uploaded tar.gz in the bucket after image creation")
-	deployCmd.Flags().Bool("skip-firewall", false, "Skip creating firewall rules (use when service account lacks compute.firewalls.create; ensure VPC already allows the required ports)")
+	deployCmd.Flags().Bool("skip-firewall", false, "Skip creating firewall rules (use when service account lacks compute.firewalls.create)")
 
 	for _, name := range []string{"id", "disk-path", "project", "bucket"} {
 		_ = deployCmd.MarkFlagRequired(name)
@@ -488,6 +488,10 @@ func createFirewallRules(client *GCPClient, d DeploymentInfo, allowedIP string) 
 			FirewallResource: fw,
 		})
 		if err != nil {
+			if isAlreadyExists(err) {
+				fmt.Printf("   (firewall %s already exists, skipping)\n", fw.GetName())
+				continue
+			}
 			return fmt.Errorf("insert firewall %s: %w", fw.GetName(), err)
 		}
 		if err := op.Wait(client.ctx); err != nil {
