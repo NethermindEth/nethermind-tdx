@@ -116,6 +116,12 @@ jobs:
             mkosi-azure-${{ inputs.image }}-${{ runner.os }}-
 
       - name: Prepare env.json
+        env:
+          # Private L1 endpoints live in repo/org Actions secrets, not in the
+          # committed env file (env.taiko-devnet.json ships them empty).
+          L1_RPC: ${{ secrets.L1_RPC }}
+          L1_RPC_WS: ${{ secrets.L1_RPC_WS }}
+          L1_BEACON_RPC: ${{ secrets.L1_BEACON_RPC }}
         run: |
           set -euxo pipefail
           ENV_SOURCE="${{ inputs.env_file }}"
@@ -125,6 +131,21 @@ jobs:
             exit 1
           fi
           cp "$ENV_SOURCE" env.json
+          # Inject the private L1 endpoints from CI secrets. Each is applied only
+          # when set, so a locally-provided env.json is left untouched. -x is off
+          # here so the values never hit the build log (GitHub also masks them).
+          set +x
+          if [ -n "${L1_RPC}${L1_RPC_WS}${L1_BEACON_RPC}" ]; then
+            jq --arg rpc "$L1_RPC" --arg ws "$L1_RPC_WS" --arg beacon "$L1_BEACON_RPC" \
+              '.tdx_prover.l1_rpc       = (if $rpc    != "" then $rpc    else .tdx_prover.l1_rpc       end)
+             | .tdx_prover.l1_rpc_ws    = (if $ws     != "" then $ws     else .tdx_prover.l1_rpc_ws    end)
+             | .tdx_prover.l1_beacon_rpc= (if $beacon != "" then $beacon else .tdx_prover.l1_beacon_rpc end)' \
+              env.json > env.json.tmp && mv env.json.tmp env.json
+            echo "Injected L1 endpoints from CI secrets."
+          else
+            echo "WARN: L1_RPC / L1_RPC_WS / L1_BEACON_RPC secrets not set — L1 endpoints stay empty."
+          fi
+          set -x
           python3 -c "import json; d=json.load(open('env.json'))['tdx_prover']; print('  chain:   L1={} L2={}'.format(d['l1_chainid'],d['l2_chainid'])); print('  inbox:   '+d['shasta_inbox']); print('  verifier:'+d['shasta_verifier'])"
 
       - name: Enable unprivileged user namespaces
@@ -230,6 +251,12 @@ jobs:
             mkosi-gcp-${{ inputs.image }}-${{ runner.os }}-
 
       - name: Prepare env.json
+        env:
+          # Private L1 endpoints live in repo/org Actions secrets, not in the
+          # committed env file (env.taiko-devnet.json ships them empty).
+          L1_RPC: ${{ secrets.L1_RPC }}
+          L1_RPC_WS: ${{ secrets.L1_RPC_WS }}
+          L1_BEACON_RPC: ${{ secrets.L1_BEACON_RPC }}
         run: |
           set -euxo pipefail
           ENV_SOURCE="${{ inputs.env_file }}"
@@ -239,6 +266,21 @@ jobs:
             exit 1
           fi
           cp "$ENV_SOURCE" env.json
+          # Inject the private L1 endpoints from CI secrets. Each is applied only
+          # when set, so a locally-provided env.json is left untouched. -x is off
+          # here so the values never hit the build log (GitHub also masks them).
+          set +x
+          if [ -n "${L1_RPC}${L1_RPC_WS}${L1_BEACON_RPC}" ]; then
+            jq --arg rpc "$L1_RPC" --arg ws "$L1_RPC_WS" --arg beacon "$L1_BEACON_RPC" \
+              '.tdx_prover.l1_rpc       = (if $rpc    != "" then $rpc    else .tdx_prover.l1_rpc       end)
+             | .tdx_prover.l1_rpc_ws    = (if $ws     != "" then $ws     else .tdx_prover.l1_rpc_ws    end)
+             | .tdx_prover.l1_beacon_rpc= (if $beacon != "" then $beacon else .tdx_prover.l1_beacon_rpc end)' \
+              env.json > env.json.tmp && mv env.json.tmp env.json
+            echo "Injected L1 endpoints from CI secrets."
+          else
+            echo "WARN: L1_RPC / L1_RPC_WS / L1_BEACON_RPC secrets not set — L1 endpoints stay empty."
+          fi
+          set -x
           python3 -c "import json; d=json.load(open('env.json'))['tdx_prover']; print('  chain:   L1={} L2={}'.format(d['l1_chainid'],d['l2_chainid'])); print('  inbox:   '+d['shasta_inbox']); print('  verifier:'+d['shasta_verifier'])"
 
       - name: Enable unprivileged user namespaces
