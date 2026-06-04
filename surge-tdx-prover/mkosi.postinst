@@ -57,16 +57,14 @@ done
 mkosi-chroot systemctl disable ssh.service ssh.socket
 mkosi-chroot systemctl mask ssh.service ssh.socket
 
-# Install SSH public key if available
-if [ -f "id_ed25519.pub" ]; then
-    mkdir -p "$BUILDROOT/etc/dropbear"
-    cat "id_ed25519.pub" >> "$BUILDROOT/etc/dropbear/authorized_keys"
-    mkosi-chroot chmod 0600 "/etc/dropbear/authorized_keys"
-
-    mkdir -p "$BUILDROOT/root/.ssh"
-    cat "id_ed25519.pub" >> "$BUILDROOT/root/.ssh/authorized_keys"
-    mkosi-chroot chmod 0600 "/root/.ssh/authorized_keys"
-fi
+# NOTE: do NOT bake an SSH public key into the image here. The prover's SSH
+# key is injected at runtime via the runtime-init webserver on :8080. The old
+# `if [ -f id_ed25519.pub ]` block baked a key into /etc/dropbear and
+# /root/.ssh whenever that git-ignored file happened to exist in the build
+# tree — which (a) broke reproducibility (CI's clean checkout has no such
+# file, a local dev tree does → different authorized_keys → different
+# initrd → different PCRs/RTMRs) and (b) embedded a dev key into the
+# measured boot. Runtime injection is the only supported path.
 
 # # Lock the root account
 # mkosi-chroot passwd -l root
