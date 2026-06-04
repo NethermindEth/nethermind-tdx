@@ -31,6 +31,19 @@ if [ -f "$TDXS_CONFIG" ]; then
         TDXS_ISSUER="tdx"
     fi
     sed -i -E "s/^([[:space:]]*type:[[:space:]]*)__TDXS_ISSUER__[[:space:]]*$/\1${TDXS_ISSUER}/" "$TDXS_CONFIG"
+
+    # Native (tdx) issuer needs CAP_DAC_OVERRIDE for the root-owned configfs-tsm
+    # quote path; azure does not. Gate the drop-in on the issuer.
+    if [ "$TDXS_ISSUER" = "tdx" ]; then
+        DROPIN_DIR="$BUILDROOT/etc/systemd/system/tdxs.service.d"
+        mkdir -p "$DROPIN_DIR"
+        cat > "$DROPIN_DIR/10-configfs-tsm.conf" <<'EOF'
+[Service]
+AmbientCapabilities=CAP_DAC_OVERRIDE
+CapabilityBoundingSet=CAP_DAC_OVERRIDE
+EOF
+        chmod 644 "$DROPIN_DIR/10-configfs-tsm.conf"
+    fi
 fi
 
 # TODO: remove this once not necessary anymore

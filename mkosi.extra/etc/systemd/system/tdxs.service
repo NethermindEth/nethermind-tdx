@@ -9,15 +9,9 @@ User=tdxs
 Group=tdx
 WorkingDirectory=/home/tdxs
 Type=notify
-# CAP_DAC_OVERRIDE lets tdxs (running as the unprivileged tdxs user) create a
-# report entry under /sys/kernel/config/tsm/report and write its root-owned
-# `inblob` attribute file. The native TDX (gcp/bare-metal) issuer generates
-# quotes through this configfs-tsm interface; the dir and its kernel-created
-# attribute files are root-owned, so without this cap mkdir/inblob fail with
-# EACCES. Harmless for the azure issuer (which uses the tdx-group-owned vTPM
-# devices instead).
-AmbientCapabilities=CAP_DAC_OVERRIDE
-CapabilityBoundingSet=CAP_DAC_OVERRIDE
+# NOTE: the native (tdx) issuer additionally needs CAP_DAC_OVERRIDE to drive the
+# root-owned configfs-tsm interface. That capability is added by a drop-in only
+# for the tdx issuer (see render-config.sh); the azure issuer does not get it.
 ExecStart=/usr/bin/tdxs \
     --config /etc/tdxs/config.yaml
 Restart=on-failure

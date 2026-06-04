@@ -37,6 +37,26 @@ if [ -f "$TDXS_CONFIG" ]; then
     fi
     sed -i -E "s/^([[:space:]]*type:[[:space:]]*)__TDXS_ISSUER__[[:space:]]*$/\1${TDXS_ISSUER}/" "$TDXS_CONFIG"
     echo "render-config: tdxs issuer set to '${TDXS_ISSUER}' (profiles: ${PROFILES:-none})"
+
+    # The native (tdx) issuer generates quotes through the root-owned configfs-tsm
+    # interface (/sys/kernel/config/tsm/report); tdxs runs as the unprivileged
+    # tdxs user, so it needs CAP_DAC_OVERRIDE to mkdir a report entry and write
+    # its root-owned inblob. The azure issuer uses the tdx-group-owned vTPM
+    # devices and must NOT get this extra privilege, so gate the drop-in on the
+    # issuer rather than baking it into the shared unit.
+    if [ "$TDXS_ISSUER" = "tdx" ]; then
+        DROPIN_DIR="$BUILDROOT/etc/systemd/system/tdxs.service.d"
+        mkdir -p "$DROPIN_DIR"
+        cat > "$DROPIN_DIR/10-configfs-tsm.conf" <<'EOF'
+[Service]
+# Required for the native (tdx) issuer's configfs-tsm quote path. See
+# taiko-tdx-prover/render-config.sh. Not present for the azure issuer.
+AmbientCapabilities=CAP_DAC_OVERRIDE
+CapabilityBoundingSet=CAP_DAC_OVERRIDE
+EOF
+        chmod 644 "$DROPIN_DIR/10-configfs-tsm.conf"
+        echo "render-config: added CAP_DAC_OVERRIDE drop-in for native tdx issuer"
+    fi
 fi
 
 # NOTE: reth-tdx reads all configuration from CLI flags + env vars set by the
