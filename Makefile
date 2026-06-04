@@ -58,11 +58,12 @@ build: check-perms setup ## Build the specified module
 		taiko-tdx-prover) variant_profile="taiko" ;; \
 	esac; \
 	profiles="$$variant_profile"; \
-	image_id="$(IMAGE)"; \
-	if [ "$(DEV)" = "true" ]; then profiles="$$profiles,devtools"; image_id="$(IMAGE)-dev"; fi; \
+	if [ "$(DEV)" = "true" ]; then profiles="$$profiles,devtools"; fi; \
 	if [ "$(AZURE)" = "true" ]; then profiles="$$profiles,azure"; fi; \
 	if [ "$(GCP)" = "true" ]; then profiles="$$profiles,gcp"; fi; \
-	if [ "$(GCP)" = "true" ] && [ "$(DEV)" = "true" ]; then image_id="$(IMAGE)-gcp-dev"; fi; \
+	image_id="$(IMAGE)"; \
+	if [ "$(GCP)" = "true" ]; then image_id="$(IMAGE)-gcp"; fi; \
+	if [ "$(DEV)" = "true" ]; then image_id="$$image_id-dev"; fi; \
 	$(WRAPPER) mkosi --force --image-id $$image_id --profile=$$profiles -I tdx-prover.conf
 
 

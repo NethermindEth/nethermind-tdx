@@ -1,6 +1,6 @@
 name: Release taiko-tdx-prover
 
-# Builds Azure VHD (AZURE=true DEV=true) and GCP tar.gz (GCP=true DEV=true)
+# Builds Azure VHD (AZURE=true) and GCP tar.gz (GCP=true)
 # images in parallel, extracts measured-boot PCR values and TDX RTMR values,
 # and publishes all artifacts to a GitHub release. Operators consume the
 # release to:
@@ -70,7 +70,7 @@ jobs:
             **Source commit**: `${{ github.sha }}`
             **Chain config**: `${{ inputs.env_file }}`
 
-            Azure (`${{ inputs.image }}-dev`) and GCP (`${{ inputs.image }}-gcp-dev`)
+            Azure (`${{ inputs.image }}`) and GCP (`${{ inputs.image }}-gcp`)
             artifacts are uploaded by parallel build jobs — they may appear a few
             minutes after the release is created.
 
@@ -157,10 +157,10 @@ jobs:
           grep -E "^$USER:" /etc/subuid || echo "WARN: no subuid range for $USER"
           grep -E "^$USER:" /etc/subgid || echo "WARN: no subgid range for $USER"
 
-      - name: Build Azure VHD (AZURE=true DEV=true)
+      - name: Build Azure VHD (AZURE=true)
         run: |
           set -euxo pipefail
-          make build IMAGE="$IMAGE" AZURE=true DEV=true
+          make build IMAGE="$IMAGE" AZURE=true
 
       - name: Fix build directory ownership
         if: ${{ runner.environment == 'github-hosted' }}
@@ -171,13 +171,13 @@ jobs:
         id: artifacts
         run: |
           set -euxo pipefail
-          scripts/collect_release_artifacts.sh "${IMAGE}-dev" | tee -a "$GITHUB_OUTPUT"
+          scripts/collect_release_artifacts.sh "${IMAGE}" | tee -a "$GITHUB_OUTPUT"
 
       - name: Resolve image version
         id: version
         run: |
           base='${{ steps.artifacts.outputs.base }}'
-          echo "version=${base#${IMAGE}-dev_}" >> "$GITHUB_OUTPUT"
+          echo "version=${base#${IMAGE}_}" >> "$GITHUB_OUTPUT"
 
       - name: Show artifact sizes
         run: |
@@ -196,7 +196,7 @@ jobs:
           body: |
             ## Azure (`${{ steps.artifacts.outputs.base }}`)
 
-            Build flags: `make build IMAGE=${{ inputs.image }} AZURE=true DEV=true`
+            Build flags: `make build IMAGE=${{ inputs.image }} AZURE=true`
 
             - `${{ steps.artifacts.outputs.base }}.vhd` — Azure-compatible fixed VHD.
               Deploy with `go run tools/deploy-azure/main.go deploy --disk-path …`
@@ -292,12 +292,12 @@ jobs:
           grep -E "^$USER:" /etc/subuid || echo "WARN: no subuid range for $USER"
           grep -E "^$USER:" /etc/subgid || echo "WARN: no subgid range for $USER"
 
-      - name: Build GCP image (GCP=true DEV=true)
+      - name: Build GCP image (GCP=true)
         run: |
           set -euxo pipefail
-          # GCP+DEV produces image_id "<image>-gcp-dev" (see Makefile), keeping
-          # artifacts distinct from Azure's "<image>-dev" in the same release.
-          make build IMAGE="$IMAGE" GCP=true DEV=true
+          # GCP produces image_id "<image>-gcp" (see Makefile), keeping
+          # artifacts distinct from Azure's "<image>" in the same release.
+          make build IMAGE="$IMAGE" GCP=true
 
       - name: Fix build directory ownership
         if: ${{ runner.environment == 'github-hosted' }}
@@ -308,13 +308,13 @@ jobs:
         id: artifacts
         run: |
           set -euxo pipefail
-          scripts/collect_gcp_release_artifacts.sh "${IMAGE}-gcp-dev" | tee -a "$GITHUB_OUTPUT"
+          scripts/collect_gcp_release_artifacts.sh "${IMAGE}-gcp" | tee -a "$GITHUB_OUTPUT"
 
       - name: Resolve image version
         id: version
         run: |
           base='${{ steps.artifacts.outputs.base }}'
-          echo "version=${base#${IMAGE}-gcp-dev_}" >> "$GITHUB_OUTPUT"
+          echo "version=${base#${IMAGE}-gcp_}" >> "$GITHUB_OUTPUT"
 
       - name: Show artifact sizes
         run: |
@@ -334,7 +334,7 @@ jobs:
           body: |
             ## GCP (`${{ steps.artifacts.outputs.base }}`)
 
-            Build flags: `make build IMAGE=${{ inputs.image }} GCP=true DEV=true`
+            Build flags: `make build IMAGE=${{ inputs.image }} GCP=true`
 
             - `${{ steps.artifacts.outputs.base }}.tar.gz` — GCP raw disk image
               (`disk.raw` inside tar). Deploy with
