@@ -14,7 +14,10 @@ export RETH_TDX_GIT_URL="https://github.com/NethermindEth/reth-tdx.git"
 export TAIKO_CLIENT_VERSION="285d4576b80317d9f29030a66e1fd19cc9de7843"
 export TAIKO_CLIENT_GIT_URL="https://github.com/taikoxyz/taiko-mono/"
 
-export TDXS_VERSION="df890f7d378367cec8104328f685bdb9cb92e286"
+# TODO: re-pin to master once the configfs-tsm quote fix (fd2529a) is merged.
+# Pinned to fix/configfs-tsm-quote so modern kernels (GCP C3 / 6.13) use the
+# configfs-tsm quote path instead of the legacy /dev/tdx_guest ioctl ABI.
+export TDXS_VERSION="fd2529aef802be9de182181a11c91a0d2cb50fb0"
 export TDXS_GIT_URL="https://github.com/NethermindEth/tdxs"
 # ----------------------------------------------------------------------------
 
