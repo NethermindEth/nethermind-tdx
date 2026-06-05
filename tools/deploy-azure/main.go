@@ -320,7 +320,8 @@ func deployCommand(cmd *cobra.Command, args []string) error {
 	if publicIPAddress != "" {
 		fmt.Printf("   Public IP Address: %s\n", publicIPAddress)
 	}
-	fmt.Printf("\n💻 Connection:\n")
+	fmt.Printf("\n💻 Next steps (for DEV image):")
+	fmt.Printf("   Wait for the image to fully boot:\n")
 	if publicIPAddress != "" {
 		fmt.Printf("   SSH to your VM using: ssh <username>@%s\n", publicIPAddress)
 	} else {
@@ -328,7 +329,7 @@ func deployCommand(cmd *cobra.Command, args []string) error {
 		fmt.Printf("   (Check Azure Portal for the public IP address)\n")
 	}
 	fmt.Printf("\n🗑️  To delete this deployment:\n")
-	fmt.Printf("   surgetdx-vm delete %s\n", deploymentID)
+	fmt.Printf("   go run tools/deploy-azure/main.go delete %s\n", deploymentID)
 
 	return nil
 }

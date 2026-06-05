@@ -32,49 +32,38 @@ const (
 // firewallPorts is the same set of TCP ports the Azure NSG opens for the
 // prover stack. Defined once so deploy + delete refer to the same list.
 var firewallPorts = []string{
-	"22",    // SSH (restricted by source range)
-	"8080",  // raiko2 / tdx-init webserver
-	"8545",  // execution client JSON-RPC HTTP
-	"8551",  // engine API (JWT)
-	"8645",
-	"8745",
-	"8018",
-	"8547",  // L2 execution client (taiko)
-	"8548",
-	"8552",
-	"30303", // p2p (TCP+UDP — UDP handled by separate rule)
-	"30313",
+	"22",   // SSH (restricted by source range)
+	"8080", // reth-tdx HTTP server
 }
 
 // DeploymentInfo is persisted to ~/.surgetdx/deployments-gcp/<id>.json so
 // `delete` can tear down exactly the resources `deploy` created.
 type DeploymentInfo struct {
-	ID                 string    `json:"id"`
-	ProjectID          string    `json:"project_id"`
-	Zone               string    `json:"zone"`
-	Region             string    `json:"region"`
-	InstanceName       string    `json:"instance_name"`
-	ImageName          string    `json:"image_name"`
-	DataDiskName       string    `json:"data_disk_name"`
-	Network            string    `json:"network"`
-	Subnetwork         string    `json:"subnetwork"`
-	FirewallSSHName    string    `json:"firewall_ssh_name"`
-	FirewallSvcsName   string    `json:"firewall_services_name"`
-	FirewallP2PName    string    `json:"firewall_p2p_name"`
-	Bucket             string    `json:"bucket"`
-	StagingObject      string    `json:"staging_object"`
-	CreatedAt          time.Time `json:"created_at"`
+	ID               string    `json:"id"`
+	ProjectID        string    `json:"project_id"`
+	Zone             string    `json:"zone"`
+	Region           string    `json:"region"`
+	InstanceName     string    `json:"instance_name"`
+	ImageName        string    `json:"image_name"`
+	DataDiskName     string    `json:"data_disk_name"`
+	Network          string    `json:"network"`
+	Subnetwork       string    `json:"subnetwork"`
+	FirewallSSHName  string    `json:"firewall_ssh_name"`
+	FirewallSvcsName string    `json:"firewall_services_name"`
+	Bucket           string    `json:"bucket"`
+	StagingObject    string    `json:"staging_object"`
+	CreatedAt        time.Time `json:"created_at"`
 }
 
 // GCPClient bundles the long-lived clients we use across resource operations.
 type GCPClient struct {
-	ctx        context.Context
-	projectID  string
-	instances  *compute.InstancesClient
-	images     *compute.ImagesClient
-	disks      *compute.DisksClient
-	firewalls  *compute.FirewallsClient
-	storage    *storage.Client
+	ctx       context.Context
+	projectID string
+	instances *compute.InstancesClient
+	images    *compute.ImagesClient
+	disks     *compute.DisksClient
+	firewalls *compute.FirewallsClient
+	storage   *storage.Client
 }
 
 func main() {
@@ -213,7 +202,6 @@ func deployCommand(cmd *cobra.Command, _ []string) error {
 		Subnetwork:       subnetwork,
 		FirewallSSHName:  fmt.Sprintf("%s-allow-ssh", resourceBase),
 		FirewallSvcsName: fmt.Sprintf("%s-allow-svcs", resourceBase),
-		FirewallP2PName:  fmt.Sprintf("%s-allow-p2p", resourceBase),
 		Bucket:           bucket,
 		StagingObject:    stagingObject,
 		CreatedAt:        time.Now(),
@@ -255,10 +243,9 @@ func deployCommand(cmd *cobra.Command, _ []string) error {
 	}
 
 	if skipFirewall {
-		fmt.Println("⚠️  Skipping firewall rules (--skip-firewall). Ensure the VPC already allows ports 22, 8080, 30303, etc.")
+		fmt.Println("⚠️  Skipping firewall rules (--skip-firewall). Ensure the VPC already allows ports 22 and 8080.")
 		deployment.FirewallSSHName = ""
 		deployment.FirewallSvcsName = ""
-		deployment.FirewallP2PName = ""
 	} else {
 		fmt.Println("🔒 Creating firewall rules...")
 		if err := createFirewallRules(client, deployment, allowedIP); err != nil {
@@ -295,7 +282,8 @@ func deployCommand(cmd *cobra.Command, _ []string) error {
 	fmt.Printf("   Instance:          %s\n", deployment.InstanceName)
 	if externalIP != "" {
 		fmt.Printf("   External IP:       %s\n", externalIP)
-		fmt.Println("\n💻 Next steps:")
+		fmt.Println("\n💻 Next steps (for DEV image):")
+		fmt.Printf("   0. Wait for the image to fully boot:\n")
 		fmt.Printf("   1. Inject your SSH key:\n")
 		fmt.Printf("        curl -X POST -d \"$(cut -d' ' -f2 ~/.ssh/id_ed25519.pub)\" http://%s:8080\n", externalIP)
 		fmt.Printf("   2. SSH into the VM:\n")
@@ -427,21 +415,20 @@ func createDataDisk(client *GCPClient, d DeploymentInfo, sizeGB int64) error {
 	return op.Wait(client.ctx)
 }
 
-// createFirewallRules attaches three rules to the project's VPC, all scoped to
+// createFirewallRules attaches two rules to the project's VPC, scoped to
 // instances tagged with the deployment ID so they don't affect other VMs:
 //   - SSH: TCP/22 from `allowedIP`
-//   - Services: TCP/<prover ports>, from anywhere
-//   - P2P: UDP/30303 (TCP/30303 is part of the services rule)
+//   - Services: TCP/8080, from anywhere
 func createFirewallRules(client *GCPClient, d DeploymentInfo, allowedIP string) error {
 	tag := instanceTag(d.ID)
 
 	// Split SSH out because it has a narrower source range.
 	ssh := &computepb.Firewall{
-		Name:        proto.String(d.FirewallSSHName),
-		Network:     proto.String(fmt.Sprintf("projects/%s/global/networks/%s", d.ProjectID, d.Network)),
-		Direction:   proto.String("INGRESS"),
-		Priority:    proto.Int32(1000),
-		TargetTags:  []string{tag},
+		Name:         proto.String(d.FirewallSSHName),
+		Network:      proto.String(fmt.Sprintf("projects/%s/global/networks/%s", d.ProjectID, d.Network)),
+		Direction:    proto.String("INGRESS"),
+		Priority:     proto.Int32(1000),
+		TargetTags:   []string{tag},
 		SourceRanges: []string{allowedIP},
 		Allowed: []*computepb.Allowed{{
 			IPProtocol: proto.String("tcp"),
@@ -469,20 +456,7 @@ func createFirewallRules(client *GCPClient, d DeploymentInfo, allowedIP string) 
 		}},
 	}
 
-	p2p := &computepb.Firewall{
-		Name:         proto.String(d.FirewallP2PName),
-		Network:      proto.String(fmt.Sprintf("global/networks/%s", d.Network)),
-		Direction:    proto.String("INGRESS"),
-		Priority:     proto.Int32(1002),
-		TargetTags:   []string{tag},
-		SourceRanges: []string{"0.0.0.0/0"},
-		Allowed: []*computepb.Allowed{{
-			IPProtocol: proto.String("udp"),
-			Ports:      []string{"30303"},
-		}},
-	}
-
-	for _, fw := range []*computepb.Firewall{ssh, svcs, p2p} {
+	for _, fw := range []*computepb.Firewall{ssh, svcs} {
 		op, err := client.firewalls.Insert(client.ctx, &computepb.InsertFirewallRequest{
 			Project:          d.ProjectID,
 			FirewallResource: fw,
@@ -605,7 +579,7 @@ func deleteCommand(_ *cobra.Command, args []string) error {
 	fmt.Printf("  - Boot image:      %s\n", d.ImageName)
 	fmt.Printf("  - Data disk:       %s\n", d.DataDiskName)
 	fwNames := []string{}
-	for _, fw := range []string{d.FirewallSSHName, d.FirewallSvcsName, d.FirewallP2PName} {
+	for _, fw := range []string{d.FirewallSSHName, d.FirewallSvcsName} {
 		if fw != "" {
 			fwNames = append(fwNames, fw)
 		}
@@ -643,7 +617,7 @@ func deleteCommand(_ *cobra.Command, args []string) error {
 		fmt.Printf("  ⚠️  Failed to delete data disk: %v\n", err)
 	}
 
-	for _, fw := range []string{d.FirewallSSHName, d.FirewallSvcsName, d.FirewallP2PName} {
+	for _, fw := range []string{d.FirewallSSHName, d.FirewallSvcsName} {
 		if fw == "" {
 			continue
 		}
