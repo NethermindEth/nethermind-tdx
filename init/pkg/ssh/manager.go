@@ -35,6 +35,11 @@ func NewManager(cfg config.SSHConfig, dm *disks.Manager) (*Manager, error) {
 }
 
 func (sm *Manager) Setup(ctx context.Context) error {
+	if sm.provider == nil {
+		log.Println("SSH strategy is 'none' — skipping SSH setup")
+		return nil
+	}
+
 	var sshKey string
 	var err error
 
@@ -131,6 +136,8 @@ func (sm *Manager) writeSSHKey(sshKey string) error {
 
 func CreateKeyProvider(cfg config.SSHConfig) (KeyProvider, error) {
 	switch cfg.Strategy {
+	case "none":
+		return nil, nil
 	case "webserver":
 		serverURL := ":8080"
 		if url, ok := cfg.StrategyConfig["server_url"].(string); ok {

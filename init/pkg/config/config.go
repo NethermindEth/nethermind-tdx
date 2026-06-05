@@ -57,6 +57,9 @@ func (c *Config) Validate() error {
 	if c.SSH.Strategy == "" {
 		return fmt.Errorf("ssh.strategy is required")
 	}
+	if c.SSH.Strategy != "none" && c.SSH.Strategy != "webserver" {
+		return fmt.Errorf("ssh.strategy must be 'none' or 'webserver'")
+	}
 	if c.SSH.Dir == "" {
 		c.SSH.Dir = "/root/.ssh"
 	}

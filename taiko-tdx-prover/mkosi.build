@@ -8,7 +8,7 @@ set -euxo pipefail
 export NETHERMIND_VERSION="2a258a47bc22d2ab32c48df2662d324a8c4071a3"
 export NETHERMIND_GIT_URL="https://github.com/NethermindEth/nethermind.git"
 
-export RETH_TDX_VERSION="82b22af7d25e7ccd8fc02cffbea1722a46252031"
+export RETH_TDX_VERSION="734f888696f928ca572ffd35a11fde5a1ab5432a"
 export RETH_TDX_GIT_URL="https://github.com/NethermindEth/reth-tdx.git"
 
 export TAIKO_CLIENT_VERSION="285d4576b80317d9f29030a66e1fd19cc9de7843"
