@@ -1,0 +1,54 @@
+name: Kernel build and boot
+
+on:
+  pull_request:
+    paths:
+      - 'kernel/**'
+      - '.github/workflows/kernel.yml'
+  push:
+    paths:
+      - 'kernel/**'
+      - '.github/workflows/kernel.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  kernel:
+    name: Build and boot x86 kernel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - name: Install build and boot tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential flex bison bc libssl-dev libelf-dev \
+            cpio busybox-static qemu-system-x86
+      - name: Prepare kernel sources
+        run: |
+          set -euo pipefail
+          version=$(cat kernel/version)
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          git clone --depth 1 --branch "v$version" https://github.com/gregkh/linux "$RUNNER_TEMP/linux"
+          bash kernel/apply-patches.sh "$RUNNER_TEMP/linux"
+          grep -Fq 'kfree_rcu(rcu_dereference_protected(inet->inet_opt, 1), rcu)' "$RUNNER_TEMP/linux/net/ipv4/af_inet.c"
+          grep -Fq 'kfree_rcu(rcu_dereference_protected(inet_rsk(req)->ireq_opt, 1), rcu)' "$RUNNER_TEMP/linux/net/ipv4/tcp_ipv4.c"
+          grep -Fq '__inet_csk_reqsk_queue_drop(sk_listener, nreq, false)' "$RUNNER_TEMP/linux/net/ipv4/inet_connection_sock.c"
+          cp kernel/kernel-yocto.config "$RUNNER_TEMP/linux/.config"
+      - name: Build with the image kernel configuration
+        run: |
+          set -euo pipefail
+          export KBUILD_BUILD_TIMESTAMP='1970-01-01 00:00:00 UTC'
+          export KBUILD_BUILD_USER=mkosi KBUILD_BUILD_HOST=mkosi-builder
+          make -C "$RUNNER_TEMP/linux" olddefconfig ARCH=x86_64
+          for option in INTEL_TDX_GUEST TDX_GUEST_DRIVER EFI_STUB HYPERV HYPERV_STORAGE HYPERV_NET VIRTIO_BLK VIRTIO_NET; do
+            grep -qx "CONFIG_$option=y" "$RUNNER_TEMP/linux/.config"
+          done
+          make -C "$RUNNER_TEMP/linux" -j "$(nproc)" bzImage ARCH=x86_64 CONFIG_EFI_STUB=y
+      - name: Boot smoke test
+        run: |
+          expected=$(make -s -C "$RUNNER_TEMP/linux" kernelrelease)
+          bash kernel/smoke-boot.sh "$RUNNER_TEMP/linux/arch/x86/boot/bzImage" "$expected"
